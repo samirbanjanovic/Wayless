@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wayless", "src\Wayless\Wayless.csproj", "{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE1546B5-2DD2-4C67-8219-3A3DA3830058}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{640475B6-32D7-42A8-AE65-873E7DAD67BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wayless.Tests", "tests\Wayless.Tests\Wayless.Tests.csproj", "{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343} = {DE1546B5-2DD2-4C67-8219-3A3DA3830058}
+		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29} = {640475B6-32D7-42A8-AE65-873E7DAD67BA}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8A77E16D-CE73-4801-8EFA-EE4885E81C31}
+	EndGlobalSection
+EndGlobal
