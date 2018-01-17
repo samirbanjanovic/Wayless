@@ -42,6 +42,7 @@ You can review mappings by calling the ShowMapping() method. This returns an IEn
                                 
     var mappingRules = mapper.ShowMapping();
     
-    SourceObject.Name => DestinationObject.Name
-    SourceObject.CorrelationId => DestinationObject.CorrelationId
-    SourceObject.TimeStamp => DestinationObject.AssignmentDate
+    // output:
+    // SourceObject.Name => DestinationObject.Name
+    // SourceObject.CorrelationId => DestinationObject.CorrelationId
+    // SourceObject.TimeStamp => DestinationObject.AssignmentDate
