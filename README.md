@@ -1,7 +1,7 @@
 # Wayless
 A lightweight object mapper...less should be more
 
-The idea is to write less mapping code. Using Wayless you can take Object A and request an instance of Object B with field values mapped from A.  By default fields are mapped by name; you can set to ignore casing.
+The idea is to write less mapping code. Using Wayless you can take Object A and request an instance of Object B with field values mapped from A. By default fields are mapped by name; you can set to ignore casing. You're not limited to receiving a new instance, you can also pass in instances and map fields on existing objects. It's really intedned to help you stop writing tedious mapping code so you can concentrate on the bigger picture.
 
 Mappings can be extended by calling the FieldMap and FieldSet methods.  
 
@@ -22,12 +22,7 @@ Using FieldSkip you can skip value assignment on the destination object.  A call
     var mapper = new WaylessMap<SourceObject, DestinationObject>()
                         .FieldSkip(d => d.CorrelationId);
                     
-Think of FieldSet, FieldMap, FieldSkip as rule creations.  None of these rules are applied until the Map() method is called.  On call to Map() al lthe rules are evaluated and applied.
+Think of FieldSet, FieldMap, FieldSkip as rule creations.  None of these rules are applied until Map() called.
 
     // evalute rules and create instance of new object
     var destination = mapper.Map(TestSource);
-
-If you already have a destination object instance adn you want to partially map the rest of it you can call the overloaded Map() method that let's you pass in an existing instance of the destination object.
-
-    void Map(TDestination destinationObject); // uses sourceObject passed in to constructor
-    void Map(TDestination destinationObject, TSource sourceObject);
