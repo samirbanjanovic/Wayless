@@ -56,6 +56,16 @@ namespace Wayless
             InternalMap(destinationObject, sourceObject);
         }
 
+        public void Map(TDestination destinationObject, TSource sourceObject)
+        {
+            InternalMap(destinationObject, sourceObject);
+        }
+
+        public void Map(TDestination destinationObject)
+        {
+            InternalMap(destinationObject, _sourceObject);
+        }
+
         public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList, params object[] constructorParameters)
         {
             foreach (var sourceObject in sourceList)
