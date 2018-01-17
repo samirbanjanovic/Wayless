@@ -1,15 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2003
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wayless", "src\Wayless\Wayless.csproj", "{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wayless", "src\Wayless\Wayless.csproj", "{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE1546B5-2DD2-4C67-8219-3A3DA3830058}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{640475B6-32D7-42A8-AE65-873E7DAD67BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wayless.Tests", "tests\Wayless.Tests\Wayless.Tests.csproj", "{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wayless.Tests", "tests\Wayless.Tests\Wayless.Tests.csproj", "{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{602198EC-C1A9-4FAA-8710-434D16C7A2FD}"
+	ProjectSection(SolutionItems) = preProject
+		_config.yml = _config.yml
+		icon.png = icon.png
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
