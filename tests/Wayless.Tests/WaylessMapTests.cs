@@ -62,7 +62,7 @@ namespace Wayless.Tests
         public void TestFieldSet()
         {
             var mapper = new WaylessMap<SourceObject, DestinationObject>()
-                                .FieldSet(d => d.CorrelationId, Guid.NewGuid().ToString());
+                                .FieldSet(d => d.CorrelationId, Guid.NewGuid());
 
             var destination = mapper.Map(TestSource);
 
@@ -73,7 +73,7 @@ namespace Wayless.Tests
         public void TestSkipField()
         {
             var mapper = new WaylessMap<SourceObject, DestinationObject>()
-                                .SkipAssignment(d => d.CorrelationId);
+                                .FieldSkip(d => d.CorrelationId);
 
             var destination = mapper.Map(TestSource);
 

@@ -129,7 +129,7 @@ namespace Wayless
             return this;
         }
 
-        public WaylessMap<TSource, TDestination> SkipAssignment(Expression<Func<TDestination, object>> ignoreAtDestination)
+        public WaylessMap<TSource, TDestination> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestination)
         {
             if (_skipFields == null)
             {
