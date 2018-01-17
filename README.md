@@ -1,4 +1,3 @@
-![alt text](https://github.com/SamirBanjanovic/Wayless/blob/master/icon.png) 
 # Wayless
 A lightweight object mapper...less should be more
 
