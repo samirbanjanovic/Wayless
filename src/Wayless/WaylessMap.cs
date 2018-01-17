@@ -28,7 +28,7 @@ namespace Wayless
             _mappingDictionary = new Dictionary<string, PropertyInfoPair>();
             _explicitDirectAssignments = new List<Action<TDestination>>();
             _explicitMappingAssigments = new List<Action<TSource, TDestination>>();
-            
+
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
 
@@ -47,15 +47,15 @@ namespace Wayless
         public Type SourceType { get; }
 
         public Type DestinationType { get; }
-        
+
         public void Map(ref TSource sourceObject, ref TDestination destinationObject)
         {
             InternalMap(sourceObject, destinationObject);
         }
-        
+
         public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList, params object[] constructorParameters)
-        {            
-            foreach(var sourceObject in sourceList)
+        {
+            foreach (var sourceObject in sourceList)
             {
                 yield return Map(sourceObject, constructorParameters);
             }
@@ -70,7 +70,7 @@ namespace Wayless
         }
 
         public TDestination Map(TSource sourceObject, params object[] constructorParameters)
-        {        
+        {
             var destinationObject = (TDestination)Activator.CreateInstance(DestinationType, constructorParameters);
 
             InternalMap(sourceObject, destinationObject);
@@ -80,21 +80,37 @@ namespace Wayless
 
         private void InternalMap(TSource sourceObject, TDestination destinationObject)
         {
-            foreach (var map in _mappingDictionary.Values)
-            {
-                var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
-                map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
-            }
+            MapFromDictionary(sourceObject, destinationObject);
+            ExecuteExplicitDirectAssignment(sourceObject, destinationObject);
+            ExecuteExplicitMappingAssignments(sourceObject, destinationObject);
+        }
 
-            if(_explicitDirectAssignments.Count > 0)
+        private void MapFromDictionary(TSource sourceObject, TDestination destinationObject)
+        {
+            if(_mappingDictionary.Values.Count > 0)
+            {
+                foreach (var map in _mappingDictionary.Values)
+                {
+                    var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
+                    map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
+                }
+            }            
+        }
+
+        private void ExecuteExplicitDirectAssignment(TSource sourceObject, TDestination destinationObject)
+        {
+            if (_explicitDirectAssignments.Count > 0)
             {
                 foreach (var explicitAssign in _explicitDirectAssignments)
                 {
                     explicitAssign(destinationObject);
                 }
             }
-            
-            if(_explicitMappingAssigments.Count > 0)
+        }
+
+        private void ExecuteExplicitMappingAssignments(TSource sourceObject, TDestination destinationObject)
+        {
+            if (_explicitMappingAssigments.Count > 0)
             {
                 foreach (var explicitMapAssign in _explicitMappingAssigments)
                 {
@@ -107,7 +123,7 @@ namespace Wayless
         {
             var destinationKey = GetKey(destination.GetMember<TDestination, PropertyInfo>());
             var sourceKey = GetKey(source.GetMember<TSource, PropertyInfo>());
-             
+
             if (_mappingDictionary.TryGetValue(destinationKey, out PropertyInfoPair mappingPair))
             {
                 if (_sourceProperties.TryGetValue(sourceKey, out PropertyDetails fromSource))
@@ -133,11 +149,11 @@ namespace Wayless
 
         public WaylessMap<TSource, TDestination> Explicit(Action<TDestination> explicitAssignment)
         {
-            if(explicitAssignment != null)
+            if (explicitAssignment != null)
             {
                 _explicitDirectAssignments.Add(explicitAssignment);
             }
-            
+
             return this;
         }
 
@@ -155,15 +171,15 @@ namespace Wayless
         {
             var destinationkey = GetKey(ignoreAtDestination.GetMember<TDestination, PropertyInfo>());
 
-            if(_mappingDictionary.ContainsKey(destinationkey))
+            if (_mappingDictionary.ContainsKey(destinationkey))
             {
                 _mappingDictionary.Remove(destinationkey);
             }
-            
+
             return this;
         }
 
-        public IEnumerable<PropertyPair>  ShowMapping()
+        public IEnumerable<PropertyPair> ShowMapping()
         {
             return _mappingDictionary.Values.Select(v => v.PropertyPair).ToList();
         }
@@ -173,16 +189,16 @@ namespace Wayless
         private string GetKey(PropertyInfo propertyInfo)
         {
             var propertyName = propertyInfo.Name;
-            
+
             return _ignoreCasing ? propertyName.ToLowerInvariant() : propertyName;
         }
 
         private void GenerateDefaultMappingDictionary()
-        {            
+        {
             foreach (var destinationDetails in _destinationProperties)
             {
-                if(_sourceProperties.TryGetValue(destinationDetails.Key, out PropertyDetails sourceDetails))
-                {                    
+                if (_sourceProperties.TryGetValue(destinationDetails.Key, out PropertyDetails sourceDetails))
+                {
                     var mapping = GetPropertyPair(destinationDetails.Value, sourceDetails);
                     _mappingDictionary.Add(destinationDetails.Key, mapping);
                 }
