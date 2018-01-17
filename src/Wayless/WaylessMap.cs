@@ -100,8 +100,7 @@ namespace Wayless
             {
                 if (_sourceProperties.TryGetValue(sourceKey, out PropertyDetails fromSource))
                 {
-                    var mapping = _mappingDictionary[destinationKey];
-                    mapping.PropertyPair.SourcePropertyName = fromSource.Name;
+                    var mapping = _mappingDictionary[destinationKey];                    
                     mapping.SourceProperty = fromSource;
                 }
             }
@@ -157,9 +156,9 @@ namespace Wayless
             return this;
         }
 
-        public IEnumerable<PropertyPair> ShowMapping()
+        public IEnumerable<string> ShowMapping()
         {
-            return _mappingDictionary.Values.Select(v => v.PropertyPair).ToList();
+            return _mappingDictionary.Values.Select(v => $"{v.SourceProperty.Name} => {v.DestinationProperty.Name}").ToList();
         }
 
         #region helpers
@@ -258,18 +257,13 @@ namespace Wayless
 
         private PropertyInfoPair GetPropertyPair(PropertyDetails destinationDetails, PropertyDetails sourceDetails)
         {
-            var propertyPair = new PropertyInfoPair
+            var propertyInfoPair = new PropertyInfoPair
             {
-                PropertyPair = new PropertyPair
-                {
-                    SourcePropertyName = sourceDetails.PropertyInfo.Name,
-                    DestinationPropertyName = destinationDetails.PropertyInfo.Name
-                },
                 DestinationProperty = destinationDetails,
                 SourceProperty = sourceDetails
             };
 
-            return propertyPair;
+            return propertyInfoPair;
         }
 
         #endregion helpers
