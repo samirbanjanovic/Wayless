@@ -13,6 +13,8 @@
     <PackageLicenseUrl>https://github.com/SamirBanjanovic/Wayless/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/SamirBanjanovic/Wayless</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <PackageTags>object mapper, entity mapper, fluent</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
