@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -78,46 +79,6 @@ namespace Wayless
             return destinationObject;
         }
 
-        private void InternalMap(TSource sourceObject, TDestination destinationObject)
-        {
-            MapFromDictionary(sourceObject, destinationObject);
-            ExecuteExplicitDirectAssignment(sourceObject, destinationObject);
-            ExecuteExplicitMappingAssignments(sourceObject, destinationObject);
-        }
-
-        private void MapFromDictionary(TSource sourceObject, TDestination destinationObject)
-        {
-            if(_mappingDictionary.Values.Count > 0)
-            {
-                foreach (var map in _mappingDictionary.Values)
-                {
-                    var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
-                    map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
-                }
-            }            
-        }
-
-        private void ExecuteExplicitDirectAssignment(TSource sourceObject, TDestination destinationObject)
-        {
-            if (_explicitDirectAssignments.Count > 0)
-            {
-                foreach (var explicitAssign in _explicitDirectAssignments)
-                {
-                    explicitAssign(destinationObject);
-                }
-            }
-        }
-
-        private void ExecuteExplicitMappingAssignments(TSource sourceObject, TDestination destinationObject)
-        {
-            if (_explicitMappingAssigments.Count > 0)
-            {
-                foreach (var explicitMapAssign in _explicitMappingAssigments)
-                {
-                    explicitMapAssign(sourceObject, destinationObject);
-                }
-            }
-        }
 
         public WaylessMap<TSource, TDestination> Explicit(Expression<Func<TSource, object>> source, Expression<Func<TDestination, object>> destination)
         {
@@ -128,7 +89,7 @@ namespace Wayless
             {
                 if (_sourceProperties.TryGetValue(sourceKey, out PropertyDetails fromSource))
                 {
-                    var mapping = _mappingDictionary[sourceKey];
+                    var mapping = _mappingDictionary[destinationKey];
                     mapping.PropertyPair.SourcePropertyName = fromSource.Name;
                     mapping.SourceProperty = fromSource;
                 }
@@ -185,6 +146,59 @@ namespace Wayless
         }
 
         #region helpers
+        private void InternalMap(TSource sourceObject, TDestination destinationObject)
+        {
+            MapFromDictionary(sourceObject, destinationObject);
+            ExecuteExplicitDirectAssignment(sourceObject, destinationObject);
+            ExecuteExplicitMappingAssignments(sourceObject, destinationObject);
+        }
+
+        private void MapFromDictionary(TSource sourceObject, TDestination destinationObject)
+        {
+            if (_mappingDictionary.Values.Count > 0)
+            {
+                foreach (var map in _mappingDictionary.Values)
+                {                    
+                    var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
+
+                    if (map.SourceProperty.PropertyInfo.PropertyType != map.DestinationProperty.PropertyInfo.PropertyType)
+                    {// perform some basic conversion
+                        var converter = TypeDescriptor.GetConverter(map.SourceProperty.PropertyInfo.PropertyType);
+                        if (converter.CanConvertTo(map.DestinationProperty.PropertyInfo.PropertyType))
+                        {
+                            var convertedValue = converter.ConvertTo(sourceValue, map.DestinationProperty.PropertyInfo.PropertyType);
+                            map.DestinationProperty.PropertyInfo.SetValue(destinationObject, convertedValue);
+                        }
+                    }
+                    else
+                    {
+                        map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
+                    }
+                }
+            }
+        }
+
+        private void ExecuteExplicitDirectAssignment(TSource sourceObject, TDestination destinationObject)
+        {
+            if (_explicitDirectAssignments.Count > 0)
+            {
+                foreach (var explicitAssign in _explicitDirectAssignments)
+                {
+                    explicitAssign(destinationObject);
+                }
+            }
+        }
+
+        private void ExecuteExplicitMappingAssignments(TSource sourceObject, TDestination destinationObject)
+        {
+            if (_explicitMappingAssigments.Count > 0)
+            {
+                foreach (var explicitMapAssign in _explicitMappingAssigments)
+                {
+                    explicitMapAssign(sourceObject, destinationObject);
+                }
+            }
+        }
 
         private string GetKey(PropertyInfo propertyInfo)
         {

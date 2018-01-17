@@ -39,13 +39,17 @@ namespace Wayless.Tests
             Assert.AreNotEqual(SourceObjcet.TimeStamp, destination.DateTime);
         }
 
+        // do we want to convert on our own, or have users
+        // use one of the other explicit methods and perform
+        // conversion on their own 
+        // Seems some basic type of conversion should be handled
         [TestMethod]
         public void TestExplicitMap()
         {
-            var mapper = new WaylessMap<Source, Destination>()
-                                .Explicit(s => s.TimeStamp, d => d.DateTime);
-
-            var destination = mapper.Map(SourceObjcet);
+            var destination = new WaylessMap<Source, Destination>()
+                                .Explicit(s => s.TimeStamp, d => d.DateTime)
+                                .Explicit(s => s.Id, d => d.Name)
+                                .Map(SourceObjcet);
 
             Assert.AreEqual(SourceObjcet.Name, destination.Name);
             Assert.AreEqual(SourceObjcet.TimeStamp, destination.DateTime);
@@ -54,10 +58,9 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestIgnoreMap()
         {
-            var mapper = new WaylessMap<Source, Destination>()
-                                .Ignore(x => x.Name);
-
-            var destination = mapper.Map(SourceObjcet);
+            var destination = new WaylessMap<Source, Destination>()
+                                .Ignore(x => x.Name)
+                                .Map(SourceObjcet);
 
             Assert.AreNotEqual(SourceObjcet.Name, destination.Name);
         }
@@ -65,11 +68,10 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestExplicitWithIgnore()
         {
-            var mapper = new WaylessMap<Source, Destination>()
-                                .Explicit(s => s.TimeStamp, d => d.DateTime)
-                                .Ignore(x => x.Name);
-
-            var destination = mapper.Map(SourceObjcet);
+            var destination = new WaylessMap<Source, Destination>()
+                                    .Explicit(s => s.TimeStamp, d => d.DateTime)                                    
+                                    .Ignore(x => x.Name)
+                                    .Map(SourceObjcet);
 
             Assert.AreEqual(SourceObjcet.TimeStamp, destination.DateTime);
             Assert.AreNotEqual(SourceObjcet.Name, destination.Name);
@@ -78,9 +80,8 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestShowMappingDictionary()
         {
-            var mapper = new WaylessMap<Source, Destination>();
-
-            var mapping = mapper.ShowMapping();
+            var mapping = new WaylessMap<Source, Destination>()
+                                .ShowMapping();
         }
 
         [TestMethod]
