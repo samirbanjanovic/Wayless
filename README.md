@@ -1,4 +1,5 @@
-![alt text](https://github.com/SamirBanjanovic/Wayless/blob/master/icon.png) Wayless
+![alt text](https://github.com/SamirBanjanovic/Wayless/blob/master/icon.png) #Wayless
+
 A lightweight object mapper...less should be more
 
 The idea is to write less mapping code. Using Wayless you can take Object A and request an instance of Object B with field values mapped from A. By default fields are mapped by name; you can set to ignore casing. You're not limited to receiving a new instance, you can also pass in instances and map fields on existing objects. It's really intedned to help you stop writing tedious mapping code so you can concentrate on the bigger picture.
