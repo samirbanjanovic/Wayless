@@ -26,3 +26,15 @@ Think of FieldSet, FieldMap, FieldSkip as rule creations.  None of these rules a
 
     // evalute rules and create instance of new object
     var destination = mapper.Map(TestSource);
+
+You can review mappings by calling the ShowMapping() method. This returns an IEnumerable<string> and shows relationships in form of SourceTypeName.Property => DestinationTypeName.Property.
+    
+    // get rules
+    var mapper = new WaylessMap<SourceObject, DestinationObject>()
+                                .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
+                                
+    var mappingRules = mapper.ShowMapping();
+    
+    SourceObject.Name => DestinationObjectName
+    SourceObject.CorrelationId => DestinationObjectCorrelationId
+    SourceObject.TimeStamp => DestinationObjectAssignmentDate
