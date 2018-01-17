@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Wayless.Tests
@@ -37,8 +38,6 @@ namespace Wayless.Tests
         public void TestDefaultMap()
         {
             var mapper = new WaylessMap<SourceObject, DestinationObject>();
-
-
             var destination = mapper.Map(TestSource);
 
             Assert.AreEqual(TestSource.Name, destination.Name);
@@ -78,6 +77,17 @@ namespace Wayless.Tests
             var destination = mapper.Map(TestSource);
 
             Assert.AreNotEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
+        }
+
+        [TestMethod]
+        public void TestShowMapping()
+        {
+            var mapper = new WaylessMap<SourceObject, DestinationObject>()
+                                .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
+                                
+            var mappingRules = mapper.ShowMapping();
+
+            Debug.Write(string.Join(Environment.NewLine, mappingRules));
         }
     }
 }

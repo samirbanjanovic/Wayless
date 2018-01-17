@@ -158,7 +158,7 @@ namespace Wayless
 
         public IEnumerable<string> ShowMapping()
         {
-            return _mappingDictionary.Values.Select(v => $"{v.SourceProperty.Name} => {v.DestinationProperty.Name}").ToList();
+            return _mappingDictionary.Values.Select(v => $"{SourceType.Name}.{v.SourceProperty.Name} => {DestinationType.Name}.{v.DestinationProperty.Name}").ToList();
         }
 
         #region helpers
