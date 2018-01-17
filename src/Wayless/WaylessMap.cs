@@ -8,9 +8,9 @@ using System.Text;
 
 namespace Wayless
 {
-    public class WaylessMap<TSource, TDestination>
-     where TSource : class
+    public class WaylessMap<TDestination, TSource>     
      where TDestination : class
+     where TSource : class
     {
         private readonly IDictionary<string, PropertyInfoPair> _mappingDictionary;
 
@@ -91,7 +91,7 @@ namespace Wayless
             return destinationObject;
         }
 
-        public WaylessMap<TSource, TDestination> FieldMap(Expression<Func<TDestination, object>> destination, Expression<Func<TSource, object>> source)
+        public WaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destination, Expression<Func<TSource, object>> source)
         {
             var destinationKey = GetKey(destination.GetMember<TDestination, PropertyInfo>());
             var sourceKey = GetKey(source.GetMember<TSource, PropertyInfo>());
@@ -118,7 +118,7 @@ namespace Wayless
             return this;
         }
 
-        public WaylessMap<TSource, TDestination> FieldSet(Expression<Func<TDestination, object>> destination, object fieldValue)
+        public WaylessMap<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destination, object fieldValue)
         {
             if (_explicitAssignments == null)
             {
@@ -138,7 +138,7 @@ namespace Wayless
             return this;
         }
 
-        public WaylessMap<TSource, TDestination> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestination)
+        public WaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestination)
         {
             if (_skipFields == null)
             {

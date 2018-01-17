@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>0.1.0</Version>
+    <Authors>Samir Banjanovic</Authors>
+    <Company />
+    <Product>Wayless Object Mapper</Product>
+    <PackageId>WaylessMap</PackageId>
+    <Description>A lightweight object to object mapper</Description>
+    <Copyright>2018 Samir Banjanovic</Copyright>
+    <PackageLicenseUrl>https://github.com/SamirBanjanovic/Wayless/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SamirBanjanovic/Wayless</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
