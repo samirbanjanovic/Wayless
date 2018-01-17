@@ -38,7 +38,7 @@ You can review mappings by calling the ShowMapping() method. This returns an IEn
     
     // get rules
     var mapper = new WaylessMap<SourceObject, DestinationObject>()
-                                .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
+                        .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
                                 
     var mappingRules = mapper.ShowMapping();
     
