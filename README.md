@@ -50,8 +50,11 @@ are evaluated and applied.
 type or it can set values of an existing instance.
 
 You can review the relationships that were created between two types by calling the `ShowMapping` method.
-This returns an `IEnumerable<string>` that lists relationships in a simple format
+This will return a simple text string identifying all the applied mapping rules
     
-    SourceType.SourceProperty => DestinationType.DestinationProperty
+    DestinationType.DestinationProperty = SourceType.SourceProperty
+    DestinationType.DestinationProperty2 = "Explicit"
+    DestinationType.DestinationProperty3 - Skip
+    
 
 That's all there's to it. Just a simple Object-To-Object mapper.
