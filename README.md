@@ -22,17 +22,14 @@ Using FieldSkip you can skip value assignment on the destination object.  A call
     var mapper = new WaylessMap<DestinationObject, SourceObject>()
                     .FieldSkip(d => d.CorrelationId);
 
-Mapping rules can be set up fluently. You can chain, FieldMap, FieldSet, and FieldSkip.
+Mapping rules can be set fluently without reasonable limitation.
 
         var mapper = new WaylessMap<DestinationObject, SourceObject>()
                     .FieldMap(d => d.AssignmentDate, s => s.TimeStamp)
                     .FieldSet(d => d.CorrelationId, Guid.NewGuid())
                     .FieldSkip(d => d.Name);
 
-Think of FieldSet, FieldMap, FieldSkip as rule creations.  None of these rules are applied until Map() called.
-
-    // evalute rules and create instance of new object
-    var destination = mapper.Map(TestSource);
+Once rules are set they are stored for the life cycle of the object. This allows you to use one mapper and modify it's rules to create multiple objects of the same type using a different set of rules.
 
 You can review mappings by calling the ShowMapping() method. This returns an IEnumerable<string> and shows relationships in form of SourceTypeName.Property => DestinationTypeName.Property.
                      
