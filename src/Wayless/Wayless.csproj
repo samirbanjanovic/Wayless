@@ -17,8 +17,4 @@
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Core\" />
-  </ItemGroup>
-
 </Project>

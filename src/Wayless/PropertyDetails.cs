@@ -5,7 +5,8 @@ using System.Text;
 
 namespace Wayless
 {
-    public class PropertyDetails
+    public class PropertyDetails 
+        : IPropertyDetails
     {
         public PropertyDetails(PropertyInfo propertyInfo)
         {
@@ -16,9 +17,8 @@ namespace Wayless
 
         public string Name { get; }
 
-        internal string InvarientName { get; }
+        public string InvarientName { get; }
 
-        internal PropertyInfo PropertyInfo { get; }
-
+        public PropertyInfo PropertyInfo { get; }
     }
 }

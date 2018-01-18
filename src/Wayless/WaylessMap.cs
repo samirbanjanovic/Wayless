@@ -4,18 +4,18 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace Wayless
 {
-    public class WaylessMap<TDestination, TSource>     
-     where TDestination : class
-     where TSource : class
+    public class WaylessMap<TDestination, TSource>
+        : IWaylessMap<TDestination, TSource>
+        where TDestination : class
+        where TSource : class
     {
-        private readonly IDictionary<string, PropertyInfoPair> _mappingDictionary;
+        private readonly IDictionary<string, IPropertyInfoPair> _mappingDictionary;
 
-        private readonly IDictionary<string, PropertyDetails> _destinationProperties;
-        private readonly IDictionary<string, PropertyDetails> _sourceProperties;
+        private readonly IDictionary<string, IPropertyDetails> _destinationProperties;
+        private readonly IDictionary<string, IPropertyDetails> _sourceProperties;
 
         private readonly bool _ignoreCasing;
         private readonly TSource _sourceObject;
@@ -30,7 +30,7 @@ namespace Wayless
             _ignoreCasing = ignoreCasing;
             _hasAppliedFieldSkipSet = false;
 
-            _mappingDictionary = new Dictionary<string, PropertyInfoPair>();
+            _mappingDictionary = new Dictionary<string, IPropertyInfoPair>();
 
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
@@ -91,23 +91,24 @@ namespace Wayless
             return destinationObject;
         }
 
-        public WaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destination, Expression<Func<TSource, object>> source)
+        public IWaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
-            var destinationKey = GetKey(destination.GetMember<TDestination, PropertyInfo>());
-            var sourceKey = GetKey(source.GetMember<TSource, PropertyInfo>());
+            var destinationKey = GetKey(destinationExpression);
 
-            if (_mappingDictionary.TryGetValue(destinationKey, out PropertyInfoPair mappingPair))
+            var sourceKey = GetKey(sourceExpression);
+
+            if (_mappingDictionary.TryGetValue(destinationKey, out IPropertyInfoPair mappingPair))
             {
-                if (_sourceProperties.TryGetValue(sourceKey, out PropertyDetails fromSource))
+                if (_sourceProperties.TryGetValue(sourceKey, out IPropertyDetails fromSource))
                 {
-                    var mapping = _mappingDictionary[destinationKey];                    
+                    var mapping = _mappingDictionary[destinationKey];
                     mapping.SourceProperty = fromSource;
                 }
             }
             else
             {
-                if ((_destinationProperties.TryGetValue(destinationKey, out PropertyDetails destinationDetails)) &&
-                   (_sourceProperties.TryGetValue(sourceKey, out PropertyDetails sourceDetails)))
+                if ((_destinationProperties.TryGetValue(destinationKey, out IPropertyDetails destinationDetails)) &&
+                   (_sourceProperties.TryGetValue(sourceKey, out IPropertyDetails sourceDetails)))
                 {
                     mappingPair = GetPropertyPair(destinationDetails, sourceDetails);
                 }
@@ -118,13 +119,14 @@ namespace Wayless
             return this;
         }
 
-        public WaylessMap<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destination, object fieldValue)
+        public IWaylessMap<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpressoin, object fieldValue)
         {
             if (_explicitAssignments == null)
             {
                 _explicitAssignments = new Dictionary<string, object>();
             }
-            var destinationKey = GetKey(destination.GetMember<TDestination, PropertyInfo>());
+
+            var destinationKey = GetKey(destinationExpressoin);
 
             if (_explicitAssignments.ContainsKey(destinationKey))
             {
@@ -138,14 +140,14 @@ namespace Wayless
             return this;
         }
 
-        public WaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestination)
+        public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
             if (_skipFields == null)
             {
                 _skipFields = new List<string>();
             }
 
-            var destinationkey = GetKey(ignoreAtDestination.GetMember<TDestination, PropertyInfo>());
+            var destinationkey = GetKey(ignoreAtDestinationExpression);
 
             if (!_skipFields.Contains(destinationkey))
             {
@@ -165,8 +167,15 @@ namespace Wayless
 
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            SetSkipAssignmentInMappingDictionary();
+            ApplyFieldSkipToMappingDictionary();
 
+            ApplyMappingDictionary(destinationObject, sourceObject);
+
+            ApplyExplicitAssignments(destinationObject, sourceObject);
+        }
+
+        private void ApplyMappingDictionary(TDestination destinationObject, TSource sourceObject)
+        {
             if (_mappingDictionary.Values.Count > 0)
             {
                 foreach (var map in _mappingDictionary.Values)
@@ -183,39 +192,31 @@ namespace Wayless
                         map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
                     }
                 }
+            }
+        }
 
-                if (_explicitAssignments != null)
+        private void ApplyExplicitAssignments(TDestination destinationObject, TSource sourceObject)
+        {
+            if (_explicitAssignments != null)
+            {
+                foreach (var explicitAssignment in _explicitAssignments)
                 {
-                    foreach (var explicitAssignment in _explicitAssignments)
+                    if (_destinationProperties.TryGetValue(explicitAssignment.Key, out IPropertyDetails propertyDetails))
                     {
-                        if (_destinationProperties.TryGetValue(explicitAssignment.Key, out PropertyDetails propertyDetails))
+                        if (explicitAssignment.Value.GetType() != propertyDetails.PropertyInfo.PropertyType)
                         {
-                            if (explicitAssignment.Value.GetType() != propertyDetails.PropertyInfo.PropertyType)
-                            {
-                                SetValueWithConversion(propertyDetails, destinationObject, explicitAssignment.Value);
-                            }
-                            else
-                            {
-                                propertyDetails.PropertyInfo.SetValue(destinationObject, explicitAssignment.Value);
-                            }
+                            SetValueWithConversion(propertyDetails, destinationObject, explicitAssignment.Value);
+                        }
+                        else
+                        {
+                            propertyDetails.PropertyInfo.SetValue(destinationObject, explicitAssignment.Value);
                         }
                     }
                 }
             }
         }
 
-        private void SetValueWithConversion(PropertyDetails destinationProperty, TDestination destinationObject, object value)
-        {
-            var converter = TypeDescriptor.GetConverter(value.GetType());
-            if (converter.CanConvertTo(destinationProperty.PropertyInfo.PropertyType))
-            {
-                var convertedValue = converter.ConvertTo(value, destinationProperty.PropertyInfo.PropertyType);
-                destinationProperty.PropertyInfo.SetValue(destinationObject, convertedValue);
-            }
-        }
-
-
-        private void SetSkipAssignmentInMappingDictionary()
+        private void ApplyFieldSkipToMappingDictionary()
         {
             if (_hasAppliedFieldSkipSet || _skipFields == null)
                 return;
@@ -236,8 +237,21 @@ namespace Wayless
             _hasAppliedFieldSkipSet = true;
         }
 
-        private string GetKey(PropertyInfo propertyInfo)
+        private void SetValueWithConversion(IPropertyDetails destinationProperty, TDestination destinationObject, object value)
         {
+            var converter = TypeDescriptor.GetConverter(value.GetType());
+            if (converter.CanConvertTo(destinationProperty.PropertyInfo.PropertyType))
+            {
+                var convertedValue = converter.ConvertTo(value, destinationProperty.PropertyInfo.PropertyType);
+                destinationProperty.PropertyInfo.SetValue(destinationObject, convertedValue);
+            }
+        }
+
+
+        private string GetKey<T>(Expression<Func<T, object>> expression)
+            where T : class
+        {
+            var propertyInfo = expression.GetMember<T, PropertyInfo>();
             var propertyName = propertyInfo.Name;
 
             return _ignoreCasing ? propertyName.ToLowerInvariant() : propertyName;
@@ -247,7 +261,7 @@ namespace Wayless
         {
             foreach (var destinationDetails in _destinationProperties)
             {
-                if (_sourceProperties.TryGetValue(destinationDetails.Key, out PropertyDetails sourceDetails))
+                if (_sourceProperties.TryGetValue(destinationDetails.Key, out IPropertyDetails sourceDetails))
                 {
                     var mapping = GetPropertyPair(destinationDetails.Value, sourceDetails);
                     _mappingDictionary.Add(destinationDetails.Key, mapping);
@@ -255,7 +269,7 @@ namespace Wayless
             }
         }
 
-        private PropertyInfoPair GetPropertyPair(PropertyDetails destinationDetails, PropertyDetails sourceDetails)
+        private IPropertyInfoPair GetPropertyPair(IPropertyDetails destinationDetails, IPropertyDetails sourceDetails)
         {
             var propertyInfoPair = new PropertyInfoPair
             {
