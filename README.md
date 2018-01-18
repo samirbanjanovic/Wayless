@@ -54,4 +54,4 @@ This returns an `IEnumerable<string>` that simply lists relationships in a simpl
     
     SourceType.SourceProperty => DestinationType.DestinationProperty
 
-That's all there's to it. Nothing sophisticated or elequent, just a simple Object-To-Object mapper.
+That's all there's to it. Just a simple Object-To-Object mapper.
