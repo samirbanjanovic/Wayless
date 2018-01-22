@@ -5,10 +5,15 @@ using System.Text;
 
 namespace Wayless
 {
-    public class PropertyInfoPair : IPropertyInfoPair
+    public class PropertyInfoPair 
+        : IPropertyInfoPair
     {
         public IPropertyDetails DestinationProperty { get; set; }
 
         public IPropertyDetails SourceProperty { get; set; }
+
+        public Action<object, object> Setter { get; set; }
+
+        public Func<object, object> Getter { get; set; }
     }
 }
