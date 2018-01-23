@@ -50,7 +50,7 @@ namespace Wayless
 
         private readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
                                                                               .GetConstructor(Type.EmptyTypes)))
-                                                                              .Compile();    
+                                                                              .Compile();
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -261,9 +261,6 @@ namespace Wayless
         {
             foreach (var map in _mappingDictionary.Values)
             {
-
-                //var value = map.Getter(sourceObject);
-                //map.Setter(destinationObject, value);
                 var sourceValue = map.SourceProperty.PropertyInfo.GetMethod.Invoke(sourceObject, null);
                 map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
             }
@@ -276,18 +273,8 @@ namespace Wayless
             {
                 foreach (var explicitAssignment in _explicitAssignments)
                 {
-                    if (_destinationProperties.TryGetValue(explicitAssignment.Key, out IPropertyDetails propertyDetails))
-                    {
-                        if (explicitAssignment.Value.GetType() != propertyDetails.PropertyInfo.PropertyType)
-                        {// rudementary logic  to check if we need to use a converter
-                         // this can be improved since some types can be implicitly converted
-                            SetValueWithConversion(propertyDetails, destinationObject, explicitAssignment.Value);
-                        }
-                        else
-                        {
-                            propertyDetails.PropertyInfo.SetValue(destinationObject, explicitAssignment.Value);
-                        }
-                    }
+                    var propertyDetails = _destinationProperties[explicitAssignment.Key];
+                    propertyDetails.PropertyInfo.SetValue(destinationObject, explicitAssignment.Value);
                 }
             }
         }
@@ -357,7 +344,7 @@ namespace Wayless
                 SourceProperty = sourceDetails
             };
 
-            
+
 
             //propertyInfoPair.Setter = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object>), null, propertyInfoPair.DestinationProperty.PropertyInfo.GetSetMethod());
             //propertyInfoPair.Getter = (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object>), null, propertyInfoPair.SourceProperty.PropertyInfo.GetGetMethod());
