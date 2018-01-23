@@ -45,6 +45,12 @@ namespace Wayless
 
         private bool _hasAppliedFieldSkipSet;
 
+
+
+
+        private readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
+                                                                              .GetConstructor(Type.EmptyTypes)))
+                                                                              .Compile();    
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -122,7 +128,8 @@ namespace Wayless
         /// <returns>Mapped object</returns>
         public TDestination Map(TSource sourceObject, params object[] constructorParameters)
         {
-            var destinationObject = (TDestination)Activator.CreateInstance(DestinationType, constructorParameters);
+            //var destinationObject = (TDestination)Activator.CreateInstance(DestinationType, constructorParameters);
+            TDestination destinationObject = _destinationActivator();
 
             InternalMap(destinationObject, sourceObject);
 
@@ -255,11 +262,11 @@ namespace Wayless
             foreach (var map in _mappingDictionary.Values)
             {
 
-                var value = map.Getter(sourceObject);
-                map.Setter(destinationObject, value);
-                //map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
+                //var value = map.Getter(sourceObject);
+                //map.Setter(destinationObject, value);
+                var sourceValue = map.SourceProperty.PropertyInfo.GetMethod.Invoke(sourceObject, null);
+                map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
             }
-
         }
 
         // apply explicit assignments
@@ -350,8 +357,10 @@ namespace Wayless
                 SourceProperty = sourceDetails
             };
 
-            propertyInfoPair.Setter = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object>), null, propertyInfoPair.DestinationProperty.PropertyInfo.GetSetMethod());
-            propertyInfoPair.Getter = (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object>), null, propertyInfoPair.SourceProperty.PropertyInfo.GetGetMethod());
+            
+
+            //propertyInfoPair.Setter = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object>), null, propertyInfoPair.DestinationProperty.PropertyInfo.GetSetMethod());
+            //propertyInfoPair.Getter = (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object>), null, propertyInfoPair.SourceProperty.PropertyInfo.GetGetMethod());
 
 
             return propertyInfoPair;
