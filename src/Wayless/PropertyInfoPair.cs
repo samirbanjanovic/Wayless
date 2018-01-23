@@ -20,7 +20,7 @@ namespace Wayless
 
         internal void InitializeSet()
         {
-            var instance = Expression.Parameter(typeof(object), "instance");
+            var instance = Expression.Parameter(typeof(TDestination), "instance");
             var value = Expression.Parameter(typeof(object), "value");
 
             // value as T is slightly faster than (T)value, so if it's not a value type, use that

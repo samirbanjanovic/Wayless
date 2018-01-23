@@ -51,15 +51,18 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
-            MeasureWaylessMap();
-            //var mm = Task.Run(() => MeasureManualMap());
-            //var am = Task.Run(() => MeasureAutoMapper());
-            ////var tm = Task.Run(() => MeasureTinyMapper());
-            //var wm = Task.Run(() => MeasureWaylessMap());
+            while(true)
+            {
+                //MeasureWaylessMap();
+                var mm = Task.Run(() => MeasureManualMap());
+                var am = Task.Run(() => MeasureAutoMapper());
+                ////var tm = Task.Run(() => MeasureTinyMapper());
+                var wm = Task.Run(() => MeasureWaylessMap());
 
-            //Task.WaitAll(mm, am,wm);
+                Task.WaitAll(mm, am, wm);
 
-            Console.ReadLine();
+                Console.ReadLine();
+            }            
         }
 
         private static void MeasureManualMap()
