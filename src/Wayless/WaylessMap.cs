@@ -12,25 +12,27 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
+        private static readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
+                                                                              .GetConstructor(Type.EmptyTypes)))
+                                                                              .Compile();
+
         /// <summary>
         /// Stores mapping rules defining what value to apply to which destination property 
         /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
         /// </summary>
-        private readonly IDictionary<string, IPropertyInfoPair> _mappingDictionary;
+        private readonly IDictionary<string, PropertyInfoPair<TDestination, TSource>> _mappingDictionary;
 
         /// <summary>
         /// Dictionary of discovered destination type properties
         /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
         /// </summary>
-        private readonly IDictionary<string, IPropertyDetails> _destinationProperties;
+        private readonly IDictionary<string, PropertyDetails<TDestination>> _destinationProperties;
 
         /// <summary>
         /// Dictionary of discovered source type properties
         /// /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
         /// </summary>
-        private readonly IDictionary<string, IPropertyDetails> _sourceProperties;
-
-        private readonly bool _ignoreCasing;
+        private readonly IDictionary<string, PropertyDetails<TSource>> _sourceProperties;
 
         /// <summary>
         /// Properties to receive an explicit value  assignment
@@ -41,9 +43,7 @@ namespace Wayless
         /// <summary>
         /// Destination properties to be excluded from mapping rules
         /// </summary>
-        private IList<string> _skipFields;
-
-        private bool _hasAppliedFieldSkipSet;
+        private IList<string> _fields;
 
         /// <summary>
         /// Create instance of Wayless mapper
@@ -52,18 +52,15 @@ namespace Wayless
         ///     True: Ignores casing during  initial property matchup
         ///     False: Property name casing affects matching
         /// </param>
-        public WaylessMap(bool ignoreCasing = false)
-        {
-            _ignoreCasing = ignoreCasing;
-            _hasAppliedFieldSkipSet = false;
-
-            _mappingDictionary = new Dictionary<string, IPropertyInfoPair>();
-
+        public WaylessMap()
+        {            
+            _mappingDictionary = new Dictionary<string, PropertyInfoPair<TDestination, TSource>>();
+            _fields = new List<string>();
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
 
-            _destinationProperties = DestinationType.GetPropertyDictionary(_ignoreCasing);
-            _sourceProperties = SourceType.GetPropertyDictionary(_ignoreCasing);
+            _destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
+            _sourceProperties = SourceType.GetPropertyDictionary<TSource>();
 
             GenerateDefaultMappingDictionary();
         }
@@ -106,11 +103,11 @@ namespace Wayless
         /// <param name="constructorParameters">Constructor parameters, if any, to be used when 
         /// creating an instance of the destination object</param>
         /// <returns>Collection of mapped objects</returns>
-        public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList, params object[] constructorParameters)
+        public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList)
         {
             foreach (var sourceObject in sourceList)
             {
-                yield return Map(sourceObject, constructorParameters);
+                yield return Map(sourceObject);
             }
         }
 
@@ -120,9 +117,9 @@ namespace Wayless
         /// <param name="sourceObject">Object to read avalues from</param>
         /// <param name="constructorParameters">Parameters passed to destination object constructor</param>
         /// <returns>Mapped object</returns>
-        public TDestination Map(TSource sourceObject, params object[] constructorParameters)
+        public TDestination Map(TSource sourceObject)
         {
-            var destinationObject = (TDestination)Activator.CreateInstance(DestinationType, constructorParameters);
+            TDestination destinationObject = _destinationActivator();
 
             InternalMap(destinationObject, sourceObject);
 
@@ -140,24 +137,16 @@ namespace Wayless
             var destinationKey = GetKey(destinationExpression);
             var sourceKey = GetKey(sourceExpression);
 
-            if (_mappingDictionary.TryGetValue(destinationKey, out IPropertyInfoPair mappingPair))
-            {// replace existing mapping rule for property if one exists
-                if (_sourceProperties.TryGetValue(sourceKey, out IPropertyDetails fromSource))
-                {
-                    var mapping = _mappingDictionary[destinationKey];
-                    mapping.SourceProperty = fromSource;
-                }
+            if (_mappingDictionary.TryGetValue(destinationKey, out PropertyInfoPair<TDestination,TSource> mapping))
+            {
+                mapping.SourceProperty = _sourceProperties[sourceKey];
             }
             else
             {
-                // add the new mapping rule to mapping dictionary
-                if ((_destinationProperties.TryGetValue(destinationKey, out IPropertyDetails destinationDetails)) &&
-                   (_sourceProperties.TryGetValue(sourceKey, out IPropertyDetails sourceDetails)))
-                {
-                    mappingPair = GetPropertyPair(destinationDetails, sourceDetails);
-                }
+                var destinationDetails = _destinationProperties[destinationKey];
+                var sourceDetails = _sourceProperties[sourceKey];
 
-                _mappingDictionary.Add(destinationKey, mappingPair);
+                AddToMappingDictionary(destinationDetails, sourceDetails);              
             }
 
             return this;
@@ -199,18 +188,7 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
-            if (_skipFields == null)
-            {
-                _skipFields = new List<string>();
-            }
-
-            var destinationkey = GetKey(ignoreAtDestinationExpression);
-
-            if (!_skipFields.Contains(destinationkey))
-            {
-                _skipFields.Add(destinationkey);
-                _hasAppliedFieldSkipSet = false;
-            }
+            _fields.Remove(GetKey(ignoreAtDestinationExpression));
 
             return this;
         }
@@ -223,7 +201,7 @@ namespace Wayless
         {
             var mappingDictionary = _mappingDictionary.Values.Select(v => $"{DestinationType.Name}.{v.DestinationProperty.Name} = {SourceType.Name}.{v.SourceProperty.Name} ").ToList();
             var explicitAssignments = _explicitAssignments?.Select(x => $"{DestinationType.Name}.{_destinationProperties[x.Key].PropertyInfo.Name} = {x.Value.ToString()}").ToList();
-            var skipAssignment = _skipFields?.Select(x => $"{DestinationType.Name}.{_destinationProperties[x].PropertyInfo.Name} - Skip").ToList();
+            var skipAssignment = _fields?.Select(x => $"{DestinationType.Name}.{_destinationProperties[x].PropertyInfo.Name} - Skip").ToList();
 
             List<string> mappingRules = new List<string>();
             mappingRules.AddRange(mappingDictionary);
@@ -242,32 +220,20 @@ namespace Wayless
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            ApplyFieldSkipToMappingDictionary();
-
             ApplyMappingDictionary(destinationObject, sourceObject);
 
             ApplyExplicitAssignments(destinationObject, sourceObject);
         }
 
+        private static readonly IDictionary<Type, TypeConverter> _typeConverters = new Dictionary<Type, TypeConverter>();
         // apply mapping dictionary
         private void ApplyMappingDictionary(TDestination destinationObject, TSource sourceObject)
         {
-            if (_mappingDictionary.Values.Count > 0)
+            foreach (var field in _fields)
             {
-                foreach (var map in _mappingDictionary.Values)
-                {
-                    var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
-
-                    if (map.SourceProperty.PropertyInfo.PropertyType != map.DestinationProperty.PropertyInfo.PropertyType)
-                    {// perform some basic conversion
-
-                        SetValueWithConversion(map.DestinationProperty, destinationObject, sourceValue);
-                    }
-                    else
-                    {
-                        map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
-                    }
-                }
+                var propertyPair = _mappingDictionary[field];
+                object sourceValue = propertyPair.SourceProperty.ValueGet(sourceObject);
+                propertyPair.DestinationProperty.ValueSet(destinationObject, sourceValue);
             }
         }
 
@@ -278,63 +244,10 @@ namespace Wayless
             {
                 foreach (var explicitAssignment in _explicitAssignments)
                 {
-                    if (_destinationProperties.TryGetValue(explicitAssignment.Key, out IPropertyDetails propertyDetails))
-                    {
-                        if (explicitAssignment.Value.GetType() != propertyDetails.PropertyInfo.PropertyType)
-                        {// rudementary logic  to check if we need to use a converter
-                         // this can be improved since some types can be implicitly converted
-                            SetValueWithConversion(propertyDetails, destinationObject, explicitAssignment.Value);
-                        }
-                        else
-                        {
-                            propertyDetails.PropertyInfo.SetValue(destinationObject, explicitAssignment.Value);
-                        }
-                    }
+                    PropertyDetails<TDestination> propertyDetails = _destinationProperties[explicitAssignment.Key];                    
+                    propertyDetails.ValueSet(destinationObject, explicitAssignment.Value);
                 }
             }
-        }
-
-        // remove rules from both mapping dictionary and explicit assignment
-        private void ApplyFieldSkipToMappingDictionary()
-        {
-            if (_hasAppliedFieldSkipSet || _skipFields == null)
-                return;
-
-            foreach (var fieldKey in _skipFields)
-            {
-                if (_mappingDictionary.ContainsKey(fieldKey))
-                {
-                    _mappingDictionary.Remove(fieldKey);
-                }
-
-                if (_explicitAssignments?.ContainsKey(fieldKey) == true)
-                {
-                    _explicitAssignments.Remove(fieldKey);
-                }
-            }
-
-            _hasAppliedFieldSkipSet = true;
-        }
-
-        // try applying value using basic conversion
-        private void SetValueWithConversion(IPropertyDetails destinationProperty, TDestination destinationObject, object value)
-        {
-            var converter = TypeDescriptor.GetConverter(value.GetType());
-            if (converter.CanConvertTo(destinationProperty.PropertyInfo.PropertyType))
-            {
-                var convertedValue = converter.ConvertTo(value, destinationProperty.PropertyInfo.PropertyType);
-                destinationProperty.PropertyInfo.SetValue(destinationObject, convertedValue);
-            }
-        }
-
-        // determine if key is properties true name or invariant lower case
-        private string GetKey<T>(Expression<Func<T, object>> expression)
-            where T : class
-        {
-            var propertyInfo = expression.GetMember<T, PropertyInfo>();
-            var propertyName = propertyInfo.Name;
-
-            return _ignoreCasing ? propertyName.ToLowerInvariant() : propertyName;
         }
 
         // create initial mapping dictionary by matching property (key) names
@@ -342,24 +255,27 @@ namespace Wayless
         {
             foreach (var destinationDetails in _destinationProperties)
             {
-                if (_sourceProperties.TryGetValue(destinationDetails.Key, out IPropertyDetails sourceDetails))
+                _fields.Add(destinationDetails.Key);
+                if (_sourceProperties.TryGetValue(destinationDetails.Key, out PropertyDetails<TSource> sourceDetails))
                 {
-                    var mapping = GetPropertyPair(destinationDetails.Value, sourceDetails);
-                    _mappingDictionary.Add(destinationDetails.Key, mapping);
+                    AddToMappingDictionary(destinationDetails.Value, sourceDetails);
                 }
             }
         }
 
-        // create mapping pair
-        private IPropertyInfoPair GetPropertyPair(IPropertyDetails destinationDetails, IPropertyDetails sourceDetails)
+        private void AddToMappingDictionary(PropertyDetails<TDestination> destinationDetails, PropertyDetails<TSource> sourceDetails)
         {
-            var propertyInfoPair = new PropertyInfoPair
-            {
-                DestinationProperty = destinationDetails,
-                SourceProperty = sourceDetails
-            };
+            var mapping = new PropertyInfoPair<TDestination, TSource>(destinationDetails, sourceDetails);
+            _mappingDictionary.Add(destinationDetails.Name, mapping);
+        }
 
-            return propertyInfoPair;
+        // determine if key is properties true name or invariant lower case
+        private static string GetKey<T>(Expression<Func<T, object>> expression)
+            where T : class
+        {
+            var propertyInfo = expression.GetMember<T, PropertyInfo>();
+
+            return propertyInfo.Name;
         }
 
         #endregion helpers

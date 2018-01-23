@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Wayless
 {
-    public static class Extensions
+    internal static class Extensions
     { 
-        public static IDictionary<string, IPropertyDetails> GetPropertyDictionary(this Type type, bool useInvarientKey = false)
+        public static IDictionary<string, PropertyDetails<T>> GetPropertyDictionary<T>(this Type type)
         {
-            return type.GetProperties().Select(x => new PropertyDetails(x) as IPropertyDetails).ToDictionary(p => useInvarientKey ? p.InvarientName : p.Name);
+            return type.GetProperties()
+                       .Select(pd => new PropertyDetails<T>(pd))
+                       .ToDictionary(p => p.Name);
         }
 
         public static TMemberOut GetMember<T, TMemberOut>(this Expression<Func<T, object>> expression)
@@ -29,6 +32,7 @@ namespace Wayless
             }
 
             return memberExpression.Member as TMemberOut;
-        }        
+        }
+
     }
 }

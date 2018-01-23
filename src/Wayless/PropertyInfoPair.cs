@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
 namespace Wayless
 {
-    public class PropertyInfoPair : IPropertyInfoPair
+    internal class PropertyInfoPair<TDestination, TSource> 
     {
-        public IPropertyDetails DestinationProperty { get; set; }
+        public PropertyInfoPair(PropertyDetails<TDestination> destinationProperty, PropertyDetails<TSource> sourceProperty)
+        {
+            DestinationProperty = destinationProperty;
+            SourceProperty = sourceProperty;
+        }
 
-        public IPropertyDetails SourceProperty { get; set; }
+        public PropertyDetails<TDestination> DestinationProperty { get; set; }
+        
+        public PropertyDetails<TSource> SourceProperty { get; set; }
+        
+        public object ValueToSet { get; }
     }
 }
