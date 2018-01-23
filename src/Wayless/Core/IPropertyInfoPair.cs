@@ -6,9 +6,5 @@ namespace Wayless
     {
         IPropertyDetails DestinationProperty { get; set; }
         IPropertyDetails SourceProperty { get; set; }
-
-        Action<object, object> Setter { get; set; }
-
-        Func<object, object> Getter { get; set; }
     }
 }

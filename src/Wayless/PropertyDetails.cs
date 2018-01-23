@@ -12,7 +12,7 @@ namespace Wayless
         {
             PropertyInfo = propertyInfo;
             Name = PropertyInfo.Name;
-            InvarientName = Name.ToLowerInvariant();
+            InvarientName = Name.ToLowerInvariant();            
         }
 
         public string Name { get; }

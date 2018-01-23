@@ -261,8 +261,9 @@ namespace Wayless
         {
             foreach (var map in _mappingDictionary.Values)
             {
-                var sourceValue = map.SourceProperty.PropertyInfo.GetMethod.Invoke(sourceObject, null);
-                map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
+                var pip = ((PropertyInfoPair<TDestination, TSource>)map);
+                var sourceValue = pip.Getter(sourceObject);
+                pip.Setter(destinationObject, sourceValue);
             }
         }
 
@@ -301,17 +302,6 @@ namespace Wayless
             _hasAppliedFieldSkipSet = true;
         }
 
-        // try applying value using basic conversion
-        private void SetValueWithConversion(IPropertyDetails destinationProperty, TDestination destinationObject, object value)
-        {
-            var converter = TypeDescriptor.GetConverter(value.GetType());
-            if (converter.CanConvertTo(destinationProperty.PropertyInfo.PropertyType))
-            {
-                var convertedValue = converter.ConvertTo(value, destinationProperty.PropertyInfo.PropertyType);
-                destinationProperty.PropertyInfo.SetValue(destinationObject, convertedValue);
-            }
-        }
-
         // determine if key is properties true name or invariant lower case
         private string GetKey<T>(Expression<Func<T, object>> expression)
             where T : class
@@ -338,18 +328,14 @@ namespace Wayless
         // create mapping pair
         private IPropertyInfoPair GetPropertyPair(IPropertyDetails destinationDetails, IPropertyDetails sourceDetails)
         {
-            var propertyInfoPair = new PropertyInfoPair
+            var propertyInfoPair = new PropertyInfoPair<TDestination, TSource>
             {
                 DestinationProperty = destinationDetails,
                 SourceProperty = sourceDetails
             };
 
-
-
-            //propertyInfoPair.Setter = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object>), null, propertyInfoPair.DestinationProperty.PropertyInfo.GetSetMethod());
-            //propertyInfoPair.Getter = (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object>), null, propertyInfoPair.SourceProperty.PropertyInfo.GetGetMethod());
-
-
+            propertyInfoPair.InitializeSet();
+            propertyInfoPair.InitializeGet();
             return propertyInfoPair;
         }
 
