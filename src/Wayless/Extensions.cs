@@ -34,5 +34,9 @@ namespace Wayless
             return memberExpression.Member as TMemberOut;
         }
 
+        public static void ExpressionMap<Td, Ts>(Expression<Func<Td, Ts, object>> mappingExpression)
+        {
+
+        }
     }
 }

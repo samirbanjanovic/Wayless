@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -15,6 +15,7 @@
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
+    <PackageReleaseNotes>Major performance improvements. Switched property set/get to compiled expressions.  Changed logic behind field skip.</PackageReleaseNotes>
   </PropertyGroup>
 
 </Project>
