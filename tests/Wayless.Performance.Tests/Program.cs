@@ -52,15 +52,11 @@ namespace Wayless.Performance.Tests
         static void Main(string[] args)
         {
             while(true)
-            {
-                //MeasureWaylessMap();
-                var mm = Task.Run(() => MeasureManualMap());
-                var am = Task.Run(() => MeasureAutoMapper());
-                ////var tm = Task.Run(() => MeasureTinyMapper());
-                var wm = Task.Run(() => MeasureWaylessMap());
-
-                Task.WaitAll(mm, am, wm);
-
+            {                
+                MeasureManualMap();
+                MeasureAutoMapper();
+                MeasureWaylessMap();
+                
                 Console.ReadLine();
             }            
         }
@@ -96,13 +92,18 @@ namespace Wayless.Performance.Tests
 
         private static void MeasureWaylessMap()
         {
-            Person person = Person.Create();            
+            Person person = Person.Create();
+            
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = new WaylessMap<PersonDTO, Person>();
+            var mapper = new WaylessMap<PersonDTO, Person>()
+                            .FieldMap(d => d.FirstName, s => s.Nickname)
+                            .FieldMap(d => d.Nickname, s => s.FirstName);
 
             for (int i = 0; i < Iterations; i++)
             {
-                var personDto = mapper.Map(person);
+                var personDto = mapper                                
+                                .Map(person);
+                                       
             }
 
             stopwatch.Stop();
