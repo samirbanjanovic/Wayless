@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wayless.Performance.Tests", "tests\Wayless.Performance.Tests\Wayless.Performance.Tests.csproj", "{BC9B0539-F592-422B-96C3-0B50B72A459C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC9B0539-F592-422B-96C3-0B50B72A459C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC9B0539-F592-422B-96C3-0B50B72A459C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC9B0539-F592-422B-96C3-0B50B72A459C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC9B0539-F592-422B-96C3-0B50B72A459C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -40,6 +46,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{9E27D2DE-7D82-4807-B5D2-5B1F7DF3D343} = {DE1546B5-2DD2-4C67-8219-3A3DA3830058}
 		{0DFD44C1-7269-4F24-94A8-0ACA783F3B29} = {640475B6-32D7-42A8-AE65-873E7DAD67BA}
+		{BC9B0539-F592-422B-96C3-0B50B72A459C} = {640475B6-32D7-42A8-AE65-873E7DAD67BA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A77E16D-CE73-4801-8EFA-EE4885E81C31}

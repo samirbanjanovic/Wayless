@@ -252,23 +252,14 @@ namespace Wayless
         // apply mapping dictionary
         private void ApplyMappingDictionary(TDestination destinationObject, TSource sourceObject)
         {
-            if (_mappingDictionary.Values.Count > 0)
+            foreach (var map in _mappingDictionary.Values)
             {
-                foreach (var map in _mappingDictionary.Values)
-                {
-                    var sourceValue = map.SourceProperty.PropertyInfo.GetValue(sourceObject);
 
-                    if (map.SourceProperty.PropertyInfo.PropertyType != map.DestinationProperty.PropertyInfo.PropertyType)
-                    {// perform some basic conversion
-
-                        SetValueWithConversion(map.DestinationProperty, destinationObject, sourceValue);
-                    }
-                    else
-                    {
-                        map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
-                    }
-                }
+                var value = map.Getter(sourceObject);
+                map.Setter(destinationObject, value);
+                //map.DestinationProperty.PropertyInfo.SetValue(destinationObject, sourceValue);
             }
+
         }
 
         // apply explicit assignments
@@ -358,6 +349,10 @@ namespace Wayless
                 DestinationProperty = destinationDetails,
                 SourceProperty = sourceDetails
             };
+
+            propertyInfoPair.Setter = (Action<object, object>)Delegate.CreateDelegate(typeof(Action<object>), null, propertyInfoPair.DestinationProperty.PropertyInfo.GetSetMethod());
+            propertyInfoPair.Getter = (Func<object, object>)Delegate.CreateDelegate(typeof(Func<object>), null, propertyInfoPair.SourceProperty.PropertyInfo.GetGetMethod());
+
 
             return propertyInfoPair;
         }
