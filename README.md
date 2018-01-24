@@ -45,7 +45,8 @@ If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `
             .Map(SourceObject);
                         
 # Perfromance
-Some basic performance tests show that Wayless works best on small number of iterations
+Some basic performance tests show that Wayless works best on a small number of iterations. It's able to maintain
+a performance edge up to ~20,000 iterations
 
 Initial loop is always the slowest due to .NET caching and evaluations
 
