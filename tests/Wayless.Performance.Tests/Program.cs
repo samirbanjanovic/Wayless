@@ -95,9 +95,9 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
             
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = new WaylessMap<PersonDTO, Person>()
-                            .FieldMap(d => d.FirstName, s => s.Nickname)
-                            .FieldMap(d => d.Nickname, s => s.FirstName);
+            var mapper = new WaylessMap<PersonDTO, Person>();
+                        
+                            
 
             for (int i = 0; i < Iterations; i++)
             {

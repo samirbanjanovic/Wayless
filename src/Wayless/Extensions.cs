@@ -8,12 +8,12 @@ using System.Text;
 namespace Wayless
 {
     internal static class Extensions
-    { 
+    {
         public static IDictionary<string, PropertyDetails<T>> GetPropertyDictionary<T>(this Type type)
         {
             return type.GetProperties()
                        .Select(pd => new PropertyDetails<T>(pd))
-                       .ToDictionary(p => p.Name);
+                       .ToDictionary(p => p.Name.ToLowerInvariant());
         }
 
         public static TMemberOut GetMember<T, TMemberOut>(this Expression<Func<T, object>> expression)
@@ -31,8 +31,8 @@ namespace Wayless
                 memberExpression = lambda.Body as MemberExpression;
             }
 
+
             return memberExpression.Member as TMemberOut;
         }
-
     }
 }
