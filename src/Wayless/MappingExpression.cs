@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Wayless
 {
-    internal static class MappingExpression
+    public static class MappingExpression
     {
         //Expression.TypeAs(, setExpression.PropertyType)
         public static Action<TDestination, TSource> Build<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
