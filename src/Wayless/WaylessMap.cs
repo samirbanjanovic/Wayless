@@ -12,6 +12,7 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
+        /// Type activator. Using static compiled expression for optimal performance
         private static readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();

@@ -25,13 +25,13 @@ any rules you created using `FieldMap` and `FieldSet`.
     };
 
     var mapperInstance = new WaylessMap<DestinationObject, SourceObject>()
-                            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
-                            .FieldMap(dest => d.Name, src => src.InstanceName)
-                            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
-                            .FieldSkip(dest => dest.ClosingDate);
+            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
+            .FieldMap(dest => d.Name, src => src.InstanceName)
+            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
+            .FieldSkip(dest => dest.ClosingDate);
                         
     var mappedObject = mapperInstance                        
-                        .Map(SourceObject);
+            .Map(SourceObject);
 
 A call to `Map` applies all the generated rules and generates an instance of the submitted type.
 
@@ -41,13 +41,14 @@ type.
 If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `FieldRestore` to start mapping the field again.
 
     var mappedObject = mapperInstance                        
-                        .FieldRestore(dest => dest.ClosingDate)
-                        .Map(SourceObject);
+            .FieldRestore(dest => dest.ClosingDate)
+            .Map(SourceObject);
                         
 # Perfromance
-Some basic performance tests show that Wayless works best on small number of iterations
+Some basic performance tests show that Wayless works best on a small number of iterations. It's able to maintain
+a performance edge up to ~20,000 iterations
 
-Initial loop is always the slowest since .NET has to evalute all expressions and cache access
+Initial loop is always the slowest due to .NET caching and evaluations
 
     Test iteration: 0
     Set size: 1000
