@@ -80,16 +80,16 @@ namespace Wayless.Tests
             Assert.AreNotEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
         }
 
-        [TestMethod]
-        public void TestShowMapping()
-        {
-            var mapper = new WaylessMap<DestinationObject, SourceObject>()
-                                .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
+        //[TestMethod]
+        //public void TestShowMapping()
+        //{
+        //    var mapper = new WaylessMap<DestinationObject, SourceObject>()
+        //                        .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
                                 
-            var mappingRules = mapper.ShowMapping();
+        //    var mappingRules = mapper.ShowMapping();
 
-            Debug.Write(string.Join(Environment.NewLine, mappingRules));
-        }
+        //    Debug.Write(string.Join(Environment.NewLine, mappingRules));
+        //}
     }
 }
 
