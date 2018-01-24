@@ -47,7 +47,7 @@ namespace Wayless.Performance.Tests
 
     class Program
     {
-        private const int Iterations = 1000000;
+        private const int Iterations = 100000;
 
         static void Main(string[] args)
         {
