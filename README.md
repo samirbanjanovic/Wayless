@@ -25,13 +25,13 @@ any rules you created using `FieldMap` and `FieldSet`.
     };
 
     var mapperInstance = new WaylessMap<DestinationObject, SourceObject>()
-                            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
-                            .FieldMap(dest => d.Name, src => src.InstanceName)
-                            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
-                            .FieldSkip(dest => dest.ClosingDate);
+            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
+            .FieldMap(dest => d.Name, src => src.InstanceName)
+            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
+            .FieldSkip(dest => dest.ClosingDate);
                         
     var mappedObject = mapperInstance                        
-                        .Map(SourceObject);
+            .Map(SourceObject);
 
 A call to `Map` applies all the generated rules and generates an instance of the submitted type.
 
@@ -41,8 +41,8 @@ type.
 If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `FieldRestore` to start mapping the field again.
 
     var mappedObject = mapperInstance                        
-                        .FieldRestore(dest => dest.ClosingDate)
-                        .Map(SourceObject);
+            .FieldRestore(dest => dest.ClosingDate)
+            .Map(SourceObject);
                         
 # Perfromance
 Some basic performance tests show that Wayless works best on small number of iterations
