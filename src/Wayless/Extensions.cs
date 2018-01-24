@@ -34,9 +34,10 @@ namespace Wayless
             return memberExpression.Member as TMemberOut;
         }
 
-        public static void ExpressionMap<Td, Ts>(Expression<Func<Td, Ts, object>> mappingExpression)
+        public static Action<Td, Ts> ExpressionMap<Td, Ts>(Expression<Func<Td, Ts, object>> mappingExpression)
         {
-
+            var destination = Expression.Parameter(typeof(Td), "destination");
+            var source = Expression.Parameter(typeof(Ts), "source");            
         }
     }
 }
