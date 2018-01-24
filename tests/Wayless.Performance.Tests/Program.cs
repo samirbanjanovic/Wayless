@@ -98,7 +98,6 @@ namespace Wayless.Performance.Tests
             var mapper = new WaylessMap<PersonDTO, Person>();
                         
                             
-
             for (int i = 0; i < Iterations; i++)
             {
                 var personDto = mapper                                
