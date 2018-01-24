@@ -203,12 +203,12 @@ namespace Wayless
             var destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
             var sourceProperties = SourceType.GetPropertyDictionary<TSource>();
 
-            foreach(var destination in destinationProperties)
+            foreach(var destinationInfo in destinationProperties)
             {
-                _fields.Add(destination.Key);
-                if (sourceProperties.TryGetValue(destination.Key, out PropertyDetails<TSource> source))
+                _fields.Add(destinationInfo.Key);
+                if (sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
                 {
-                    _mappingDictionary.Add(destination.Key, MappingExpression.Build<TDestination, TSource>(destination.Value.PropertyInfo, source.PropertyInfo));
+                    _mappingDictionary.Add(destinationInfo.Key, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo));
                 }                
             }
         }
