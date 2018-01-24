@@ -47,7 +47,7 @@ If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `
 # Perfromance
 Some basic performance tests show that Wayless works best on small number of iterations
 
-Initial loop is always the slowest since .NET has to evalute all expressions and cache access
+Initial loop is always the slowest due to .NET caching and evaluations
 
     Test iteration: 0
     Set size: 1000
