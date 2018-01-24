@@ -15,6 +15,8 @@ and source type.
 `FieldSkip`: removes property in destination type from mapping rules. Calling this method will override 
 any rules you created using `FieldMap` and `FieldSet`.
 
+`FieldRestore`: restores a previously skipped field to be mapped again
+
     var TestSource = new SourceObject()
     {
         Id = 1,
@@ -22,11 +24,13 @@ any rules you created using `FieldMap` and `FieldSet`.
         TimeStamp = DateTime.Now.AddDays(-1)
     };
 
-    var mappedObject = new WaylessMap<DestinationObject, SourceObject>()
-                        .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
-                        .FieldMap(dest => d.Name, src => src.InstanceName)
-                        .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
-                        .FieldSkip(dest => dest.ClosingDate)
+    var mapperInstance = new WaylessMap<DestinationObject, SourceObject>()
+                            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
+                            .FieldMap(dest => d.Name, src => src.InstanceName)
+                            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
+                            .FieldSkip(dest => dest.ClosingDate);
+                        
+    var mappedObject = mapperInstance                        
                         .Map(SourceObject);
 
 A call to `Map` applies all the generated rules and generates an instance of the submitted type.
@@ -34,9 +38,8 @@ A call to `Map` applies all the generated rules and generates an instance of the
 `Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
 type.
 
-You can review the relationships that were created between two types by calling the `ShowMapping` method.
-This will return a simple text string identifying all the generated mapping rules
-    
-    DestinationType.DestinationProperty = SourceType.SourceProperty
-    DestinationType.DestinationProperty2 = "SomeExplicitValue"
-    DestinationType.DestinationProperty3 - Skip   
+If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `FieldRestore` to start mapping the field again.
+
+    var mappedObject = mapperInstance                        
+                        .FieldRestore(dest => dest.ClosingDate)
+                        .Map(SourceObject);
