@@ -12,6 +12,7 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
+        /// Type activator. Using static compiled expression for optimal performance
         private static readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();
@@ -56,16 +57,6 @@ namespace Wayless
         /// Type to map to
         /// </summary>
         public Type DestinationType { get; }
-
-        /// <summary>
-        /// Apply mapping rules to  existing instance of object
-        /// </summary>
-        /// <param name="destinationObject">Object to apply mapping rules to</param>
-        /// <param name="sourceObject">Object to read values from</param>
-        public void Map(ref TDestination destinationObject, ref TSource sourceObject)
-        {
-            InternalMap(destinationObject, sourceObject);
-        }
 
         /// <summary>
         /// Apply mapping rules to  existing instance of object
