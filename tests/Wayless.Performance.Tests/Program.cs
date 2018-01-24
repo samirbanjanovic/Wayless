@@ -47,7 +47,7 @@ namespace Wayless.Performance.Tests
 
     class Program
     {
-        private const int Iterations = 1000000;
+        private const int Iterations = 100000;
 
         static void Main(string[] args)
         {
@@ -98,7 +98,6 @@ namespace Wayless.Performance.Tests
             var mapper = new WaylessMap<PersonDTO, Person>();
                         
                             
-
             for (int i = 0; i < Iterations; i++)
             {
                 var personDto = mapper                                

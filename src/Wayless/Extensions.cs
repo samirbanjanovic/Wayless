@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Wayless
 {
-    internal static class Extensions
+    public static class Extensions
     {
         public static IDictionary<string, PropertyInfo> GetPropertyDictionary<T>(this Type type)
         {
