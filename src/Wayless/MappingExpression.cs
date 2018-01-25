@@ -21,7 +21,13 @@ namespace Wayless
             PropertyInfo sourceProperty = sourceExpression.GetMember<TSource, PropertyInfo>();
 
             var assign = Expression.Lambda<Action<TDestination, TSource>>(Expression.Call(destination, destinationProperty.GetSetMethod(),
-                                    Expression.Call(source, sourceProperty.GetGetMethod())), new ParameterExpression[] { destination, source }).Compile();
+                                    Expression.Call(source, sourceProperty.GetGetMethod()))
+                                    , new ParameterExpression[] 
+                                    {
+                                        destination
+                                        , source
+                                    })
+                                    .Compile();
 
             return assign;
         }
