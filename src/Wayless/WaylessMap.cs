@@ -20,11 +20,13 @@ namespace Wayless
 
         private readonly IList<Map<TDestination, TSource>> _mappings = new List<Map<TDestination, TSource>>();
 
+        private readonly IDictionary<string, (PropertyInfo, PropertyInfo)> _pairs;
         private readonly IDictionary<string, PropertyInfo> _destinationProperties;
         private readonly IDictionary<string, PropertyInfo> _sourceProperties;
 
-        
+        private Action<TDestination, TSource> _map;
 
+        private bool _isCompiled;
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -37,6 +39,8 @@ namespace Wayless
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
 
+            _pairs = new Dictionary<string, (PropertyInfo, PropertyInfo)>();
+            _isCompiled = false;
             _destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
             _sourceProperties = SourceType.GetPropertyDictionary<TSource>();
 
@@ -168,10 +172,13 @@ namespace Wayless
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            foreach (var map in _mappings)
+            if(!_isCompiled)
             {
-                map.MapValue(destinationObject, sourceObject);
+                _map = MappingExpression.BuildMap<TDestination, TSource>(_pairs.Values);
+                _isCompiled = true;
             }
+
+            _map(destinationObject, sourceObject);
         }
 
         // create initial mapping dictionary by matching property (key) names
@@ -181,9 +188,12 @@ namespace Wayless
             {
                 if (_sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
                 {
-                    _mappings.Add(new Map<TDestination, TSource>(destinationInfo.Value.Name, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo)));
+                    _pairs.Add(destinationInfo.Key.ToLowerInvariant(),(destinationInfo.Value, sourceInfo));
                 }
             }
+
+            _map = MappingExpression.BuildMap<TDestination, TSource>(_pairs.Values);
+            _isCompiled = true;
         }
 
         // determine if key is properties true name or invariant lower case

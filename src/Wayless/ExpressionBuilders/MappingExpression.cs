@@ -82,20 +82,32 @@ namespace Wayless
             return mapCall;
         }
 
-        //private static void BuildMap<TDestination, TSource>(IEnumerable<(PropertyInfo, PropertyInfo)> properties)
-        //    where TDestination : class
-        //    where TSource : class
-        //{
-        //    var expressions = new List<Expression<Action<TDestination, TSource>>>();
-        //    foreach(var pair in properties)
-        //    {
-        //        expressions.Add(BuildExpression<TDestination, TSource>(pair.Item1, pair.Item2));
-        //    }
+        public static Action<TDestination, TSource> BuildMap<TDestination, TSource>(IEnumerable<(PropertyInfo, PropertyInfo)> properties)
+            where TDestination : class
+            where TSource : class
+        {
+            var destination = Expression.Parameter(typeof(TDestination), "destination");
+            var source = Expression.Parameter(typeof(TSource), "source");
 
-        //    var assign 
-        //}
+            var expressions = new List<Expression>();
+            foreach (var pair in properties)
+            {
+                expressions.Add(Expression.Call(destination, pair.Item1.GetSetMethod()
+                                        , Expression.Convert(Expression.Call(source, pair.Item2.GetGetMethod()), pair.Item2.PropertyType)));
+            }
 
+            var assign = Expression.Lambda<Action<TDestination, TSource>>(
+                                   Expression.Block(
+                                    expressions)
+                                   , new ParameterExpression[]
+                                    {
+                                        destination
+                                        , source
+                                    })
+                                    .Compile();
 
+            return assign;
+        }        
 
         public static Expression<Action<TDestination, TSource>> BuildExpression<TDestination, TSource>(PropertyInfo destinationProperty, PropertyInfo sourceProperty)
             where TDestination : class
