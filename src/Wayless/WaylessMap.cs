@@ -12,6 +12,7 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
+        /// Type activator. Using static compiled expression for optimal performance
         private static readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();
@@ -20,14 +21,8 @@ namespace Wayless
         /// Stores mapping rules defining what value to apply to which destination property 
         /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
         /// </summary>
-        //private readonly IDictionary<string, PropertyInfoPair<TDestination, TSource>> _defaultPairs;
-
         private readonly IDictionary<string, Action<TDestination, TSource>> _mappingDictionary;
 
-        /// <summary>
-        /// Destination properties to be excluded from mapping rules
-        /// </summary>
-        private IList<string> _fields;
 
         /// <summary>
         /// Create instance of Wayless mapper
@@ -37,9 +32,8 @@ namespace Wayless
         ///     False: Property name casing affects matching
         /// </param>
         public WaylessMap()
-        {            
+        {
             _mappingDictionary = new Dictionary<string, Action<TDestination, TSource>>();
-            _fields = new List<string>();
 
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
@@ -56,16 +50,6 @@ namespace Wayless
         /// Type to map to
         /// </summary>
         public Type DestinationType { get; }
-
-        /// <summary>
-        /// Apply mapping rules to  existing instance of object
-        /// </summary>
-        /// <param name="destinationObject">Object to apply mapping rules to</param>
-        /// <param name="sourceObject">Object to read values from</param>
-        public void Map(ref TDestination destinationObject, ref TSource sourceObject)
-        {
-            InternalMap(destinationObject, sourceObject);
-        }
 
         /// <summary>
         /// Apply mapping rules to  existing instance of object
@@ -118,7 +102,7 @@ namespace Wayless
         public IWaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
             var destination = GetName(destinationExpression);
-            
+
             if (_mappingDictionary.ContainsKey(destination))
             {
                 _mappingDictionary[destination] = MappingExpression.Build(destinationExpression, sourceExpression);
@@ -127,7 +111,7 @@ namespace Wayless
             {
                 _mappingDictionary.Add(destination, MappingExpression.Build(destinationExpression, sourceExpression));
             }
-                        
+
             return this;
         }
 
@@ -161,40 +145,23 @@ namespace Wayless
         public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
             var ignoreItem = GetName(ignoreAtDestinationExpression);
-            if (_fields.Contains(ignoreItem))
+            if (_mappingDictionary.ContainsKey(ignoreItem))
             {
-                _fields.Remove(ignoreItem);
+                _mappingDictionary.Remove(ignoreItem);
             }
-
+            
             return this;
         }
-
-        /// <summary>
-        /// Restores field to mapping dictionary if a prior instruction had it set to be skipped
-        /// </summary>
-        /// <param name="ignoredFieldToRestore">Field to restore</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWaylessMap<TDestination, TSource> FieldRestore(Expression<Func<TDestination, object>> ignoredFieldToRestore)
-        {
-            var restoreItem = GetName(ignoredFieldToRestore);
-            if (!_fields.Contains(restoreItem))
-            {
-                _fields.Add(restoreItem);
-            }
-
-            return this;
-        }
-
 
         #region helpers
 
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            foreach(var field in _fields)
+            foreach(var map in _mappingDictionary.Values)
             {
-                _mappingDictionary[field](destinationObject, sourceObject);
-            }            
+                map(destinationObject, sourceObject);
+            }
         }
 
         // create initial mapping dictionary by matching property (key) names
@@ -203,12 +170,11 @@ namespace Wayless
             var destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
             var sourceProperties = SourceType.GetPropertyDictionary<TSource>();
 
-            foreach(var destinationInfo in destinationProperties)
+            foreach (var destinationInfo in destinationProperties)
             {
-                _fields.Add(destinationInfo.Key);
                 if (sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
                 {
-                    _mappingDictionary.Add(destinationInfo.Key, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo));
+                    _mappingDictionary.Add(destinationInfo.Key, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo));                    
                 }                
             }
         }
