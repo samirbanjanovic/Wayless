@@ -33,8 +33,15 @@ namespace Wayless
             var destination = Expression.Parameter(typeof(TDestination), "destination");
             var source = Expression.Parameter(typeof(TSource), "source");
 
-            var assign = Expression.Lambda<Action<TDestination, TSource>>(Expression.Call(destination, destinationProperty.GetSetMethod(),
-                                    Expression.Call(source, sourceProperty.GetGetMethod())), new ParameterExpression[] { destination, source }).Compile();
+            var assign = Expression.Lambda<Action<TDestination, TSource>>(
+                                    Expression.Call(destination, destinationProperty.GetSetMethod()
+                                        , Expression.Convert(Expression.Call(source, sourceProperty.GetGetMethod()), destinationProperty.PropertyType))
+                                    , new ParameterExpression[] 
+                                    {
+                                        destination
+                                        , source
+                                    })
+                                    .Compile();
 
             return assign;
         }
@@ -49,7 +56,15 @@ namespace Wayless
             PropertyInfo destinationProperty = destinationExpression.GetMember<TDestination, PropertyInfo>();
 
             // pass source object but ignore it so it can be used in same mapping dictionary
-            var assign = Expression.Lambda<Action<TDestination, TSource>>(Expression.Call(destination, destinationProperty.GetSetMethod(), Expression.Constant(value)), new ParameterExpression[] { destination, source }).Compile();
+            var assign = Expression.Lambda<Action<TDestination, TSource>>(
+                                    Expression.Call(destination, destinationProperty.GetSetMethod()
+                                        , Expression.Convert(Expression.Constant(value), destinationProperty.PropertyType))
+                                    , new ParameterExpression[] 
+                                    {
+                                        destination
+                                        , source
+                                    })
+                                    .Compile();
 
             return assign;
         }

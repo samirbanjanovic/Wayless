@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -20,8 +20,8 @@ Opened up Extensions and MappingExpression classes to public access
 This is a breaking update. ShowMappings() is not longer party of IWayLess defintion.
 Further performance  improvements.
 Added FielRestore() - intedned use is to restore a field mapping if it was skipped in prioer mapping usage</PackageReleaseNotes>
-    <AssemblyVersion>0.4.0.0</AssemblyVersion>
-    <FileVersion>0.4.0.0</FileVersion>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <FileVersion>0.5.0.0</FileVersion>
   </PropertyGroup>
 
 </Project>

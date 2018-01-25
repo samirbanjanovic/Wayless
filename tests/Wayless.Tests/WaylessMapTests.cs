@@ -24,7 +24,7 @@ namespace Wayless.Tests
 
             public DateTime AssignmentDate { get; set; }
 
-            public string CorrelationId { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
         public SourceObject TestSource = new SourceObject()
