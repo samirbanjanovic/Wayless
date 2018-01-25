@@ -15,7 +15,8 @@
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
-    <PackageReleaseNotes>Removed overloaded Map(ref dest, ref source) method
+    <PackageReleaseNotes>Removed FieldRestore mothod, further improved performance
+Removed overloaded Map(ref dest, ref source) method
 Opened up Extensions and MappingExpression classes to public access
 This is a breaking update. ShowMappings() is not longer party of IWayLess defintion.
 Further performance  improvements.
