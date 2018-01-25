@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using AutoMapper;
-
+using Mapster;
 
 namespace Wayless.Performance.Tests
 {
@@ -47,18 +47,24 @@ namespace Wayless.Performance.Tests
 
     class Program
     {
-        private const int Iterations = 100000;
+        private const int Iterations = 1000;
 
         static void Main(string[] args)
         {
-            while(true)
-            {                
+            int i = 0;
+            while (true)
+            {
+                Console.WriteLine($"Test iteration: {i++}");
+                Console.WriteLine($"Set size: {Iterations}");
                 MeasureManualMap();
                 MeasureAutoMapper();
                 MeasureWaylessMap();
-                
+                MeasureStaticWaylessMap();
+                MesaureMapster();
+
+                Console.WriteLine("------------------------------------");
                 Console.ReadLine();
-            }            
+            }
         }
 
         private static void MeasureManualMap()
@@ -72,15 +78,19 @@ namespace Wayless.Performance.Tests
                 PersonDTO personDto = ManualMap(person);
             }
             stopwatch.Stop();
-            Console.WriteLine("Handwritten: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Manual: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private static void MeasureAutoMapper()
         {
-            Person person = Person.Create();            
+            Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Person, PersonDTO>());
             var mapper = config.CreateMapper();
+            stopwatch.Stop();
+            Console.WriteLine("AutoMapper Init: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+
+            stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
             {
                 var personDto = mapper.Map<Person, PersonDTO>(person);
@@ -89,25 +99,54 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("AutoMapper: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-
         private static void MeasureWaylessMap()
         {
             Person person = Person.Create();
-            
+
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = new WaylessMap<PersonDTO, Person>();
-                        
-                            
+
+            stopwatch.Stop();
+            Console.WriteLine("Wayless Init: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+
+            stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
             {
-                var personDto = mapper                                
-                                .Map(person);
-                                       
+                var personDto = mapper.Map(person);
             }
 
             stopwatch.Stop();
             Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
+
+        private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
+        private static void MeasureStaticWaylessMap()
+        {
+            Person person = Person.Create();
+
+            Stopwatch stopwatch = Stopwatch.StartNew();        
+            for (int i = 0; i < Iterations; i++)
+            {
+                var personDto = _staticWaylessMapper.Map(person);
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine("Static Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private static void MesaureMapster()
+        {
+            Person person = Person.Create();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+           
+            for(int i =0; i < Iterations; i++)
+            {   
+               var personDto  = person.Adapt<PersonDTO>();
+            }
+
+            stopwatch.Start();
+            Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        } 
 
         private static PersonDTO ManualMap(Person person)
         {
