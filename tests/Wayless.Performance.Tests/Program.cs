@@ -22,13 +22,13 @@ namespace Wayless.Performance.Tests
             return new Person
             {
                 Id = Guid.NewGuid(),
-                FirstName = "John",
+                FirstName = "Jane",
                 LastName = "Doe",
-                Email = "support@tinymapper.net",
-                Address = "Wall Street",
+                Email = "tests@gitTest.com",
+                Address = "Test Street",
                 CreateTime = DateTime.Now,
-                Nickname = "Object Mapper",
-                Phone = "Call Me Maybe "
+                Nickname = "Jenny",
+                Phone = "8675309 "
             };
         }
     }
