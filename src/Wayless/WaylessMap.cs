@@ -18,16 +18,23 @@ namespace Wayless
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();
 
-        private static readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
+        /// <summary>
+        /// Generates mapping expressions that will be eventually compiled into map
+        /// </summary>
+        private readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
 
         private readonly IDictionary<string, PropertyInfo> _destinationProperties;
         private readonly IDictionary<string, PropertyInfo> _sourceProperties;
         private readonly IDictionary<string, Expression> _fieldExpressions;
 
-        private Action<TDestination, TSource> _compiledMap;
-        private bool _isCompiled;
+        // Indicates if the _compiledMap action has the latest rules
+        // each time mapping is modified this flag will be switched
+        // to false, letting Wayless know to compile a new 
+        // mapping function from it's collected expressions
+        private bool _isMapUpToDate;
 
-        
+        private Action<TDestination, TSource> _map;
+                
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -40,7 +47,7 @@ namespace Wayless
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
 
-            _isCompiled = false;
+            _isMapUpToDate = false;
 
             _fieldExpressions = new Dictionary<string, Expression>();
             
@@ -115,7 +122,7 @@ namespace Wayless
 
             RegisterFieldExpression(destination, expression);
 
-            _isCompiled = false;
+            _isMapUpToDate = false;
             return this;
         }
 
@@ -132,7 +139,7 @@ namespace Wayless
 
             RegisterFieldExpression(destination, expression);
 
-            _isCompiled = false;
+            _isMapUpToDate = false;
             return this;
         }
 
@@ -149,7 +156,7 @@ namespace Wayless
                 _fieldExpressions.Remove(ignore);
             }
 
-            _isCompiled = false;
+            _isMapUpToDate = false;
             return this;
         }
 
@@ -169,13 +176,13 @@ namespace Wayless
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            if(!_isCompiled)
+            if(!_isMapUpToDate)
             {
-                _compiledMap = _expressionBuilder.BuildActionMap(_fieldExpressions.Values);
-                _isCompiled = true;
+                _map = _expressionBuilder.BuildActionMap(_fieldExpressions.Values);
+                _isMapUpToDate = true;
             }
 
-            _compiledMap(destinationObject, sourceObject);
+            _map(destinationObject, sourceObject);
         }
 
         // create initial mapping dictionary by matching property (key) names
