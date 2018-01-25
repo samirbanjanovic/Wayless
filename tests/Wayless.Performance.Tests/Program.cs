@@ -15,8 +15,7 @@ namespace Wayless.Performance.Tests
         public Guid Id { get; set; }
         public string LastName { get; set; }
         public string Nickname { get; set; }
-        public string Phone { get; set; }
-
+        public string Phone { get; set; }        
         public static Person Create()
         {
             return new Person
@@ -42,12 +41,12 @@ namespace Wayless.Performance.Tests
         public string LastName { get; set; }
         public string Nickname { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Phone { get; set; }
+        public string Phone { get; set; }        
     }
 
     class Program
     {
-        private const int Iterations = 1000;
+        private const int Iterations = 1000000;
 
         static void Main(string[] args)
         {
@@ -59,7 +58,7 @@ namespace Wayless.Performance.Tests
                 MeasureManualMap();
                 MeasureAutoMapper();
                 MeasureWaylessMap();
-                MeasureStaticWaylessMap();
+                MeasureStaticWaylessMap();                
                 MesaureMapster();
 
                 Console.WriteLine("------------------------------------");
@@ -123,10 +122,10 @@ namespace Wayless.Performance.Tests
         private static void MeasureStaticWaylessMap()
         {
             Person person = Person.Create();
-
             Stopwatch stopwatch = Stopwatch.StartNew();        
             for (int i = 0; i < Iterations; i++)
             {
+                
                 var personDto = _staticWaylessMapper.Map(person);
             }
 
@@ -140,8 +139,8 @@ namespace Wayless.Performance.Tests
             Stopwatch stopwatch = Stopwatch.StartNew();
            
             for(int i =0; i < Iterations; i++)
-            {   
-               var personDto  = person.Adapt<PersonDTO>();
+            {                
+                var personDto  = person.Adapt<PersonDTO>();
             }
 
             stopwatch.Start();
@@ -160,6 +159,7 @@ namespace Wayless.Performance.Tests
                 CreateTime = person.CreateTime,
                 Nickname = person.Nickname,
                 Phone = person.Phone
+                
             };
             return result;
         }

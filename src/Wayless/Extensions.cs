@@ -9,7 +9,7 @@ namespace Wayless
 {
     public static class Extensions
     {
-        public static IDictionary<string, PropertyInfo> GetPropertyDictionary<T>(this Type type)
+        public static IDictionary<string, PropertyInfo> GetInvariantPropertyDictionary<T>(this Type type)
         {
             return type.GetProperties()                       
                        .ToDictionary(p => p.Name.ToLowerInvariant());
