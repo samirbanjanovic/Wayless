@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using AutoMapper;
-
+using Mapster;
 
 namespace Wayless.Performance.Tests
 {
@@ -47,7 +47,7 @@ namespace Wayless.Performance.Tests
 
     class Program
     {
-        private const int Iterations = 10000;
+        private const int Iterations = 1000;
 
         static void Main(string[] args)
         {
@@ -59,6 +59,7 @@ namespace Wayless.Performance.Tests
                 MeasureManualMap();
                 MeasureAutoMapper();
                 MeasureWaylessMap();
+                MesaureMapster();
 
                 Console.ReadLine();
             }
@@ -96,7 +97,6 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("AutoMapper: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-
         private static void MeasureWaylessMap()
         {
             Person person = Person.Create();
@@ -116,6 +116,20 @@ namespace Wayless.Performance.Tests
             stopwatch.Stop();
             Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
+
+        private static void MesaureMapster()
+        {
+            Person person = Person.Create();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
+            for(int i =0; i < Iterations; i++)
+            {   
+               var personDto  = person.Adapt<PersonDTO>();
+            }
+
+            stopwatch.Start();
+            Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        } 
 
         private static PersonDTO ManualMap(Person person)
         {
