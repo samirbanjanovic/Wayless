@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Wayless.ExpressionBuilders;
 
 namespace Wayless
 {
@@ -12,21 +13,21 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
-        /// Type activator. Using static compiled expression for optimal performance
+        /// Type activator. Using static compiled expression for improved performance
         private static readonly Func<TDestination> _destinationActivator = Expression.Lambda<Func<TDestination>>(Expression.New(typeof(TDestination)
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();
 
+        private static readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
 
-        private readonly IList<Map<TDestination, TSource>> _mappings = new List<Map<TDestination, TSource>>();
-
-        private readonly IDictionary<string, (PropertyInfo, PropertyInfo)> _pairs;
         private readonly IDictionary<string, PropertyInfo> _destinationProperties;
         private readonly IDictionary<string, PropertyInfo> _sourceProperties;
+        private readonly IDictionary<string, Expression> _fieldExpressions;
 
-        private Action<TDestination, TSource> _map;
-
+        private Action<TDestination, TSource> _compiledMap;
         private bool _isCompiled;
+
+        
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -39,10 +40,12 @@ namespace Wayless
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
 
-            _pairs = new Dictionary<string, (PropertyInfo, PropertyInfo)>();
             _isCompiled = false;
-            _destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
-            _sourceProperties = SourceType.GetPropertyDictionary<TSource>();
+
+            _fieldExpressions = new Dictionary<string, Expression>();
+            
+            _destinationProperties = DestinationType.GetInvariantPropertyDictionary<TDestination>();
+            _sourceProperties = SourceType.GetInvariantPropertyDictionary<TSource>();
 
             GenerateDefaultMappingDictionary();
         }
@@ -107,20 +110,12 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
-            var destination = GetName(destinationExpression);
+            var destination = GetInvariantName(destinationExpression);
+            var expression = _expressionBuilder.GetPropertyFieldMapExpression(destinationExpression, sourceExpression);
 
-            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == destination);
-            if (map != default(Map<TDestination, TSource>))
-            {
-                var index = _mappings.IndexOf(map);
-                _mappings[index] = new Map<TDestination, TSource>(destination, MappingExpression.Build(destinationExpression, sourceExpression));
-            }
-            else
-            {
-                map = new Map<TDestination, TSource>(destination, MappingExpression.Build(destinationExpression, sourceExpression));
-                _mappings.Add(map);
-            }
+            RegisterFieldExpression(destination, expression);
 
+            _isCompiled = false;
             return this;
         }
 
@@ -132,20 +127,12 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWaylessMap<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
         {
-            var destination = GetName(destinationExpression);
+            var destination = GetInvariantName(destinationExpression);
+            var expression = _expressionBuilder.GetPropertyFieldSetExression(destinationExpression, value);
 
-            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == destination);
-            if (map != default(Map<TDestination, TSource>))
-            {
-                var index = _mappings.IndexOf(map);
-                _mappings[index] = new Map<TDestination, TSource>(destination, MappingExpression.Build<TDestination, TSource>(destinationExpression, value));
-            }
-            else
-            {
-                map = new Map<TDestination, TSource>(destination, MappingExpression.Build<TDestination, TSource>(destinationExpression, value));
-                _mappings.Add(map);
-            }
+            RegisterFieldExpression(destination, expression);
 
+            _isCompiled = false;
             return this;
         }
 
@@ -156,53 +143,61 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
-            var ignore = GetName(ignoreAtDestinationExpression);
-
-            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == ignore);
-            if (map != default(Map<TDestination, TSource>))
+            var ignore = GetInvariantName(ignoreAtDestinationExpression);
+            if(_fieldExpressions.ContainsKey(ignore))
             {
-                _mappings.Remove(map);
+                _fieldExpressions.Remove(ignore);
             }
 
+            _isCompiled = false;
             return this;
         }
 
         #region helpers
+        private void RegisterFieldExpression(string destination, Expression expression)
+        {
+            if (_fieldExpressions.ContainsKey(destination))
+            {
+                _fieldExpressions[destination] = expression;
+            }
+            else
+            {
+                _fieldExpressions.Add(destination, expression);
+            }
+        }
 
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
             if(!_isCompiled)
             {
-                _map = MappingExpression.BuildMap<TDestination, TSource>(_pairs.Values);
+                _compiledMap = _expressionBuilder.BuildActionMap(_fieldExpressions.Values);
                 _isCompiled = true;
             }
 
-            _map(destinationObject, sourceObject);
+            _compiledMap(destinationObject, sourceObject);
         }
 
         // create initial mapping dictionary by matching property (key) names
         private void GenerateDefaultMappingDictionary()
         {            
-            foreach (var destinationInfo in _destinationProperties)
+            foreach(var destination in _destinationProperties)
             {
-                if (_sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
+                if(_sourceProperties.TryGetValue(destination.Key, out PropertyInfo source))
                 {
-                    _pairs.Add(destinationInfo.Key.ToLowerInvariant(),(destinationInfo.Value, sourceInfo));
+                    var expression = _expressionBuilder.GetPropertyFieldMapExpression(destination.Value, source);
+                    _fieldExpressions.Add(destination.Key, expression);
                 }
             }
-
-            _map = MappingExpression.BuildMap<TDestination, TSource>(_pairs.Values);
-            _isCompiled = true;
         }
 
         // determine if key is properties true name or invariant lower case
-        private static string GetName<T>(Expression<Func<T, object>> expression)
+        private static string GetInvariantName<T>(Expression<Func<T, object>> expression)
             where T : class
         {
             var propertyInfo = expression.GetMember<T, PropertyInfo>();
 
-            return propertyInfo.Name;
+            return propertyInfo.Name.ToLowerInvariant();
         }
 
         #endregion helpers
