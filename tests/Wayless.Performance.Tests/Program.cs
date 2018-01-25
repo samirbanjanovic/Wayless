@@ -55,12 +55,14 @@ namespace Wayless.Performance.Tests
             while (true)
             {
                 Console.WriteLine($"Test iteration: {i++}");
-                Console.WriteLine($"Set size: {Iterations}\r\n");
+                Console.WriteLine($"Set size: {Iterations}");
                 MeasureManualMap();
                 MeasureAutoMapper();
                 MeasureWaylessMap();
+                MeasureStaticWaylessMap();
                 MesaureMapster();
 
+                Console.WriteLine("------------------------------------");
                 Console.ReadLine();
             }
         }
@@ -117,11 +119,26 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
+        private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
+        private static void MeasureStaticWaylessMap()
+        {
+            Person person = Person.Create();
+
+            Stopwatch stopwatch = Stopwatch.StartNew();        
+            for (int i = 0; i < Iterations; i++)
+            {
+                var personDto = _staticWaylessMapper.Map(person);
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine("Static Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
         private static void MesaureMapster()
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
-            
+           
             for(int i =0; i < Iterations; i++)
             {   
                var personDto  = person.Adapt<PersonDTO>();

@@ -21,8 +21,6 @@ namespace Wayless
         /// Stores mapping rules defining what value to apply to which destination property 
         /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
         /// </summary>
-        //private readonly IDictionary<string, PropertyInfoPair<TDestination, TSource>> _defaultPairs;
-
         private readonly IDictionary<string, Action<TDestination, TSource>> _mappingDictionary;
 
         /// <summary>
