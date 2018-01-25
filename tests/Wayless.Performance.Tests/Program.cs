@@ -47,7 +47,7 @@ namespace Wayless.Performance.Tests
 
     class Program
     {
-        private const int Iterations = 1000;
+        private const int Iterations = 1000000;
 
         static void Main(string[] args)
         {
@@ -56,11 +56,12 @@ namespace Wayless.Performance.Tests
             {
                 Console.WriteLine($"Test iteration: {i++}");
                 Console.WriteLine($"Set size: {Iterations}");
-                MeasureManualMap();
-                MeasureAutoMapper();
-                MeasureWaylessMap();
+                //MeasureManualMap();
+                //MeasureAutoMapper();
+                //MeasureWaylessMap();
                 MeasureStaticWaylessMap();
-                MesaureMapster();
+                MeasureStaticWaylessMap2();
+                //MesaureMapster();
 
                 Console.WriteLine("------------------------------------");
                 Console.ReadLine();
@@ -123,15 +124,29 @@ namespace Wayless.Performance.Tests
         private static void MeasureStaticWaylessMap()
         {
             Person person = Person.Create();
-
+            PersonDTO personDto = new PersonDTO();
             Stopwatch stopwatch = Stopwatch.StartNew();        
             for (int i = 0; i < Iterations; i++)
             {
-                var personDto = _staticWaylessMapper.Map(person);
+                _staticWaylessMapper.Map(personDto, person);
             }
 
             stopwatch.Stop();
             Console.WriteLine("Static Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper2 = new WaylessMap<PersonDTO, Person>();
+        private static void MeasureStaticWaylessMap2()
+        {
+            Person person = Person.Create();            
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            for (int i = 0; i < Iterations; i++)
+            {
+               var personDto = _staticWaylessMapper2.Map(person);
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine("Static Wayless2: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private static void MesaureMapster()

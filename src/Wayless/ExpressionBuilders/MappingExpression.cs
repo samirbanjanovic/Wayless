@@ -36,20 +36,7 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var destination = Expression.Parameter(typeof(TDestination), "destination");
-            var source = Expression.Parameter(typeof(TSource), "source");
-
-            var assign = Expression.Lambda<Action<TDestination, TSource>>(
-                                    Expression.Call(destination, destinationProperty.GetSetMethod()
-                                        , Expression.Convert(Expression.Call(source, sourceProperty.GetGetMethod()), destinationProperty.PropertyType))
-                                    , new ParameterExpression[] 
-                                    {
-                                        destination
-                                        , source
-                                    })
-                                    .Compile();
-
-            return assign;
+            return BuildExpression<TDestination, TSource>(destinationProperty, sourceProperty).Compile();
         }
 
         public static Action<TDestination, TSource> Build<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value)
@@ -64,7 +51,7 @@ namespace Wayless
             // pass source object but ignore it so it can be used in same mapping dictionary
             var assign = Expression.Lambda<Action<TDestination, TSource>>(
                                     Expression.Call(destination, destinationProperty.GetSetMethod()
-                                        , Expression.Convert(Expression.Constant(value), destinationProperty.PropertyType))
+                                        , Expression.Convert(Expression.Constant(value), destinationProperty.PropertyType), destination, source)
                                     , new ParameterExpression[] 
                                     {
                                         destination
@@ -74,5 +61,61 @@ namespace Wayless
 
             return assign;
         }
+
+        public static Action<TDestination, TSource> BuildMapperAccess<TDestination, TSource>(IWaylessMap<TDestination, TSource> mapper)
+            where TDestination : class
+            where TSource : class
+        {
+            var destination = Expression.Parameter(typeof(TDestination), "destination");
+            var source = Expression.Parameter(typeof(TSource), "source");
+
+
+            var mapCall = Expression.Lambda<Action<TDestination, TSource>>(
+                                    Expression.Call(Expression.Constant(mapper), mapper.GetType().GetMethod("Map", new Type[] { typeof(TDestination), typeof(TSource) }),  destination, source)
+                                    , new ParameterExpression[]
+                                    {
+                                        destination
+                                        , source
+                                    })
+                                    .Compile();
+
+            return mapCall;
+        }
+
+        //private static void BuildMap<TDestination, TSource>(IEnumerable<(PropertyInfo, PropertyInfo)> properties)
+        //    where TDestination : class
+        //    where TSource : class
+        //{
+        //    var expressions = new List<Expression<Action<TDestination, TSource>>>();
+        //    foreach(var pair in properties)
+        //    {
+        //        expressions.Add(BuildExpression<TDestination, TSource>(pair.Item1, pair.Item2));
+        //    }
+
+        //    var assign 
+        //}
+
+
+
+        public static Expression<Action<TDestination, TSource>> BuildExpression<TDestination, TSource>(PropertyInfo destinationProperty, PropertyInfo sourceProperty)
+            where TDestination : class
+            where TSource : class
+        {
+            var destination = Expression.Parameter(typeof(TDestination), "destination");
+            var source = Expression.Parameter(typeof(TSource), "source");
+
+            var assign = Expression.Lambda<Action<TDestination, TSource>>(
+                                    Expression.Call(destination, destinationProperty.GetSetMethod()
+                                        , Expression.Convert(Expression.Call(source, sourceProperty.GetGetMethod()), destinationProperty.PropertyType))
+                                    , new ParameterExpression[]
+                                    {
+                                        destination
+                                        , source
+                                    });
+            
+            return assign;
+        }
     }
+
+    
 }

@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Wayless
 {
-    public class WaylessMap<TDestination, TSource>
+    public sealed class WaylessMap<TDestination, TSource>
         : IWaylessMap<TDestination, TSource>
         where TDestination : class
         where TSource : class
@@ -17,12 +17,13 @@ namespace Wayless
                                                                               .GetConstructor(Type.EmptyTypes)))
                                                                               .Compile();
 
-        /// <summary>
-        /// Stores mapping rules defining what value to apply to which destination property 
-        /// Depending on _ignoreCasing value key is either the true property name or lower case invariant
-        /// </summary>
-        private readonly IDictionary<string, Action<TDestination, TSource>> _mappingDictionary;
 
+        private readonly IList<Map<TDestination, TSource>> _mappings = new List<Map<TDestination, TSource>>();
+
+        private readonly IDictionary<string, PropertyInfo> _destinationProperties;
+        private readonly IDictionary<string, PropertyInfo> _sourceProperties;
+
+        
 
         /// <summary>
         /// Create instance of Wayless mapper
@@ -33,10 +34,11 @@ namespace Wayless
         /// </param>
         public WaylessMap()
         {
-            _mappingDictionary = new Dictionary<string, Action<TDestination, TSource>>();
-
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
+
+            _destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
+            _sourceProperties = SourceType.GetPropertyDictionary<TSource>();
 
             GenerateDefaultMappingDictionary();
         }
@@ -92,7 +94,7 @@ namespace Wayless
             return destinationObject;
         }
 
-        private readonly IList<Action<TDestination, TSource>> _mappingActions = new List<Action<TDestination, TSource>>();
+
         /// <summary>
         /// Create a mapping rule between destination property and 
         /// </summary>
@@ -103,13 +105,16 @@ namespace Wayless
         {
             var destination = GetName(destinationExpression);
 
-            if (_mappingDictionary.ContainsKey(destination))
+            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == destination);
+            if (map != default(Map<TDestination, TSource>))
             {
-                _mappingDictionary[destination] = MappingExpression.Build(destinationExpression, sourceExpression);
+                var index = _mappings.IndexOf(map);
+                _mappings[index] = new Map<TDestination, TSource>(destination, MappingExpression.Build(destinationExpression, sourceExpression));
             }
             else
             {
-                _mappingDictionary.Add(destination, MappingExpression.Build(destinationExpression, sourceExpression));
+                map = new Map<TDestination, TSource>(destination, MappingExpression.Build(destinationExpression, sourceExpression));
+                _mappings.Add(map);
             }
 
             return this;
@@ -125,13 +130,16 @@ namespace Wayless
         {
             var destination = GetName(destinationExpression);
 
-            if (_mappingDictionary.ContainsKey(destination))
+            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == destination);
+            if (map != default(Map<TDestination, TSource>))
             {
-                _mappingDictionary[destination] = MappingExpression.Build<TDestination, TSource>(destinationExpression, value);
+                var index = _mappings.IndexOf(map);
+                _mappings[index] = new Map<TDestination, TSource>(destination, MappingExpression.Build<TDestination, TSource>(destinationExpression, value));
             }
             else
             {
-                _mappingDictionary.Add(destination, MappingExpression.Build<TDestination, TSource>(destinationExpression, value));
+                map = new Map<TDestination, TSource>(destination, MappingExpression.Build<TDestination, TSource>(destinationExpression, value));
+                _mappings.Add(map);
             }
 
             return this;
@@ -144,12 +152,14 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
-            var ignoreItem = GetName(ignoreAtDestinationExpression);
-            if (_mappingDictionary.ContainsKey(ignoreItem))
+            var ignore = GetName(ignoreAtDestinationExpression);
+
+            Map<TDestination, TSource> map = _mappings.SingleOrDefault(x => x.DestinationProperty == ignore);
+            if (map != default(Map<TDestination, TSource>))
             {
-                _mappingDictionary.Remove(ignoreItem);
+                _mappings.Remove(map);
             }
-            
+
             return this;
         }
 
@@ -158,24 +168,21 @@ namespace Wayless
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            foreach(var map in _mappingDictionary.Values)
+            foreach (var map in _mappings)
             {
-                map(destinationObject, sourceObject);
+                map.MapValue(destinationObject, sourceObject);
             }
         }
 
         // create initial mapping dictionary by matching property (key) names
         private void GenerateDefaultMappingDictionary()
-        {
-            var destinationProperties = DestinationType.GetPropertyDictionary<TDestination>();
-            var sourceProperties = SourceType.GetPropertyDictionary<TSource>();
-
-            foreach (var destinationInfo in destinationProperties)
+        {            
+            foreach (var destinationInfo in _destinationProperties)
             {
-                if (sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
+                if (_sourceProperties.TryGetValue(destinationInfo.Key, out PropertyInfo sourceInfo))
                 {
-                    _mappingDictionary.Add(destinationInfo.Key, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo));                    
-                }                
+                    _mappings.Add(new Map<TDestination, TSource>(destinationInfo.Value.Name, MappingExpression.Build<TDestination, TSource>(destinationInfo.Value, sourceInfo)));
+                }
             }
         }
 
