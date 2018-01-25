@@ -37,12 +37,6 @@ A call to `Map` applies all the generated rules and generates an instance of the
 
 `Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
 type.
-
-If you want to reuse the mapper and you've applied a `FieldSkip` you can  call `FieldRestore` to start mapping the field again.
-
-    var mappedObject = mapperInstance                        
-            .FieldRestore(dest => dest.ClosingDate)
-            .Map(SourceObject);
                         
 # Perfromance
 Some basic performance tests show that Wayless works best on a small number of iterations. It's able to maintain
@@ -52,99 +46,121 @@ Initial loop is always the slowest due to .NET caching and evaluations
 
     Test iteration: 0
     Set size: 1000
+    Manual: 0.2708ms
+    AutoMapper Init: 191.2295ms
+    AutoMapper: 50.1818ms
+    Wayless Init: 4.8484ms
+    Wayless: 1.2306ms
+    Static Wayless: 1.1678ms
+    Mapster: 62.9199ms
+    ------------------------------------
 
-    Manual: 0.3673ms
-    AutoMapper Init: 273.9257ms
-    AutoMapper: 66.4153ms
-    Wayless Init: 5.3337ms
-    Wayless: 2.1238ms
-    ----------------------------
     Test iteration: 1
     Set size: 1000
+    Manual: 0.0449ms
+    AutoMapper Init: 1.3316ms
+    AutoMapper: 3.0857ms
+    Wayless Init: 0.9938ms
+    Wayless: 0.1509ms
+    Static Wayless: 0.1489ms
+    Mapster: 0.0942ms
+    ------------------------------------
 
-    Manual: 0.0487ms
-    AutoMapper Init: 1.6632ms
-    AutoMapper: 3.5311ms
-    Wayless Init: 1.5696ms
-    Wayless: 0.4191ms
-    ----------------------------
     Test iteration: 2
     Set size: 1000
+    Manual: 0.0472ms
+    AutoMapper Init: 1.238ms
+    AutoMapper: 3.1361ms
+    Wayless Init: 1.0638ms
+    Wayless: 0.1466ms
+    Static Wayless: 0.1443ms
+    Mapster: 0.0922ms
+    ------------------------------------
 
-    Manual: 0.0645ms
-    AutoMapper Init: 1.3777ms
-    AutoMapper: 4.0869ms
-    Wayless Init: 1.2078ms
-    Wayless: 0.3885ms
-    ----------------------------
     Test iteration: 3
     Set size: 1000
+    Manual: 0.0457ms
+    AutoMapper Init: 3.2357ms
+    AutoMapper: 3.0829ms
+    Wayless Init: 1.0081ms
+    Wayless: 0.118ms
+    Static Wayless: 0.1144ms
+    Mapster: 0.0654ms
+    ------------------------------------
 
-    Manual: 0.0717ms
-    AutoMapper Init: 1.477ms
-    AutoMapper: 4.0201ms
-    Wayless Init: 1.7602ms
-    Wayless: 0.6834ms
-    ----------------------------
     Test iteration: 4
     Set size: 1000
+    Manual: 0.0212ms
+    AutoMapper Init: 0.9706ms
+    AutoMapper: 3.0459ms
+    Wayless Init: 0.9665ms
+    Wayless: 0.1134ms
+    Static Wayless: 0.1126ms
+    Mapster: 0.0648ms
+    ------------------------------------
 
-    Manual: 0.0906ms
-    AutoMapper Init: 10.8361ms
-    AutoMapper: 3.9974ms
-    Wayless Init: 1.2097ms
-    Wayless: 0.3749ms
-    ----------------------------
     Test iteration: 5
     Set size: 1000
+    Manual: 0.0206ms
+    AutoMapper Init: 0.9378ms
+    AutoMapper: 3.0477ms
+    Wayless Init: 0.9734ms
+    Wayless: 0.1142ms
+    Static Wayless: 0.1121ms
+    Mapster: 0.0666ms
+    ------------------------------------
 
-    Manual: 0.0445ms
-    AutoMapper Init: 1.4234ms
-    AutoMapper: 3.7565ms
-    Wayless Init: 1.3373ms
-    Wayless: 0.4814ms
-    ----------------------------
     Test iteration: 6
     Set size: 1000
+    Manual: 0.0199ms
+    AutoMapper Init: 0.9353ms
+    AutoMapper: 3.0536ms
+    Wayless Init: 1.0086ms
+    Wayless: 0.1481ms
+    Static Wayless: 0.1438ms
+    Mapster: 0.5912ms
+    ------------------------------------
 
-    Manual: 0.0249ms
-    AutoMapper Init: 1.1757ms
-    AutoMapper: 5.2604ms
-    Wayless Init: 1.4891ms
-    Wayless: 0.7317ms
-    ----------------------------
     Test iteration: 7
     Set size: 1000
+    Manual: 0.0173ms
+    AutoMapper Init: 1.2513ms
+    AutoMapper: 3.1637ms
+    Wayless Init: 1.1157ms
+    Wayless: 0.131ms
+    Static Wayless: 0.1223ms
+    Mapster: 0.0679ms
+    ------------------------------------
 
-    Manual: 0.0252ms
-    AutoMapper Init: 1.2433ms
-    AutoMapper: 3.872ms
-    Wayless Init: 1.4823ms
-    Wayless: 0.4644ms
-    ----------------------------
     Test iteration: 8
     Set size: 1000
+    Manual: 0.0232ms
+    AutoMapper Init: 0.9363ms
+    AutoMapper: 3.1302ms
+    Wayless Init: 1.0784ms
+    Wayless: 0.1162ms
+    Static Wayless: 0.1223ms
+    Mapster: 0.07ms
+    ------------------------------------
 
-    Manual: 0.049ms
-    AutoMapper Init: 1.2222ms
-    AutoMapper: 3.6848ms
-    Wayless Init: 1.2361ms
-    Wayless: 0.5388ms
-    ----------------------------
     Test iteration: 9
     Set size: 1000
+    Manual: 0.0219ms
+    AutoMapper Init: 0.9353ms
+    AutoMapper: 3.1225ms
+    Wayless Init: 1.0779ms
+    Wayless: 0.119ms
+    Static Wayless: 0.1221ms
+    Mapster: 0.0687ms
+    ------------------------------------
 
-    Manual: 0.043ms
-    AutoMapper Init: 2.7348ms
-    AutoMapper: 4.941ms
-    Wayless Init: 1.5076ms
-    Wayless: 0.5067ms
-    ----------------------------
     Test iteration: 10
     Set size: 1000
-
-    Manual: 0.026ms
-    AutoMapper Init: 1.2456ms
-    AutoMapper: 3.9408ms
-    Wayless Init: 1.397ms
-    Wayless: 0.5516ms
+    Manual: 0.0227ms
+    AutoMapper Init: 0.932ms
+    AutoMapper: 3.0186ms
+    Wayless Init: 0.9808ms
+    Wayless: 0.3073ms
+    Static Wayless: 0.1216ms
+    Mapster: 0.0702ms
+    ------------------------------------
