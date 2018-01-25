@@ -48,113 +48,113 @@ Initial loop is always slowest due to expression compile
 
 	// Basic Object Map
 	// Person -> PersonDTO
-
-    Test iteration: 0
+	
+	Test iteration: 0
 	Set size: 1000000
-	Manual: 93.3964ms
-	AutoMapper Init: 252.3398ms
-	AutoMapper: 379.3795ms
-	Wayless Init: 4.8602ms
-	Wayless: 128.9974ms
-	Static Wayless: 126.7195ms
-	Mapster: 274.1859ms
+	Manual: 20.1303ms
+	AutoMapper Init: 270.6555ms
+	AutoMapper: 262.1924ms
+	Wayless Init: 3.576ms
+	Wayless: 34.2216ms
+	Static Wayless: 32.439ms
+	Mapster: 198.0777ms
 	------------------------------------
 
 	Test iteration: 1
 	Set size: 1000000
-	Manual: 82.4058ms
-	AutoMapper Init: 1.6874ms
-	AutoMapper: 261.6944ms
-	Wayless Init: 0.0415ms
-	Wayless: 124.4917ms
-	Static Wayless: 120.6861ms
-	Mapster: 151.7682ms
+	Manual: 20.685ms
+	AutoMapper Init: 1.8218ms
+	AutoMapper: 198.8914ms
+	Wayless Init: 0.0419ms
+	Wayless: 28.8407ms
+	Static Wayless: 28.8675ms
+	Mapster: 89.9299ms
 	------------------------------------
 
 	Test iteration: 2
 	Set size: 1000000
-	Manual: 83.2357ms
-	AutoMapper Init: 1.3781ms
-	AutoMapper: 265.9154ms
-	Wayless Init: 0.0634ms
-	Wayless: 109.0895ms
-	Static Wayless: 114.0573ms
-	Mapster: 154.1832ms
+	Manual: 19.8883ms
+	AutoMapper Init: 3.0901ms
+	AutoMapper: 196.2041ms
+	Wayless Init: 0.0713ms
+	Wayless: 32.0796ms
+	Static Wayless: 31.2334ms
+	Mapster: 89.3797ms
 	------------------------------------
 
 	Test iteration: 3
 	Set size: 1000000
-	Manual: 87.1803ms
-	AutoMapper Init: 1.8342ms
-	AutoMapper: 269.5937ms
-	Wayless Init: 0.0709ms
-	Wayless: 106.7016ms
-	Static Wayless: 116.1053ms
-	Mapster: 152.6087ms
+	Manual: 20.219ms
+	AutoMapper Init: 1.6156ms
+	AutoMapper: 202.6883ms
+	Wayless Init: 0.0811ms
+	Wayless: 32.6769ms
+	Static Wayless: 34.1317ms
+	Mapster: 88.2451ms
 	------------------------------------
 
 	Test iteration: 4
 	Set size: 1000000
-	Manual: 89.3276ms
-	AutoMapper Init: 2.2439ms
-	AutoMapper: 262.5821ms
-	Wayless Init: 0.0385ms
-	Wayless: 106.5721ms
-	Static Wayless: 108.3256ms
-	Mapster: 153.471ms
+	Manual: 19.0561ms
+	AutoMapper Init: 1.8003ms
+	AutoMapper: 200.7649ms
+	Wayless Init: 0.0815ms
+	Wayless: 31.4343ms
+	Static Wayless: 31.2402ms
+	Mapster: 87.061ms
 	------------------------------------
 
 	Test iteration: 5
 	Set size: 1000000
-	Manual: 85.2894ms
-	AutoMapper Init: 1.7017ms
-	AutoMapper: 260.9426ms
-	Wayless Init: 0.0362ms
-	Wayless: 105.49ms
-	Static Wayless: 105.891ms
-	Mapster: 158.5295ms
+	Manual: 20.5483ms
+	AutoMapper Init: 1.539ms
+	AutoMapper: 198.9182ms
+	Wayless Init: 0.0547ms
+	Wayless: 33.0609ms
+	Static Wayless: 32.3084ms
+	Mapster: 87.6965ms
 	------------------------------------
 
 	Test iteration: 6
 	Set size: 1000000
-	Manual: 82.5636ms
-	AutoMapper Init: 2.481ms
-	AutoMapper: 269.963ms
-	Wayless Init: 0.0558ms
-	Wayless: 129.0431ms
-	Static Wayless: 114.1468ms
-	Mapster: 157.9677ms
+	Manual: 20.8043ms
+	AutoMapper Init: 1.5907ms
+	AutoMapper: 200.7853ms
+	Wayless Init: 0.0407ms
+	Wayless: 35.7531ms
+	Static Wayless: 29.5094ms
+	Mapster: 92.2999ms
 	------------------------------------
 
 	Test iteration: 7
 	Set size: 1000000
-	Manual: 85.767ms
-	AutoMapper Init: 1.3245ms
-	AutoMapper: 267.0405ms
-	Wayless Init: 0.0743ms
-	Wayless: 128.2385ms
-	Static Wayless: 106.1439ms
-	Mapster: 152.5728ms
+	Manual: 20.5921ms
+	AutoMapper Init: 1.6549ms
+	AutoMapper: 208.605ms
+	Wayless Init: 0.0849ms
+	Wayless: 29.708ms
+	Static Wayless: 29.5766ms
+	Mapster: 87.9861ms
 	------------------------------------
 
 	Test iteration: 8
 	Set size: 1000000
-	Manual: 83.2293ms
-	AutoMapper Init: 1.6111ms
-	AutoMapper: 274.7889ms
-	Wayless Init: 0.0925ms
-	Wayless: 124.2316ms
-	Static Wayless: 109.8348ms
-	Mapster: 154.9066ms
+	Manual: 47.7605ms
+	AutoMapper Init: 1.8992ms
+	AutoMapper: 200.4353ms
+	Wayless Init: 0.057ms
+	Wayless: 29.1348ms
+	Static Wayless: 29.3652ms
+	Mapster: 88.6835ms
 	------------------------------------
 
 	Test iteration: 9
 	Set size: 1000000
-	Manual: 84.0238ms
-	AutoMapper Init: 1.7795ms
-	AutoMapper: 264.7418ms
-	Wayless Init: 0.0804ms
-	Wayless: 130.2362ms
-	Static Wayless: 106.2901ms
-	Mapster: 160.0934ms
+	Manual: 22.9569ms
+	AutoMapper Init: 2.219ms
+	AutoMapper: 200.8589ms
+	Wayless Init: 0.0566ms
+	Wayless: 29.759ms
+	Static Wayless: 30.0565ms
+	Mapster: 87.5926ms
 	------------------------------------
