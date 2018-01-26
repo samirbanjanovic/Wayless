@@ -20,18 +20,18 @@ namespace Wayless
         private readonly Hashtable _mappers = new Hashtable();
         
 
-        public IWaylessMap<TDestination, TSource> Get<TDestination, TSource>()
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>()
             where TDestination : class
             where TSource : class
         {
             var key = (typeof((TDestination, TSource)));
             if (_mappers.ContainsKey(key))
             {
-                return (IWaylessMap<TDestination, TSource>)_mappers[key];
+                return (IWayless<TDestination, TSource>)_mappers[key];
             }
             else
             {
-                var mapper = new WaylessMap<TDestination, TSource>();
+                var mapper = new Wayless<TDestination, TSource>();
                 _mappers.Add(typeof((TDestination, TSource)), mapper);
 
                 return mapper;

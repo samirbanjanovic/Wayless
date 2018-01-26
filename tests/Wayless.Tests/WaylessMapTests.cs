@@ -38,7 +38,7 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestDefaultMap()
         {
-            var mapper = new WaylessMap<DestinationObject, SourceObject>();
+            var mapper = new Wayless<DestinationObject, SourceObject>();
             var destination = mapper.Map(TestSource);
 
             Assert.AreEqual(TestSource.Name, destination.Name);
@@ -48,7 +48,7 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestFieldMap()
         {
-            var mapper = new WaylessMap<DestinationObject, SourceObject>()
+            var mapper = new Wayless<DestinationObject, SourceObject>()
                                 .FieldMap(d => d.AssignmentDate, s => s.TimeStamp);
 
             var destination = mapper.Map(TestSource);
@@ -61,7 +61,7 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestFieldSet()
         {
-            var mapper = new WaylessMap<DestinationObject, SourceObject>()
+            var mapper = new Wayless<DestinationObject, SourceObject>()
                                 .FieldSet(d => d.CorrelationId, Guid.NewGuid());
 
             var destination = mapper.Map(TestSource);
@@ -72,7 +72,7 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestSkipField()
         {
-            var mapper = new WaylessMap<DestinationObject, SourceObject>()
+            var mapper = new Wayless<DestinationObject, SourceObject>()
                                 .FieldSkip(d => d.CorrelationId);
 
             var destination = mapper.Map(TestSource);

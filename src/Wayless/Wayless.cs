@@ -8,8 +8,8 @@ using Wayless.ExpressionBuilders;
 
 namespace Wayless
 {
-    public sealed class WaylessMap<TDestination, TSource>
-        : IWaylessMap<TDestination, TSource>
+    public sealed class Wayless<TDestination, TSource>
+        : IWayless<TDestination, TSource>
         where TDestination : class
         where TSource : class
     {
@@ -42,7 +42,7 @@ namespace Wayless
         ///     True: Ignores casing during  initial property matchup
         ///     False: Property name casing affects matching
         /// </param>
-        public WaylessMap()
+        public Wayless()
         {
             SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
@@ -115,7 +115,7 @@ namespace Wayless
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWaylessMap<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
+        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
             var destination = GetInvariantName(destinationExpression);
             var expression = _expressionBuilder.GetPropertyFieldMapExpression(destinationExpression, sourceExpression);
@@ -132,7 +132,7 @@ namespace Wayless
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="value">Value to assign</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWaylessMap<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
+        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
         {
             var destination = GetInvariantName(destinationExpression);
             var expression = _expressionBuilder.GetPropertyFieldSetExression(destinationExpression, value);
@@ -148,7 +148,7 @@ namespace Wayless
         /// </summary>
         /// <param name="ignoreAtDestinationExpression">Expression for property to be skipped in destination type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWaylessMap<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
+        public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression)
         {
             var ignore = GetInvariantName(ignoreAtDestinationExpression);
             if(_fieldExpressions.ContainsKey(ignore))
