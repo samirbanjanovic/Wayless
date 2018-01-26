@@ -102,9 +102,8 @@ namespace Wayless.Performance.Tests
         private static void MeasureWaylessMap()
         {
             Person person = Person.Create();
-
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = new WaylessMap<PersonDTO, Person>();
+            var mapper = WayMore.Mappers.Get<PersonDTO, Person>(); //new WaylessMap<PersonDTO, Person>();
 
             stopwatch.Stop();
             Console.WriteLine("Wayless Init: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
@@ -119,17 +118,16 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
+        //private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
         private static void MeasureStaticWaylessMap()
-        {
-            //_staticWaylessMapper.FieldMap(x => x.Nickname, s => $"{s.Nickname} - {s.FirstName}");
-
+        {            
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
+            var mapper = WayMore.Mappers.Get<PersonDTO, Person>();
             for (int i = 0; i < Iterations; i++)
             {
 
-                var personDto = _staticWaylessMapper.Map(person);
+                var personDto = mapper.Map(person);
             }
 
             stopwatch.Stop();
@@ -138,10 +136,6 @@ namespace Wayless.Performance.Tests
 
         private static void MesaureMapster()
         {
-            //TypeAdapterConfig<Person, PersonDTO>
-            //    .NewConfig()
-            //    .Map(d => d.Nickname, s => $"{s.Nickname} - {s.FirstName}");
-
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
 

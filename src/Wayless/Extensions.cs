@@ -15,7 +15,7 @@ namespace Wayless
                        .ToDictionary(p => p.Name.ToLowerInvariant());
         }
 
-        public static PropertyInfo GetPropertyInfo<T>(this Expression<Func<T, object>> expression)
+        public static PropertyInfo GetMemberAsPropertyInfo<T>(this Expression<Func<T, object>> expression)
            where T : class           
         {
             var lambda = expression as LambdaExpression;

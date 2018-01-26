@@ -6,38 +6,37 @@ using System.Text;
 
 namespace Wayless.ExpressionBuilders
 {
-    public class ExpressionMapBuilder<TDestination, TSource>
+    public sealed class ExpressionMapBuilder<TDestination, TSource>
         where TDestination : class
         where TSource : class
     {
-        ParameterExpression _destination;
-        ParameterExpression _source;
+        private readonly ParameterExpression _destination = Expression.Parameter(typeof(TDestination), "destination");
+        private readonly ParameterExpression _source = Expression.Parameter(typeof(TSource), "source");
 
-        public ExpressionMapBuilder()
-        {
-            _destination = Expression.Parameter(typeof(TDestination), "destination");
-            _source = Expression.Parameter(typeof(TSource), "source");
-        }
-
+        /// <summary>
+        /// Build a unified mapping function
+        /// </summary>
+        /// <param name="mappingExpressions">Expressions containting member mappings</param>
+        /// <returns>mapping action</returns>
         public Action<TDestination, TSource> BuildActionMap(IEnumerable<Expression> mappingExpressions)
         {
-            var mapping = Expression.Lambda<Action<TDestination, TSource>>(
+            var expressionMap = Expression.Lambda<Action<TDestination, TSource>>(
                                    Expression.Block(mappingExpressions)
                                    , new ParameterExpression[]
                                     {
                                         _destination
                                         , _source
-                                    })
-                                    .Compile();
+                                    });
 
-            return mapping;
+            
+            return expressionMap.Compile();
         }
 
         // get expression for mapping property to property or property to function output
         public Expression GetPropertyFieldMapExpression(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
-            PropertyInfo destinationProperty = destinationExpression.GetPropertyInfo();
-            PropertyInfo sourceProperty = sourceExpression.GetPropertyInfo();
+            PropertyInfo destinationProperty = destinationExpression.GetMemberAsPropertyInfo();
+            PropertyInfo sourceProperty = sourceExpression.GetMemberAsPropertyInfo();
 
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
