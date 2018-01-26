@@ -43,8 +43,8 @@ namespace Wayless.ExpressionBuilders
             where TDestination : class
             where TSource : class
         {
-            PropertyInfo destinationProperty = destinationExpression.GetMemberAsPropertyInfo();
-            PropertyInfo sourceProperty = sourceExpression.GetMemberAsPropertyInfo();
+            MemberInfo destinationProperty = destinationExpression.GetMemberInfo();
+            MemberInfo sourceProperty = sourceExpression.GetMemberInfo();
 
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)

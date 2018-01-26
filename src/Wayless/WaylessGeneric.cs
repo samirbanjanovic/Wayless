@@ -209,7 +209,7 @@ namespace Wayless.Generic
         private static string GetInvariantName<T>(Expression<Func<T, object>> expression)
             where T : class
         {
-            var propertyInfo = expression.GetMemberAsPropertyInfo();
+            var propertyInfo = expression.GetMemberInfo();
 
             return propertyInfo.Name.ToLowerInvariant();
         }

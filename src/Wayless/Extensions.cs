@@ -17,13 +17,13 @@ namespace Wayless
             return members.ToDictionary(p => p.Name.ToLowerInvariant());
         }
 
-        public static PropertyInfo GetMemberAsPropertyInfo<T>(this Expression<Func<T, object>> expression)
+        public static MemberInfo GetMemberInfo<T>(this Expression<Func<T, object>> expression)
            where T : class           
         {
             var lambda = expression as LambdaExpression;
             MemberExpression memberExpression = lambda.Body as MemberExpression;
             
-            return memberExpression?.Member as PropertyInfo;
+            return memberExpression?.Member as MemberInfo;
         }
 
         public static Type GetUnderlyingType(this MemberInfo member)
