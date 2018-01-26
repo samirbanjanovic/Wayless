@@ -36,16 +36,14 @@ namespace Wayless.ExpressionBuilders
         // get expression for mapping property to property or property to function output
         public Expression GetPropertyFieldMapExpression(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
         {
-            PropertyInfo destinationProperty = destinationExpression.GetMember<TDestination, PropertyInfo>();
-            PropertyInfo sourceProperty = sourceExpression.GetMember<TSource, PropertyInfo>();
+            PropertyInfo destinationProperty = destinationExpression.GetPropertyInfo();
+            PropertyInfo sourceProperty = sourceExpression.GetPropertyInfo();
 
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
             {
                 return GetComplexMapExpression(destinationProperty, sourceExpression);                
             }
-
-            //PropertyInfo sourceProperty = sourceExpression.GetMember<TSource, PropertyInfo>();
 
             return GetPropertyFieldMapExpression(destinationProperty, sourceProperty);
         }

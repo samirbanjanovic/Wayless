@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Mapster;
@@ -15,7 +16,7 @@ namespace Wayless.Performance.Tests
         public Guid Id { get; set; }
         public string LastName { get; set; }
         public string Nickname { get; set; }
-        public string Phone { get; set; }        
+        public string Phone { get; set; }
         public static Person Create()
         {
             return new Person
@@ -41,29 +42,29 @@ namespace Wayless.Performance.Tests
         public string LastName { get; set; }
         public string Nickname { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Phone { get; set; }        
+        public string Phone { get; set; }
     }
 
     class Program
     {
-        private const int Iterations = 100000;
+        private const int Iterations = 1000;
 
         static void Main(string[] args)
         {
-            int i = 0;
-            while (true)
+            for (int i = 1; i <= 10; i++)
             {
-                Console.WriteLine($"Test iteration: {i++}");
+                Console.WriteLine($"Test iteration: {i}");
                 Console.WriteLine($"Set size: {Iterations}");
                 MeasureManualMap();
                 MeasureAutoMapper();
                 MeasureWaylessMap();
-                MeasureStaticWaylessMap();                
+                MeasureStaticWaylessMap();
                 MesaureMapster();
 
-                Console.WriteLine("------------------------------------");
-                Console.ReadLine();
+                Console.WriteLine("------------------------------------");                
             }
+
+            Console.ReadLine();
         }
 
         private static void MeasureManualMap()
@@ -121,13 +122,13 @@ namespace Wayless.Performance.Tests
         private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
         private static void MeasureStaticWaylessMap()
         {
-            _staticWaylessMapper.FieldMap(x => x.Nickname, s => $"{s.Nickname} - {s.FirstName}");
-            
+            //_staticWaylessMapper.FieldMap(x => x.Nickname, s => $"{s.Nickname} - {s.FirstName}");
+
             Person person = Person.Create();
-            Stopwatch stopwatch = Stopwatch.StartNew();        
+            Stopwatch stopwatch = Stopwatch.StartNew();
             for (int i = 0; i < Iterations; i++)
             {
-                
+
                 var personDto = _staticWaylessMapper.Map(person);
             }
 
@@ -137,21 +138,21 @@ namespace Wayless.Performance.Tests
 
         private static void MesaureMapster()
         {
-            TypeAdapterConfig<Person, PersonDTO>
-                .NewConfig()
-                .Map(d => d.Nickname, s => $"{s.Nickname} - {s.FirstName}");
+            //TypeAdapterConfig<Person, PersonDTO>
+            //    .NewConfig()
+            //    .Map(d => d.Nickname, s => $"{s.Nickname} - {s.FirstName}");
 
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
-           
-            for(int i =0; i < Iterations; i++)
-            {                
-                var personDto  = person.Adapt<PersonDTO>();
+
+            for (int i = 0; i < Iterations; i++)
+            {
+                var personDto = person.Adapt<PersonDTO>();
             }
 
             stopwatch.Start();
             Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
-        } 
+        }
 
         private static PersonDTO ManualMap(Person person)
         {
@@ -165,7 +166,7 @@ namespace Wayless.Performance.Tests
                 CreateTime = person.CreateTime,
                 Nickname = person.Nickname,
                 Phone = person.Phone
-                
+
             };
             return result;
         }

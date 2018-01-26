@@ -21,7 +21,7 @@ namespace Wayless
         /// <summary>
         /// Generates mapping expressions that will be eventually compiled into map
         /// </summary>
-        private readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
+        private static readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
 
         private readonly IDictionary<string, PropertyInfo> _destinationProperties;
         private readonly IDictionary<string, PropertyInfo> _sourceProperties;
@@ -202,7 +202,7 @@ namespace Wayless
         private static string GetInvariantName<T>(Expression<Func<T, object>> expression)
             where T : class
         {
-            var propertyInfo = expression.GetMember<T, PropertyInfo>();
+            var propertyInfo = expression.GetPropertyInfo<T>();
 
             return propertyInfo.Name.ToLowerInvariant();
         }
