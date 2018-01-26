@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Wayless.Generic;
 
 namespace Wayless.Tests
 {

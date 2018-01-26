@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Wayless.ExpressionBuilders;
 
-namespace Wayless
+namespace Wayless.Generic
 {
     public sealed class Wayless<TDestination, TSource>
         : IWayless<TDestination, TSource>
@@ -21,10 +21,11 @@ namespace Wayless
         /// <summary>
         /// Generates mapping expressions that will be eventually compiled into map
         /// </summary>
-        private static readonly ExpressionMapBuilder<TDestination, TSource> _expressionBuilder = new ExpressionMapBuilder<TDestination, TSource>();
+        private readonly ExpressionBuilder _expressionBuilder = new ExpressionBuilder(typeof(TDestination), typeof(TSource));
 
-        private readonly IDictionary<string, PropertyInfo> _destinationProperties;
-        private readonly IDictionary<string, PropertyInfo> _sourceProperties;
+        private readonly IDictionary<string, MemberInfo> _destinationProperties;
+        private readonly IDictionary<string, MemberInfo> _sourceProperties;
+
         private readonly IDictionary<string, Expression> _fieldExpressions;
 
         // Indicates if the _compiledMap action has the latest rules
@@ -32,6 +33,8 @@ namespace Wayless
         // to false, letting Wayless know to compile a new 
         // mapping function from it's collected expressions
         private bool _isMapUpToDate;
+
+        private bool _hasMatchedDefaults;
 
         private Action<TDestination, TSource> _map;
                 
@@ -44,17 +47,14 @@ namespace Wayless
         /// </param>
         public Wayless()
         {
-            SourceType = typeof(TSource);
             DestinationType = typeof(TDestination);
+            SourceType = typeof(TSource);            
 
             _isMapUpToDate = false;
 
-            _fieldExpressions = new Dictionary<string, Expression>();
-            
-            _destinationProperties = DestinationType.GetInvariantPropertyDictionary<TDestination>();
-            _sourceProperties = SourceType.GetInvariantPropertyDictionary<TSource>();
-
-            GenerateDefaultMappingDictionary();
+            _fieldExpressions = new Dictionary<string, Expression>();            
+            _destinationProperties = DestinationType.GetMemberInfo();
+            _sourceProperties = SourceType.GetMemberInfo();         
         }
 
         /// <summary>
@@ -178,7 +178,13 @@ namespace Wayless
         {
             if(!_isMapUpToDate)
             {
-                _map = _expressionBuilder.BuildActionMap(_fieldExpressions.Values);
+                if(!_hasMatchedDefaults)
+                {
+                    MatchUnmappedItems();
+                    _hasMatchedDefaults = true;
+                }
+
+                _map = _expressionBuilder.BuildActionMap<TDestination, TSource>(_fieldExpressions.Values);
                 _isMapUpToDate = true;
             }
 
@@ -186,12 +192,13 @@ namespace Wayless
         }
 
         // create initial mapping dictionary by matching property (key) names
-        private void GenerateDefaultMappingDictionary()
-        {            
-            foreach(var destination in _destinationProperties)
+        private void MatchUnmappedItems()
+        {
+            var unmappedDestinations = _destinationProperties.Where(x => !_fieldExpressions.Keys.Contains(x.Key)).ToList();
+            foreach(var destination in unmappedDestinations)
             {
-                if(_sourceProperties.TryGetValue(destination.Key, out PropertyInfo source))
-                {
+                if(_sourceProperties.TryGetValue(destination.Key, out MemberInfo source))
+                {                    
                     var expression = _expressionBuilder.GetPropertyFieldMapExpression(destination.Value, source);
                     _fieldExpressions.Add(destination.Key, expression);
                 }

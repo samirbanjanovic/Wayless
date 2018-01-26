@@ -42,7 +42,7 @@ namespace Wayless.Performance.Tests
         public string LastName { get; set; }
         public string Nickname { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Phone { get; set; }
+        public string Phone;
     }
 
     class Program
@@ -124,6 +124,7 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Mappers.Get<PersonDTO, Person>();
+
             for (int i = 0; i < Iterations; i++)
             {
 
@@ -138,6 +139,7 @@ namespace Wayless.Performance.Tests
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
+
 
             for (int i = 0; i < Iterations; i++)
             {
