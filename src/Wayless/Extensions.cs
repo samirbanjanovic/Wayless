@@ -31,7 +31,7 @@ namespace Wayless
             }
 
 
-            return memberExpression.Member as TMemberOut;
+            return memberExpression?.Member as TMemberOut;
         }
     }
 }
