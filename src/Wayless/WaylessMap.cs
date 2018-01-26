@@ -198,7 +198,7 @@ namespace Wayless
             }
         }
 
-        // determine if key is properties true name or invariant lower case
+        // get property name
         private static string GetInvariantName<T>(Expression<Func<T, object>> expression)
             where T : class
         {
