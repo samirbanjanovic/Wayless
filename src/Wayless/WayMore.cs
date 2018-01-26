@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using Wayless.Generic;
 
 namespace Wayless
 {
@@ -17,25 +19,28 @@ namespace Wayless
             }
         }
 
-        private readonly Hashtable _mappers = new Hashtable();
-        
+        private readonly ConcurrentDictionary<object, object> _mappers = new ConcurrentDictionary<object, object>();
 
         public IWayless<TDestination, TSource> Get<TDestination, TSource>()
             where TDestination : class
             where TSource : class
         {
             var key = (typeof((TDestination, TSource)));
-            if (_mappers.ContainsKey(key))
+            if (!_mappers.TryGetValue(key, out object mapper))
             {
-                return (IWayless<TDestination, TSource>)_mappers[key];
+                mapper = GetNew<TDestination, TSource>();
+                _mappers.TryAdd(typeof((TDestination, TSource)), mapper);
             }
-            else
-            {
-                var mapper = new Wayless<TDestination, TSource>();
-                _mappers.Add(typeof((TDestination, TSource)), mapper);
 
-                return mapper;
-            }
+            return (IWayless<TDestination, TSource>)mapper;
+
+        }
+
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
+            where TDestination : class
+            where TSource : class
+        {
+            return new Wayless<TDestination, TSource>();
         }
     }
 }
