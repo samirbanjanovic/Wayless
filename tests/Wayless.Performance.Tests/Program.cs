@@ -124,7 +124,8 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Mappers.Get<PersonDTO, Person>();
-            //mapper.FieldMap(x => x.Nickname, s => $"{s.LastName}, {s.FirstName}, {s.Id}");
+            mapper.FieldMap(x => x.Nickname, s => $"{s.LastName}, {s.FirstName}, {s.Id}");
+
             for (int i = 0; i < Iterations; i++)
             {
 
@@ -139,7 +140,11 @@ namespace Wayless.Performance.Tests
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
-
+            TypeAdapterConfig<Person, PersonDTO>
+                    .NewConfig()
+                    .Map(x => x.Nickname
+                        , s => $"{s.LastName}, {s.FirstName}, {s.Id}")
+                    .Compile();
 
             for (int i = 0; i < Iterations; i++)
             {
