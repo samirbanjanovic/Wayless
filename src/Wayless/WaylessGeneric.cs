@@ -23,8 +23,8 @@ namespace Wayless.Generic
         /// </summary>
         private readonly ExpressionBuilder _expressionBuilder = new ExpressionBuilder(typeof(TDestination), typeof(TSource));
 
-        private readonly IDictionary<string, MemberInfo> _destinationProperties;
-        private readonly IDictionary<string, MemberInfo> _sourceProperties;
+        private readonly IDictionary<string, MemberInfo> _destinationFields;
+        private readonly IDictionary<string, MemberInfo> _sourceFields;
 
         private readonly IDictionary<string, Expression> _fieldExpressions;
 
@@ -34,6 +34,7 @@ namespace Wayless.Generic
         // mapping function from it's collected expressions
         private bool _isMapUpToDate;
 
+        // flag indicating if mapper has tried matching pairs on its own
         private bool _hasMatchedDefaults;
 
         private Action<TDestination, TSource> _map;
@@ -52,9 +53,10 @@ namespace Wayless.Generic
 
             _isMapUpToDate = false;
 
-            _fieldExpressions = new Dictionary<string, Expression>();            
-            _destinationProperties = DestinationType.GetMemberInfo();
-            _sourceProperties = SourceType.GetMemberInfo();         
+            _fieldExpressions = new Dictionary<string, Expression>();
+            
+            _destinationFields = DestinationType.ToMemberInfoDictionary();
+            _sourceFields = SourceType.ToMemberInfoDictionary();         
         }
 
         /// <summary>
@@ -194,10 +196,10 @@ namespace Wayless.Generic
         // create initial mapping dictionary by matching property (key) names
         private void MatchUnmappedItems()
         {
-            var unmappedDestinations = _destinationProperties.Where(x => !_fieldExpressions.Keys.Contains(x.Key)).ToList();
+            var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)).ToList();
             foreach(var destination in unmappedDestinations)
             {
-                if(_sourceProperties.TryGetValue(destination.Key, out MemberInfo source))
+                if(_sourceFields.TryGetValue(destination.Key, out MemberInfo source))
                 {                    
                     var expression = _expressionBuilder.GetPropertyFieldMapExpression(destination.Value, source);
                     _fieldExpressions.Add(destination.Key, expression);

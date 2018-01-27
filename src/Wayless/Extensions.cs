@@ -9,7 +9,7 @@ namespace Wayless
 {
     public static class Extensions
     {
-        public static IDictionary<string, MemberInfo> GetMemberInfo(this Type type)
+        public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type)
         {
             var members = type.GetFields().Cast<MemberInfo>().ToList();
             members.AddRange(type.GetProperties().Cast<MemberInfo>());
