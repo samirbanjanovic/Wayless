@@ -39,7 +39,7 @@ namespace Wayless.Generic
         private bool _hasMatchedDefaults;
 
         private Action<TDestination, TSource> _map;
-                
+
         /// <summary>
         /// Create instance of Wayless mapper
         /// </summary>
@@ -50,14 +50,14 @@ namespace Wayless.Generic
         public Wayless()
         {
             DestinationType = typeof(TDestination);
-            SourceType = typeof(TSource);            
+            SourceType = typeof(TSource);
 
             _isMapUpToDate = false;
 
             _fieldExpressions = new Dictionary<string, Expression>();
             _fieldSkips = new List<string>();
             _destinationFields = DestinationType.ToMemberInfoDictionary();
-            _sourceFields = SourceType.ToMemberInfoDictionary();         
+            _sourceFields = SourceType.ToMemberInfoDictionary();
         }
 
         /// <summary>
@@ -111,20 +111,36 @@ namespace Wayless.Generic
             return destinationObject;
         }
 
-
         /// <summary>
         /// Create a mapping rule between destination property and 
         /// </summary>
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
+        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
+                                                      , Expression<Func<TSource, object>> sourceExpression)
+        {
+            FieldMap(destinationExpression, sourceExpression, null);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Create a mapping rule between destination property and 
+        /// </summary>
+        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
+        /// <param name="sourceExpression">Expression for property to be read in source type</param>
+        /// <param name="mapCondition">Conditition to be evaluated for determening if values should be mapped</param>
+        /// <returns>Current instance of WaylessMap</returns>
+        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
+                                                      , Expression<Func<TSource, object>> sourceExpression
+                                                      , Expression<Func<TSource, bool>> mapCondition)
         {
             var destination = GetInvariantName(destinationExpression);
 
-            if(!_fieldSkips.Contains(destination))
+            if (!_fieldSkips.Contains(destination))
             {
-                var expression = _expressionBuilder.GetPropertyFieldMapExpression(destinationExpression, sourceExpression);
+                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, mapCondition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -143,9 +159,9 @@ namespace Wayless.Generic
         public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
         {
             var destination = GetInvariantName(destinationExpression);
-            if(!_fieldSkips.Contains(destination))
+            if (!_fieldSkips.Contains(destination))
             {
-                var expression = _expressionBuilder.GetPropertyFieldSetExression(destinationExpression, value);
+                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -154,6 +170,21 @@ namespace Wayless.Generic
             return this;
         }
 
+        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
+                                                      , object value
+                                                      , Expression<Func<TSource, bool>> setCondition)
+        {
+            var destination = GetInvariantName(destinationExpression);
+            if (!_fieldSkips.Contains(destination))
+            {
+                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
+
+                RegisterFieldExpression(destination, expression);
+
+                _isMapUpToDate = false;
+            }
+            return this;
+        }
         /// <summary>
         /// Create mapping rule for properties to be skipped in destination type
         /// </summary>
@@ -162,10 +193,10 @@ namespace Wayless.Generic
         public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
         {
             var ignore = GetInvariantName(skipperName);
-            if(_fieldExpressions.ContainsKey(ignore))
+            if (_fieldExpressions.ContainsKey(ignore))
             {
                 _fieldExpressions.Remove(ignore);
-                if(!_fieldSkips.Contains(ignore))
+                if (!_fieldSkips.Contains(ignore))
                 {
                     _fieldSkips.Add(ignore);
                 }
@@ -175,11 +206,16 @@ namespace Wayless.Generic
             return this;
         }
 
+        /// <summary>
+        /// If a field was set to be skipped, this method will restore the mapping to a default state if one existed
+        /// </summary>
+        /// <param name="restoreAtDestinationExpression"></param>
+        /// <returns></returns>
         public IWayless<TDestination, TSource> FieldRestore(Expression<Func<TDestination, object>> restoreAtDestinationExpression)
         {
             var restore = restoreAtDestinationExpression.GetMemberInfo();
             var key = restore.Name.ToLowerInvariant();
-            if(_fieldSkips.Contains(key))
+            if (_fieldSkips.Contains(key))
             {
                 _fieldSkips.Remove(key);
                 FindAndSetDestinationToSource(new KeyValuePair<string, MemberInfo>(key, restore));
@@ -188,6 +224,7 @@ namespace Wayless.Generic
 
             return this;
         }
+
 
         #region helpers
         private void RegisterFieldExpression(string destination, Expression expression)
@@ -205,9 +242,9 @@ namespace Wayless.Generic
         // apply all mapping rules
         private void InternalMap(TDestination destinationObject, TSource sourceObject)
         {
-            if(!_isMapUpToDate)
+            if (!_isMapUpToDate)
             {
-                if(!_hasMatchedDefaults)
+                if (!_hasMatchedDefaults)
                 {
                     MatchUnmappedItems();
                     _hasMatchedDefaults = true;
@@ -223,10 +260,10 @@ namespace Wayless.Generic
         // try to automatically map any unmapped members
         private void MatchUnmappedItems()
         {
-            var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key) 
+            var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)
                                                                   && !_fieldSkips.Contains(x.Key)).ToList();
 
-            foreach(var destination in unmappedDestinations)
+            foreach (var destination in unmappedDestinations)
             {
                 FindAndSetDestinationToSource(destination);
             }
@@ -234,11 +271,11 @@ namespace Wayless.Generic
 
         private void FindAndSetDestinationToSource(KeyValuePair<string, MemberInfo> destination)
         {
-                if(_sourceFields.TryGetValue(destination.Key, out MemberInfo source))
-                {                    
-                    var expression = _expressionBuilder.GetPropertyFieldMapExpression(destination.Value, source);
-                    _fieldExpressions.Add(destination.Key, expression);
-                }
+            if (_sourceFields.TryGetValue(destination.Key, out MemberInfo source))
+            {
+                var expression = _expressionBuilder.GetMapExpression<TSource>(destination.Value, source);
+                _fieldExpressions.Add(destination.Key, expression);
+            }
         }
 
         // get property name

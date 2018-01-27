@@ -9,9 +9,10 @@ namespace Wayless
 {
     internal static class Extensions
     {
-        public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type)
+        public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type, bool readOnly = false)
         {
             var members = type.GetFields().Cast<MemberInfo>().ToList();
+
             members.AddRange(type.GetProperties().Cast<MemberInfo>());
 
             return members.ToDictionary(p => p.Name.ToLowerInvariant());
@@ -21,8 +22,16 @@ namespace Wayless
            where T : class           
         {
             var lambda = expression as LambdaExpression;
-            MemberExpression memberExpression = lambda.Body as MemberExpression;
-            
+            MemberExpression memberExpression = null;
+            if (lambda.Body is UnaryExpression)
+            {
+                memberExpression = (lambda.Body as UnaryExpression)?.Operand as MemberExpression;
+            }
+            else
+            {
+                memberExpression = lambda.Body as MemberExpression;
+            }
+
             return memberExpression?.Member as MemberInfo;
         }
 

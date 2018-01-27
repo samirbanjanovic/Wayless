@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Wayless.ExpressionBuilders
 {
-    public sealed class ExpressionBuilder
+    internal sealed class ExpressionBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
@@ -39,24 +39,103 @@ namespace Wayless.ExpressionBuilders
         }
 
         // get expression for mapping property to property or property to function output
-        public Expression GetPropertyFieldMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression)
+        public Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
+                                                                , Expression<Func<TSource, object>> sourceExpression
+                                                                , Expression<Func<TSource, bool>> mapOnCondition = null)
             where TDestination : class
             where TSource : class
         {
-            MemberInfo destinationProperty = destinationExpression.GetMemberInfo();
+            return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);            
+        }
+
+        public Expression GetMapExpression<TSource>(MemberInfo destinationMember
+                                                  , Expression<Func<TSource, object>> sourceExpression
+                                                  , Expression<Func<TSource, bool>> condition = null)
+            where TSource : class
+        {
             MemberInfo sourceProperty = sourceExpression.GetMemberInfo();
 
+            Expression expression = null;
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
             {
-                return GetComplexMapExpression(destinationProperty, sourceExpression);
+                expression = BuildExpressionForSourceExpression(destinationMember, sourceExpression);
+            }
+            else
+            {
+                expression = BuildMapExpressionForValueMap(destinationMember, sourceProperty);
             }
 
-            return GetPropertyFieldMapExpression(destinationProperty, sourceProperty);
+            if (condition != null)
+            {
+                return BuildIfCondition(condition, expression);
+            }
+
+            return expression;
         }
 
-        // get expression for property to function output
-        public Expression GetComplexMapExpression<TSource>(MemberInfo destinationProperty, Expression<Func<TSource, object>> sourceExpression)
+        public Expression GetMapExpression<TSource>(MemberInfo destinationMember, MemberInfo sourceMember, Expression<Func<TSource, bool>> condition = null)
+        {
+            var expression = BuildMapExpressionForValueMap(destinationMember, sourceMember);
+
+            if (condition != null)
+            {
+                return BuildIfCondition(condition, expression);
+            }
+
+            return expression;
+        }
+
+        #region explicit set
+        public Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
+            where TDestination : class
+        {
+            return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
+        }
+
+        public Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
+            where TDestination : class
+        {
+            var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
+
+            return expression;
+        }
+
+        public Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
+        {
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
+                                              , BuildCastExpression(Expression.Constant(value), destinationProperty));
+
+
+            if (condition != null)
+            {
+                return BuildIfCondition(condition, expression);
+            }
+
+            return expression;
+        }
+
+        #endregion explicit set
+
+        #region helpers
+        private Expression BuildIfCondition<TSource>(Expression<Func<TSource, bool>> condition, Expression ifTrue)
+        {
+            var member = (condition.Body as MemberExpression)?.Member as MemberInfo;
+            Expression booleanExpression;
+            if (member == null)
+            {
+                booleanExpression = Expression.Invoke(condition, _source);
+            }
+            else
+            {
+                booleanExpression = Expression.PropertyOrField(_source, member.Name);
+            }
+
+            return Expression.IfThen(booleanExpression, ifTrue);
+        }
+
+        private Expression BuildExpressionForSourceExpression<TSource>(MemberInfo destinationProperty
+                                          , Expression<Func<TSource, object>> sourceExpression)
             where TSource : class
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
@@ -65,29 +144,15 @@ namespace Wayless.ExpressionBuilders
             return expression;
         }
 
-        public Expression GetPropertyFieldMapExpression(MemberInfo destinationProperty, MemberInfo sourceProperty)
-        {
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name) 
-                                                 , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty)); 
-
-            return expression;
-        }
-
-        public Expression GetPropertyFieldSetExression<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
-            where TDestination : class
-        {
-            return GetPropertyFieldSetExression(destinationExpression, value);
-        }
-
-        public Expression GetPropertyFieldSetExression(MemberInfo destinationProperty, object value)
+        private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                              , BuildCastExpression(Expression.Constant(value), destinationProperty));
+                                                 , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
+
 
             return expression;
         }
 
-        #region helpers
         private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
         {
             var destinationType = destinationProperty.GetUnderlyingType();
