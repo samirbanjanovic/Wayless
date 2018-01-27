@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Wayless
 {
-    public static class Extensions
+    internal static class Extensions
     {
         public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type)
         {
