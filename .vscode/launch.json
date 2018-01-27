@@ -10,9 +10,9 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/tests/Wayless.Tests/bin/Debug/netcoreapp2.0/Wayless.Tests.dll",
+            "program": "${workspaceFolder}/tests/Wayless.Performance.Tests/bin/Debug/netcoreapp2.0/Wayless.Performance.Tests.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/tests/Wayless.Tests",
+            "cwd": "${workspaceFolder}/tests/Wayless.Performance.Tests",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
             "stopAtEntry": false,
