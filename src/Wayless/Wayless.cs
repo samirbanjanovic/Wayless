@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Wayless.ExpressionBuilders;
 
-namespace Wayless.Generic
+namespace Wayless
 {
     public sealed class Wayless<TDestination, TSource>
         : IWayless<TDestination, TSource>
