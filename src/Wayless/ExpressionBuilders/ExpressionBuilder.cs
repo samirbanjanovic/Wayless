@@ -10,11 +10,13 @@ namespace Wayless.ExpressionBuilders
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
-
+        private readonly ExpressionSetBuilder _expressionSetBuilder;
         public ExpressionBuilder(Type destinationType, Type sourceType)
         {
              _destination = Expression.Parameter(destinationType, "destination");
             _source = Expression.Parameter(sourceType, "source");
+
+            _expressionSetBuilder = new ExpressionSetBuilder(_destination, _source);
         }
 
         /// <summary>
@@ -59,7 +61,9 @@ namespace Wayless.ExpressionBuilders
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
             {
-                expression = BuildExpressionForSourceExpression(destinationMember, sourceExpression);
+                expression = sourceExpression.AsExpressionWithInvokeSet(destinationMember, _destination, _source);
+                //sourceExpression.AsIfThenExpression(destinationMember, condition, _source);
+                // BuildExpressionForSourceExpression(destinationMember, sourceExpression);
             }
             else
             {
@@ -68,7 +72,7 @@ namespace Wayless.ExpressionBuilders
 
             if (condition != null)
             {
-                return BuildIfCondition(condition, expression);
+                return expression.AsIfThenExpression(condition, _source);
             }
 
             return expression;
@@ -80,7 +84,7 @@ namespace Wayless.ExpressionBuilders
 
             if (condition != null)
             {
-                return BuildIfCondition(condition, expression);
+                return expression.AsIfThenExpression(condition, _source);
             }
 
             return expression;
@@ -90,80 +94,60 @@ namespace Wayless.ExpressionBuilders
         public Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
             where TDestination : class
         {
-            return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
+            var expression =  _expressionSetBuilder.GetMapExressionForExplicitSet(destinationExpression, value);
+
+            return expression;
         }
 
         public Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
             where TDestination : class
         {
-            var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
+            var expression = _expressionSetBuilder.GetMapExressionForExplicitSet(destinationExpression, value, condition);
 
             return expression;
         }
 
         public Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
         {
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                              , BuildCastExpression(Expression.Constant(value), destinationProperty));
-
-
-            if (condition != null)
-            {
-                return BuildIfCondition(condition, expression);
-            }
-
+            var expression = _expressionSetBuilder.GetMapExressionForExplicitSet(destinationProperty, value, condition);
+           
             return expression;
         }
 
         #endregion explicit set
 
         #region helpers
-        private Expression BuildIfCondition<TSource>(Expression<Func<TSource, bool>> condition, Expression ifTrue)
-        {
-            var member = (condition.Body as MemberExpression)?.Member as MemberInfo;
-            Expression booleanExpression;
-            if (member == null)
-            {
-                booleanExpression = Expression.Invoke(condition, _source);
-            }
-            else
-            {
-                booleanExpression = Expression.PropertyOrField(_source, member.Name);
-            }
 
-            return Expression.IfThen(booleanExpression, ifTrue);
-        }
+        // private Expression BuildExpressionForSourceExpression<TSource>(MemberInfo destinationProperty
+        //                                   , Expression<Func<TSource, object>> sourceExpression)
+        //     where TSource : class
+        // {
+        //     var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
+        //                                      , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationProperty));
 
-        private Expression BuildExpressionForSourceExpression<TSource>(MemberInfo destinationProperty
-                                          , Expression<Func<TSource, object>> sourceExpression)
-            where TSource : class
-        {
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                             , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationProperty));
-
-            return expression;
-        }
+        //     return expression;
+        // }
 
         private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                                 , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
+                                                 , ExpressionBuilderHelpers.BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
 
 
             return expression;
         }
 
-        private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
-        {
-            var destinationType = destinationProperty.GetUnderlyingType();
+        // private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
+        // {
+        //     var destinationType = destinationProperty.GetUnderlyingType();
 
-            if (destinationType.IsValueType)
-            {
-                return Expression.Convert(valueExpression, destinationType);
-            }
+        //     if (destinationType.IsValueType)
+        //     {
+        //         return Expression.Convert(valueExpression, destinationType);
+        //     }
             
-            return Expression.TypeAs(valueExpression, destinationType);
-        }
+        //     return Expression.TypeAs(valueExpression, destinationType);
+        // }
         #endregion helpers
     }
 }
