@@ -3,41 +3,19 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Wayless;
 
 namespace Wayless.ExpressionBuilders
 {
-    internal sealed class ExpressionBuilder
+    internal class ExpressionMapBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
-        private readonly ExpressionSetBuilder _expressionSetBuilder;
-        public ExpressionBuilder(Type destinationType, Type sourceType)
+
+        public ExpressionMapBuilder(ParameterExpression destination, ParameterExpression source)
         {
-             _destination = Expression.Parameter(destinationType, "destination");
-            _source = Expression.Parameter(sourceType, "source");
-
-            _expressionSetBuilder = new ExpressionSetBuilder(_destination, _source);
-        }
-
-        /// <summary>
-        /// Build a unified mapping function
-        /// </summary>
-        /// <param name="mappingExpressions">Expressions containting member mappings</param>
-        /// <returns>mapping action</returns>
-        public Action<TDestination, TSource> BuildActionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
-            where TDestination : class
-            where TSource : class
-        {
-            var expressionMap = Expression.Lambda<Action<TDestination, TSource>>(
-                                   Expression.Block(mappingExpressions)
-                                   , new ParameterExpression[]
-                                    {
-                                        _destination
-                                        , _source
-                                    });
-
-
-            return expressionMap.Compile();
+            _destination = destination;
+            _source = source;
         }
 
         // get expression for mapping property to property or property to function output
@@ -47,7 +25,7 @@ namespace Wayless.ExpressionBuilders
             where TDestination : class
             where TSource : class
         {
-            return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);            
+            return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);
         }
 
         public Expression GetMapExpression<TSource>(MemberInfo destinationMember
@@ -62,8 +40,6 @@ namespace Wayless.ExpressionBuilders
             if (sourceProperty == null)
             {
                 expression = sourceExpression.AsExpressionWithInvokeSet(destinationMember, _destination, _source);
-                //sourceExpression.AsIfThenExpression(destinationMember, condition, _source);
-                // BuildExpressionForSourceExpression(destinationMember, sourceExpression);
             }
             else
             {
@@ -89,32 +65,6 @@ namespace Wayless.ExpressionBuilders
 
             return expression;
         }
-
-        #region explicit set
-        public Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
-            where TDestination : class
-        {
-            var expression =  _expressionSetBuilder.GetMapExressionForExplicitSet(destinationExpression, value);
-
-            return expression;
-        }
-
-        public Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
-            where TDestination : class
-        {
-            var expression = _expressionSetBuilder.GetMapExressionForExplicitSet(destinationExpression, value, condition);
-
-            return expression;
-        }
-
-        public Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
-        {
-            var expression = _expressionSetBuilder.GetMapExressionForExplicitSet(destinationProperty, value, condition);
-           
-            return expression;
-        }
-
-        #endregion explicit set
 
         #region helpers
 

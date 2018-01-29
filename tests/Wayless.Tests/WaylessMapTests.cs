@@ -8,89 +8,178 @@ namespace Wayless.Tests
     [TestClass]
     public class WaylessMapTests
     {
-        public class SourceObject
+        public class Person
         {
-            public int Id { get; set; }
-
-            public string Name { get; set; }
-
-            public DateTime TimeStamp { get; set; }
-
-            public Guid CorrelationId { get; set; }
+            public string Address { get; set; }
+            public DateTime CreateTime { get; set; }
+            public string Email { get; set; }
+            public string FirstName { get; set; }
+            public Guid Id { get; set; }
+            public string LastName { get; set; }
+            public string Nickname { get; set; }
+            public string Phone { get; set; }
+            public static Person Create()
+            {
+                return new Person
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = "Jane",
+                    LastName = "Doe",
+                    Email = "tests@gitTest.com",
+                    Address = "Test Street",
+                    CreateTime = DateTime.Now,
+                    Nickname = "Jenny",
+                    Phone = "1112223344 "
+                };
+            }
         }
 
-        public class DestinationObject
+        public class PersonDTO
         {
-            public string Name { get; set; }
+            public string Address { get; set; }
+            public string Email { get; set; }
+            public string FirstName { get; set; }
+            public Guid Id { get; set; }
+            public string LastName { get; set; }
+            public string Nickname { get; set; }
+            public DateTime CreateTime { get; set; }
 
-            public DateTime AssignmentDate { get; set; }
-
-            public Guid CorrelationId { get; set; }
+            public string Phone;
         }
 
-        public SourceObject TestSource = new SourceObject()
-        {
-            Id = 1,
-            Name = "Source",
-            CorrelationId = Guid.NewGuid(),
-            TimeStamp = DateTime.Now.AddDays(-1)
-        };
-
+        #region FieldMap Tests
         [TestMethod]
-        public void TestDefaultMap()
+        public void TestDefaultInitializeAndMap()
         {
-            var mapper = new Wayless<DestinationObject, SourceObject>();
-            var destination = mapper.Map(TestSource);
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 
-            Assert.AreEqual(TestSource.Name, destination.Name);
-            //Assert.AreEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
+            var personDto = mapper.Map(person);
+
+            Assert.AreEqual(person.Address, personDto.Address);
+            Assert.AreEqual(person.Email, personDto.Email);
+            Assert.AreEqual(person.FirstName, personDto.FirstName);
+            Assert.AreEqual(person.Id, personDto.Id);
+            Assert.AreEqual(person.LastName, personDto.LastName);
+            Assert.AreEqual(person.Nickname, personDto.Nickname);
+            Assert.AreEqual(person.CreateTime, personDto.CreateTime);
+            Assert.AreEqual(person.Phone, personDto.Phone);            
         }
 
         [TestMethod]
         public void TestFieldMap()
         {
-            var mapper = new Wayless<DestinationObject, SourceObject>()
-                                .FieldMap(d => d.AssignmentDate, s => s.TimeStamp);
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
+                  .FieldMap(x => x.FirstName, s => s.Nickname);                  
 
-            var destination = mapper.Map(TestSource);
+            var personDto = mapper.Map(person);
 
-            Assert.AreEqual(TestSource.Name, destination.Name);
-            Assert.AreEqual(TestSource.TimeStamp, destination.AssignmentDate);
-            //Assert.AreEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
+            Assert.AreEqual(person.Nickname, personDto.FirstName);
+            Assert.AreEqual(person.FirstName, personDto.Nickname);
         }
+
+        [TestMethod]
+        public void TestFieldMapWithCondition()
+        {
+            var person = Person.Create();            
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+
+            var personDto = mapper.Map(person);
+
+            Assert.AreEqual(person.Nickname, personDto.Nickname);
+        }
+
+        [TestMethod]
+        public void TestFieldMapWithoutAutoMatch()
+        {
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.DontAutoMatchMembers() 
+                  .FieldMap(x => x.Nickname, s => s.FirstName)
+                  .FieldMap(x => x.FirstName, s => s.Nickname)
+                  .FieldMap(x => x.Phone, s => s.Nickname == "Jenny");
+
+            var personDto = mapper.Map(person);
+
+            Assert.AreEqual(person.FirstName, personDto.Nickname);
+            Assert.AreEqual(person.Nickname, personDto.FirstName);
+            Assert.AreEqual(person.Phone, personDto.Phone);
+
+            Assert.AreNotEqual(person.Address, personDto.Address);
+            Assert.AreNotEqual(person.Email, personDto.Email);            
+            Assert.AreNotEqual(person.Id, personDto.Id);
+            Assert.AreNotEqual(person.LastName, personDto.LastName);            
+            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);            
+        }
+        #endregion FieldMap Tests
+
+        #region FieldSet Tests
 
         [TestMethod]
         public void TestFieldSet()
         {
-            var mapper = new Wayless<DestinationObject, SourceObject>()
-                                .FieldSet(d => d.CorrelationId, Guid.NewGuid());
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.FieldSet(x => x.Nickname, "Jacqueline");
 
-            var destination = mapper.Map(TestSource);
+            var personDto = mapper.Map(person);
 
-            Assert.AreNotEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
+            Assert.AreEqual("Jacqueline", personDto.Nickname);
         }
 
         [TestMethod]
-        public void TestSkipField()
+        public void TestFieldSetWithCondition()
         {
-            var mapper = new Wayless<DestinationObject, SourceObject>()
-                                .FieldSkip(d => d.CorrelationId);
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
-            var destination = mapper.Map(TestSource);
+            var personDto = mapper.Map(person);
 
-            Assert.AreNotEqual(TestSource.CorrelationId.ToString(), destination.CorrelationId);
+            Assert.AreEqual("8675309", personDto.Phone);
         }
 
-        //[TestMethod]
-        //public void TestShowMapping()
-        //{
-        //    var mapper = new WaylessMap<DestinationObject, SourceObject>()
-        //                        .FieldMap(d => d.AssignmentDate, s => s.TimeStamp); 
-                                
-        //    var mappingRules = mapper.ShowMapping();
+        [TestMethod]
+        public void TestFieldSetWithoutAutoMatch()
+        {
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.DontAutoMatchMembers()
+                  .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
-        //    Debug.Write(string.Join(Environment.NewLine, mappingRules));
-        //}
+            var personDto = mapper.Map(person);
+
+            Assert.AreEqual("8675309", personDto.Phone);
+
+            Assert.AreNotEqual(person.FirstName, personDto.Nickname);
+            Assert.AreNotEqual(person.Nickname, personDto.FirstName);            
+            Assert.AreNotEqual(person.Address, personDto.Address);
+            Assert.AreNotEqual(person.Email, personDto.Email);
+            Assert.AreNotEqual(person.Id, personDto.Id);
+            Assert.AreNotEqual(person.LastName, personDto.LastName);
+            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);
+        }
+
+        #endregion FieldSet Tests
+
+        #region FieldSkip Tests
+
+        [TestMethod]
+        public void TestFieldSkip()
+        {
+            var person = Person.Create();
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            mapper.FieldSkip(d => d.Nickname);
+
+            var personDto = mapper.Map(person);
+
+            Assert.AreNotEqual(person.Nickname, personDto.Nickname);
+        }
+
+        #endregion FieldSkip Tests
     }
 }
 

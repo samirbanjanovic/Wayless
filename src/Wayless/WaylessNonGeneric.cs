@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using Wayless.ExpressionBuilders;
+using Wayless.Generic;
 
-namespace Wayless.Generic
+namespace Wayless
 {
-    public sealed class Wayless<TDestination, TSource>
-        : IWayless<TDestination, TSource>
-        where TDestination : class
-        where TSource : class
+    public class Wayless 
+        : IWayless
     {
         /// Type activator. Using static compiled expression for improved performance
-        private static readonly Func<TDestination> _instanceCreate = Extensions.CreateInstanceLambda<TDestination>();
+        private readonly Func<object> _instanceCreate;
 
         /// <summary>
         /// Generates mapping expressions that will be eventually compiled into map
         /// </summary>
-        private readonly AggregateExpressionBuilder _expressionBuilder = new AggregateExpressionBuilder(typeof(TDestination), typeof(TSource));
+        private readonly ExpressionBuilder _expressionBuilder;
 
         private readonly IDictionary<string, MemberInfo> _destinationFields;
         private readonly IDictionary<string, MemberInfo> _sourceFields;
@@ -34,12 +33,15 @@ namespace Wayless.Generic
         private bool _isMapUpToDate;
         private bool _attemptAutoMatchMembers;
 
-        private Action<TDestination, TSource> _map;
+        private Action<object, object> _map;
 
-        public Wayless()
+        public Wayless(Type destinationType, Type sourceType)
         {
-            DestinationType = typeof(TDestination);
-            SourceType = typeof(TSource);
+            DestinationType = destinationType;
+            SourceType = sourceType;
+
+            _instanceCreate = Extensions.CreateInstanceLambda(destinationType);
+            _expressionBuilder = new ExpressionBuilder(destinationType, sourceType);
 
             _isMapUpToDate = false;
             _attemptAutoMatchMembers = true;
@@ -65,8 +67,11 @@ namespace Wayless.Generic
         /// </summary>
         /// <param name="destinationObject">Object to apply mapping rules to</param>
         /// <param name="sourceObject">Object to read values from</param>
-        public void Map(TDestination destinationObject, TSource sourceObject)
+        public void Map<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
+            where TDestination : class
+            where TSource : class
         {
+            IsGenericTypeOfRequest<TDestination, TSource>();
             InternalMap(destinationObject, sourceObject);
         }
 
@@ -78,11 +83,13 @@ namespace Wayless.Generic
         /// <param name="constructorParameters">Constructor parameters, if any, to be used when 
         /// creating an instance of the destination object</param>
         /// <returns>Collection of mapped objects</returns>
-        public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList)
+        public IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceList)
+            where TDestination : class
+            where TSource : class
         {
             foreach (var sourceObject in sourceList)
             {
-                yield return Map(sourceObject);
+                yield return Map<TDestination, TSource>(sourceObject);
             }
         }
 
@@ -92,9 +99,11 @@ namespace Wayless.Generic
         /// <param name="sourceObject">Object to read avalues from</param>
         /// <param name="constructorParameters">Parameters passed to destination object constructor</param>
         /// <returns>Mapped object</returns>
-        public TDestination Map(TSource sourceObject)
+        public TDestination Map<TDestination, TSource>(TSource sourceObject)
+            where TDestination : class
+            where TSource : class
         {
-            TDestination destinationObject = _instanceCreate();
+            TDestination destinationObject = (TDestination)_instanceCreate();
 
             InternalMap(destinationObject, sourceObject);
 
@@ -107,8 +116,10 @@ namespace Wayless.Generic
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
-                                                      , Expression<Func<TSource, object>> sourceExpression)
+        public IWayless FieldMap<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
+                                             , Expression<Func<TSource, object>> sourceExpression)
+            where TDestination : class
+            where TSource : class
         {
             FieldMap(destinationExpression, sourceExpression, null);
 
@@ -122,9 +133,11 @@ namespace Wayless.Generic
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <param name="mapCondition">Conditition to be evaluated for determening if values should be mapped</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
+        public IWayless FieldMap<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                       , Expression<Func<TSource, object>> sourceExpression
                                                       , Expression<Func<TSource, bool>> mapCondition)
+            where TDestination : class
+            where TSource : class
         {
             var destination = GetInvariantName(destinationExpression);
 
@@ -146,7 +159,9 @@ namespace Wayless.Generic
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="value">Value to assign</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
+        public IWayless FieldSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value)
+            where TDestination : class
+            where TSource : class
         {
             var destination = GetInvariantName(destinationExpression);
             if (!_fieldSkips.Contains(destination))
@@ -160,9 +175,11 @@ namespace Wayless.Generic
             return this;
         }
 
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
+        public IWayless FieldSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                       , object value
                                                       , Expression<Func<TSource, bool>> setCondition)
+            where TDestination : class
+            where TSource : class
         {
             var destination = GetInvariantName(destinationExpression);
             if (!_fieldSkips.Contains(destination))
@@ -180,18 +197,18 @@ namespace Wayless.Generic
         /// </summary>
         /// <param name="ignoreAtDestinationExpression">Expression for property to be skipped in destination type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
+        public IWayless FieldSkip<TDestination, TSource>(Expression<Func<TDestination, object>> skipperName)
+            where TDestination : class
+            where TSource : class
         {
             var ignore = GetInvariantName(skipperName);
-
-            if (!_fieldSkips.Contains(ignore))
-            {
-                _fieldSkips.Add(ignore);
-            }
-
             if (_fieldExpressions.ContainsKey(ignore))
             {
                 _fieldExpressions.Remove(ignore);
+                if (!_fieldSkips.Contains(ignore))
+                {
+                    _fieldSkips.Add(ignore);
+                }
             }
 
             _isMapUpToDate = false;
@@ -200,7 +217,7 @@ namespace Wayless.Generic
 
         #region basic mapper configuration
 
-        public IWayless<TDestination, TSource> DontAutoMatchMembers()
+        public IWayless DontAutoMatchMembers()
         {
             _attemptAutoMatchMembers = false;
 
@@ -222,40 +239,48 @@ namespace Wayless.Generic
         }
 
         // apply all mapping rules
-        private void InternalMap(TDestination destinationObject, TSource sourceObject)
+        private void InternalMap<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
+            where TDestination : class
+            where TSource : class
         {
-            CompileMapFunction();
+            IsGenericTypeOfRequest<TDestination, TSource>();
+            CompileMapFunction<TDestination, TSource>();
 
             _map(destinationObject, sourceObject);
         }
 
-        private void CompileMapFunction()
+        private void CompileMapFunction<TDestination, TSource>()
+            where TDestination : class
+            where TSource : class
         {
             if (!_isMapUpToDate)
             {
                 if (_attemptAutoMatchMembers)
                 {
-                    AutomatchMembers();
+                    AutomatchMembers<TDestination, TSource>();
                 }
 
-                _map = _expressionBuilder.BuildActionMap<TDestination, TSource>(_fieldExpressions.Values);
+                _map = new Action<object, object>((d,s) => _expressionBuilder.BuildActionMap<TDestination, TSource>(_fieldExpressions.Values).Invoke((TDestination)d, (TSource)s));
                 _isMapUpToDate = true;
             }
         }
 
         // try to automatically map any unmapped members
-        private void AutomatchMembers()
+        private void AutomatchMembers<TDestination, TSource>()
+            where TDestination : class
+            where TSource : class
         {
             var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)
                                                                   && !_fieldSkips.Contains(x.Key)).ToList();
 
             foreach (var destination in unmappedDestinations)
             {
-                FindAndSetDestinationToSource(destination);
+                FindAndSetDestinationToSource<TSource>(destination);
             }
         }
 
-        private void FindAndSetDestinationToSource(KeyValuePair<string, MemberInfo> destination)
+        private void FindAndSetDestinationToSource<TSource>(KeyValuePair<string, MemberInfo> destination)
+            where TSource : class
         {
             if (_sourceFields.TryGetValue(destination.Key, out MemberInfo source))
             {
@@ -273,6 +298,14 @@ namespace Wayless.Generic
             return propertyInfo.Name.ToLowerInvariant();
         }
 
+        private void IsGenericTypeOfRequest<TDestination, TSource>()
+        {
+            if (!typeof(TDestination).Equals(DestinationType))
+                throw new TypeInitializationException(typeof(TDestination).FullName, new Exception($"Submitted generic type does not equal initialized constructor type. Expected type {DestinationType.FullName}"));
+
+            if (!typeof(TSource).Equals(SourceType))
+                throw new TypeInitializationException(typeof(TSource).FullName, new Exception($"Submitted generic type does not equal initialized constructor type. Expected type {SourceType.FullName}"));
+        }
         #endregion helpers
     }
 }

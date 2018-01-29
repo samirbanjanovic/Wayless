@@ -103,6 +103,7 @@ namespace Wayless.Performance.Tests
         private static void MeasureWayless()
         {
             Person person = Person.Create();
+
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>(); //new WaylessMap<PersonDTO, Person>();
 
@@ -118,20 +119,18 @@ namespace Wayless.Performance.Tests
             stopwatch.Stop();
             Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
-
-        //private static readonly IWaylessMap<PersonDTO, Person> _staticWaylessMapper = new WaylessMap<PersonDTO, Person>();
+        
         private static void MeasureWaylessWithWayMore()
         {
             Person person = Person.Create();
+
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Mappers.Get<PersonDTO, Person>();
-            //mapper.FieldMap(x => x.CreateTime, s => s.CreateTime);
-            
-            mapper.FieldMap(x => x.Nickname, s => $"{s.LastName}, {s.FirstName}, {s.Id}", z => z.Index);
+            //mapper.FieldMap(x => x.CreateTime, s => s.CreateTime);            
+            //mapper.FieldMap(x => x.Nickname, s => $"{s.LastName}, {s.FirstName}, {s.Id}", z => z.FirstName == "Jane");
 
             for (int i = 0; i < Iterations; i++)
             {
-
                 var personDto = mapper.Map(person);
             }
 
@@ -143,12 +142,12 @@ namespace Wayless.Performance.Tests
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
-            TypeAdapterConfig<Person, PersonDTO>
-                    .NewConfig()
-                    .Map(x => x.Nickname
-                       , s => $"{s.LastName}, {s.FirstName}, {s.Id}"
-                       , s => s.Index)
-                    .Compile();
+            //TypeAdapterConfig<Person, PersonDTO>
+            //        .NewConfig()
+            //        .Map(x => x.Nickname
+            //           , s => $"{s.LastName}, {s.FirstName}, {s.Id}"
+            //           , s => s.Index)
+            //        .Compile();
 
             for (int i = 0; i < Iterations; i++)
             {
