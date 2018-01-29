@@ -36,11 +36,25 @@ namespace Wayless
 
         }
 
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destination, TSource source)
+            where TDestination : class
+            where TSource : class
+        {
+            return Get<TDestination, TSource>();
+        }
+
         public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
             where TDestination : class
             where TSource : class
         {
             return new Wayless<TDestination, TSource>();
-        }
+        }      
+        
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destination, TSource source)
+            where TDestination : class
+            where TSource : class
+        {
+            return GetNew<TDestination, TSource>();
+        }        
     }
 }

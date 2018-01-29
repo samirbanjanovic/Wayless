@@ -1,21 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 
 namespace Wayless
 {
-    public interface IWayless<TDestination, TSource>
-        where TDestination : class
-        where TSource : class
+    public interface IWayless
     {
         Type DestinationType { get; }
         Type SourceType { get; }
 
-        IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression);
-        IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object fieldValue);
-        IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression);
-        IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList);
-        void Map(TDestination destinationObject, TSource sourceObject);
-        TDestination Map(TSource sourceObject);        
+        IWayless DontAutoMatchMembers();
+        IWayless FieldMap<TDestination, TSource>(System.Linq.Expressions.Expression<Func<TDestination, object>> destinationExpression, System.Linq.Expressions.Expression<Func<TSource, object>> sourceExpression)
+            where TDestination : class
+            where TSource : class;
+        IWayless FieldMap<TDestination, TSource>(System.Linq.Expressions.Expression<Func<TDestination, object>> destinationExpression, System.Linq.Expressions.Expression<Func<TSource, object>> sourceExpression, System.Linq.Expressions.Expression<Func<TSource, bool>> mapCondition)
+            where TDestination : class
+            where TSource : class;
+        IWayless FieldSet<TDestination, TSource>(System.Linq.Expressions.Expression<Func<TDestination, object>> destinationExpression, object value)
+            where TDestination : class
+            where TSource : class;
+        IWayless FieldSet<TDestination, TSource>(System.Linq.Expressions.Expression<Func<TDestination, object>> destinationExpression, object value, System.Linq.Expressions.Expression<Func<TSource, bool>> setCondition)
+            where TDestination : class
+            where TSource : class;
+        IWayless FieldSkip<TDestination, TSource>(System.Linq.Expressions.Expression<Func<TDestination, object>> skipperName)
+            where TDestination : class
+            where TSource : class;
+        IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceList)
+            where TDestination : class
+            where TSource : class;
+        void Map<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
+            where TDestination : class
+            where TSource : class;
+        TDestination Map<TDestination, TSource>(TSource sourceObject)
+            where TDestination : class
+            where TSource : class;
     }
 }
