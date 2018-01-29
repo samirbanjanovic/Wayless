@@ -118,16 +118,6 @@ namespace Wayless.ExpressionBuilders
 
         #region helpers
 
-        // private Expression BuildExpressionForSourceExpression<TSource>(MemberInfo destinationProperty
-        //                                   , Expression<Func<TSource, object>> sourceExpression)
-        //     where TSource : class
-        // {
-        //     var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-        //                                      , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationProperty));
-
-        //     return expression;
-        // }
-
         private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
@@ -137,17 +127,6 @@ namespace Wayless.ExpressionBuilders
             return expression;
         }
 
-        // private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
-        // {
-        //     var destinationType = destinationProperty.GetUnderlyingType();
-
-        //     if (destinationType.IsValueType)
-        //     {
-        //         return Expression.Convert(valueExpression, destinationType);
-        //     }
-            
-        //     return Expression.TypeAs(valueExpression, destinationType);
-        // }
         #endregion helpers
     }
 }
