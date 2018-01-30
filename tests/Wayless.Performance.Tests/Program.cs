@@ -59,9 +59,9 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Primer call");
             RunMappers();
 
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 10; i++)
             {
-                Iterations = Iterations * 10;
+                //Iterations = Iterations * 10;
 
                 Console.WriteLine($"Test iteration: {i}");
                 Console.WriteLine($"Set size: {Iterations}");
@@ -136,10 +136,10 @@ namespace Wayless.Performance.Tests
 
         private static void MeasureWaylessWithWayMore()
         {
-            Person person = Person.Create();
-
+            Person person = Person.Create();            
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+
+            var mapper = WayMore.Mappers.Get<PersonDTO, Person>();
 
             for (int i = 0; i < Iterations; i++)
             {

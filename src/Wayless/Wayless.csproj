@@ -24,7 +24,6 @@ Added more methods to WayMore class</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Core\IWayless.cs" />
     <Compile Remove="WaylessGeneric.cs" />
     <Compile Remove="WaylessNonGeneric.cs" />
   </ItemGroup>
