@@ -64,7 +64,7 @@ with a call to `WayMore`
 	mapper.FieldMap(dest => dest.Sibling
 		       , src => WayMore.Mappers
 		       		       .Get<PerstonDTO, Person>()
-		       		       .Map(src.Nickname)
+		       		       .Map(src.Sibling)
 			); 
 	
 
