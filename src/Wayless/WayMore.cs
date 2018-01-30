@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using Wayless.ExpressionBuilders;
 
 namespace Wayless
 {
@@ -24,15 +25,28 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var key = (typeof((TDestination, TSource)));
+            var key = (typeof((TDestination, TSource)), typeof(AggregateExpressionBuilder));
             if (!_mappers.TryGetValue(key, out object mapper))
             {
                 mapper = GetNew<TDestination, TSource>();
-                _mappers.TryAdd(typeof((TDestination, TSource)), mapper);
+                _mappers.TryAdd(typeof((TDestination, TSource, AggregateExpressionBuilder)), mapper);
             }
 
             return (IWayless<TDestination, TSource>)mapper;
+        }
 
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(IExpressionBuilder expressionBuilder)
+            where TDestination : class
+            where TSource : class
+        {
+            var key = (typeof((TDestination, TSource)), expressionBuilder.GetType());
+            if (!_mappers.TryGetValue(key, out object mapper))
+            {
+                mapper = GetNew<TDestination, TSource>();
+                _mappers.TryAdd(typeof((TDestination, TSource, AggregateExpressionBuilder)), mapper);
+            }
+
+            return (IWayless<TDestination, TSource>)mapper;
         }
 
         public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destination, TSource source)

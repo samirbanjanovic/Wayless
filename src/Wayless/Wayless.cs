@@ -19,7 +19,7 @@ namespace Wayless
         /// <summary>
         /// Generates mapping expressions that will be eventually compiled into map
         /// </summary>
-        private readonly AggregateExpressionBuilder _expressionBuilder = new AggregateExpressionBuilder(typeof(TDestination), typeof(TSource));
+        private IExpressionBuilder _expressionBuilder;
 
         private readonly IDictionary<string, MemberInfo> _destinationFields;
         private readonly IDictionary<string, MemberInfo> _sourceFields;
@@ -36,29 +36,37 @@ namespace Wayless
 
         private Action<TDestination, TSource> _map;
 
-        public Wayless()
+        public Wayless(IExpressionBuilder expressionBuilder)
         {
-            DestinationType = typeof(TDestination);
-            SourceType = typeof(TSource);
+            //DestinationType = typeof(TDestination);
+            //SourceType = typeof(TSource);
 
             _isMapUpToDate = false;
             _attemptAutoMatchMembers = true;
-
+            _expressionBuilder = expressionBuilder;
             _fieldExpressions = new Dictionary<string, Expression>();
             _fieldSkips = new List<string>();
             _destinationFields = DestinationType.ToMemberInfoDictionary();
             _sourceFields = SourceType.ToMemberInfoDictionary();
         }
 
+        public Wayless()
+            : this(new AggregateExpressionBuilder(typeof(TDestination), typeof(TSource)))
+        {
+            
+        }
+
+        public Type ExpressionBuilderType => _expressionBuilder.GetType();
+
         /// <summary>
         /// Type to map from
         /// </summary>
-        public Type SourceType { get; }
+        public Type SourceType => typeof(TSource);
 
         /// <summary>
         /// Type to map to
         /// </summary>
-        public Type DestinationType { get; }
+        public Type DestinationType => typeof(TDestination);
 
         /// <summary>
         /// Apply mapping rules to  existing instance of object

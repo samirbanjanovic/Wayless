@@ -6,7 +6,8 @@ using System.Text;
 
 namespace Wayless.ExpressionBuilders
 {
-    internal sealed class AggregateExpressionBuilder
+    internal sealed class AggregateExpressionBuilder 
+        : IExpressionBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
