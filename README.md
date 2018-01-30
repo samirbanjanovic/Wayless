@@ -43,7 +43,9 @@ only  be mapped/set if the supplied condition is met.
 
 	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 	// set phone number to '8675309' if First
-	mapper.FieldMap(dest => dest.FirstName, src => src.Nickname, src => src.Phone == "8675309"); 
+	mapper.FieldMap(dest => dest.FirstName
+		       , src => src.Nickname
+		       , src => src.Phone == "8675309"); 
 
 	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 	// set phone number to '8675309' if First
