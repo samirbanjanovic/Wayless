@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Wayless.ExpressionBuilders
 {
-    internal sealed class ExpressionBuilder 
+    public class ExpressionBuilder 
         : IExpressionBuilder
     {
         private readonly ParameterExpression _destination;
@@ -24,7 +24,7 @@ namespace Wayless.ExpressionBuilders
         /// </summary>
         /// <param name="mappingExpressions">Expressions containting member mappings</param>
         /// <returns>mapping action</returns>
-        public Action<TDestination, TSource> CompileExpressionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
+        public virtual Action<TDestination, TSource> CompileExpressionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
             where TDestination : class
             where TSource : class
         {
@@ -43,7 +43,7 @@ namespace Wayless.ExpressionBuilders
 
         #region create assignment map
         // get expression for mapping property to property or property to function output
-        public Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
+        public virtual Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                                 , Expression<Func<TSource, object>> sourceExpression
                                                                 , Expression<Func<TSource, bool>> mapOnCondition = null)
             where TDestination : class
@@ -52,7 +52,7 @@ namespace Wayless.ExpressionBuilders
             return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);
         }
 
-        public Expression GetMapExpression<TSource>(MemberInfo destinationMember
+        public virtual Expression GetMapExpression<TSource>(MemberInfo destinationMember
                                                   , Expression<Func<TSource, object>> sourceExpression
                                                   , Expression<Func<TSource, bool>> condition = null)
             where TSource : class
@@ -78,7 +78,7 @@ namespace Wayless.ExpressionBuilders
             return expression;
         }
 
-        public Expression GetMapExpression<TSource>(MemberInfo destinationMember, MemberInfo sourceMember, Expression<Func<TSource, bool>> condition = null)
+        public virtual Expression GetMapExpression<TSource>(MemberInfo destinationMember, MemberInfo sourceMember, Expression<Func<TSource, bool>> condition = null)
         {
             var expression = BuildMapExpressionForValueMap(destinationMember, sourceMember);
 
@@ -105,13 +105,13 @@ namespace Wayless.ExpressionBuilders
         #endregion create assignment map
 
         #region create set map
-        public Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
+        public virtual Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
             where TDestination : class
         {
             return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
         }
 
-        public Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
+        public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
             where TDestination : class
         {
             var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
@@ -119,7 +119,7 @@ namespace Wayless.ExpressionBuilders
             return expression;
         }
 
-        public Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
+        public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
                                               , ExpressionBuilderHelpers.BuildCastExpression(Expression.Constant(value), destinationProperty));
