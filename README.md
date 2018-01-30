@@ -31,7 +31,8 @@ Example:
 	// you can also call GetNew for an uncached instance
 	var mapper = WayMore.Get<PerstonDTO, Perston>(); 
 	mapper.DontAutoMatchMembers()
-		  .FieldMap(dest => dest.Phone, src => src.Phone);
+	      .FieldMap(dest => dest.Phone
+	      	       , src => src.Phone);
 
 
 Values can be mapped or set using the overloaded `FieldMap` and `FieldSet` methods. If auto matching is enabled 
@@ -46,7 +47,9 @@ only  be mapped/set if the supplied condition is met.
 
 	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 	// set phone number to '8675309' if First
-	mapper.FieldSet(dest => dest.Phone, "8675309", src => src.FirstName == "Jenny"); 
+	mapper.FieldSet(dest => dest.Phone
+			      , "8675309"
+		       , src => src.FirstName == "Jenny"); 
 
 A call to `Map` applies all the generated rules
 
@@ -56,10 +59,11 @@ with a call to `WayMore`
 
 	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 	// For best performance use a cached version of a mapper
-	mapper.FieldMap(dest => dest.Sibling, src => WayMore.Get<PerstonDTO, Person>().Map(src.Nickname); 
+	mapper.FieldMap(dest => dest.Sibling
+		       , src => WayMore.Get<PerstonDTO, Person>()
+		       		       .Map(src.Nickname)
+			); 
 	
-
-
 
 `Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
 type.
