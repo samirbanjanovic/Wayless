@@ -62,7 +62,8 @@ with a call to `WayMore`
 	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
 	// For best performance use a cached version of a mapper
 	mapper.FieldMap(dest => dest.Sibling
-		       , src => WayMore.Get<PerstonDTO, Person>()
+		       , src => WayMore.Mappers
+		       		       .Get<PerstonDTO, Person>()
 		       		       .Map(src.Nickname)
 			); 
 	
