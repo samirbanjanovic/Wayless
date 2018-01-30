@@ -1,42 +1,67 @@
 # Wayless
 
-Wayless is a basic object-to-object mapper without any fancy features. 
-It maps quickly from TypeA to TypeB without special features. As time progresses
-more features will be added. However, each addition will be evaluated based on
-perfromance. Anything that impacts performance too much will not be included.
+Wayless is a basic, lightweight object-to-object mapper.
 
-`var mapper = new WaylessMap<SourceType, DestinationType>();`
+There are multiple ways to get or reuse an instance of mapper. The most basic 
+way is to use the `WayMore` singleton.  It keeps track of all requested mappers
+based on destinatoin type, source type, and expression builder.  
 
-The constructor has an optional parameter to ignore case when matching property names. 
-The evaluation does nothing sophisticated; it looks for a 1-1 match. 
+`Wayless` has an overloaded constructor. Using the empty constructor tells Wayless
+to use the default ExpressionBuilder. You can also pass your own implementation of 
+`IExpressionBuilder` for Wayless to use.  If you need to only change a few thigns you 
+can inherit from `ExpressionBuilder` and override its implementations.
 
-Default rules can be extended using `FieldMap`, `FiledSet`, and `FieldSkip` methods. 
+# WayMore
+`WayMore` is the prefered way of getting `Wayless` instances.  It uses Lazy<T> and stores instances in a 
+ConcurrentDictionary; Wayless, however, is not thread-safe.  
 
-`FieldMap`: create an explicit mapping relationship between properties in your destination
-and source type.
+It's best to use the overloaded `Get` method to get instances of Wayless. `Get` checks if 
+an instance of the mapper has been requested, if it has it's reused. If an instance doesn't exist it's created
+and cached for reuse.
 
-`FieldSet`: set a value explicitly. 
+You can use the overloaded `GetNew` method to get a clean, new instance, without caching, of `Wayless`. 
 
-`FieldSkip`: removes property in destination type from mapping rules. Calling this method will override 
-any rules you created using `FieldMap` and `FieldSet`.
+# Usage
 
-    var TestSource = new SourceObject()
-    {
-        Id = 1,
-        InstanceName = "Source",
-        TimeStamp = DateTime.Now.AddDays(-1)
-    };
+By default `Wayless` will attempt the most basic property name matching by ignoring the casing of each property.
+There are plans to make this configurable in future relases. 
 
-    var mapperInstance = new WaylessMap<DestinationObject, SourceObject>()
-            .FieldMap(dest => dest.AssignmentDate, src => src.TimeStamp)
-            .FieldMap(dest => d.Name, src => src.InstanceName)
-            .FieldSet(dest => dest.CorrelationId, Guid.NewGuid())
-            .FieldSkip(dest => dest.ClosingDate);
-                        
-    var mappedObject = mapperInstance                        
-            .Map(SourceObject);
+To prevent automatic matching make a call to `DontAutoMatchMembers` before calling the `Map` method.
 
-A call to `Map` applies all the generated rules and generates an instance of the submitted type.
+Example:
+
+	// you can also call GetNew for an uncached instance
+	var mapper = WayMore.Get<PerstonDTO, Perston>(); 
+	mapper.DontAutoMatchMembers()
+		  .FieldMap(dest => dest.Phone, src => src.Phone);
+
+
+Values can be mapped or set using the overloaded `FieldMap` and `FieldSet` methods. If auto matching is enabled 
+you can use `FieldSkip` to ignore a field.  
+
+Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping. Meaning, a value will
+only  be mapped/set if the supplied condition is met.
+
+	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+	// set phone number to '8675309' if First
+	mapper.FieldMap(dest => dest.FirstName, src => src.Nickname, src => src.Phone == "8675309"); 
+
+	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+	// set phone number to '8675309' if First
+	mapper.FieldSet(dest => dest.Phone, "8675309", src => src.FirstName == "Jenny"); 
+
+A call to `Map` applies all the generated rules
+
+# Complex Map
+`Wayless` does not currently support complex mappings. To perform a nested complex map you can use `FieldMap`
+with a call to `WayMore`
+
+	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+	// For best performance use a cached version of a mapper
+	mapper.FieldMap(dest => dest.Sibling, src => WayMore.Get<PerstonDTO, Person>().Map(src.Nickname); 
+	
+
+
 
 `Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
 type.
@@ -44,117 +69,117 @@ type.
 # Perfromance
 Some basic performance tests show that Wayless is nearly as fast as doing manual mappings
 
-Initial loop is always slowest due to expression compile
+A primer call was made for .NET to spin up all its caches. This was also done to let mapping 
+APIs build any caches they require
 
-	// Basic Object Map
-	// Person -> PersonDTO
-	
-	Test iteration: 0
-	Set size: 1000000
-	Manual: 20.1303ms
-	AutoMapper Init: 270.6555ms
-	AutoMapper: 262.1924ms
-	Wayless Init: 3.576ms
-	Wayless: 34.2216ms
-	Static Wayless: 32.439ms
-	Mapster: 198.0777ms
+    public sealed class Person
+    {
+        public bool Index { get { return true; } }
+        public string Address { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public Guid Id { get; set; }
+        public string LastName { get; set; }
+        public string Nickname { get; set; }
+        public string Phone { get; set; }
+        public static Person Create()
+        {
+            return new Person
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Jane",
+                LastName = "Doe",
+                Email = "tests@gitTest.com",
+                Address = "Test Street",
+                CreateTime = DateTime.Now,
+                Nickname = "Jenny",
+                Phone = "8675309 "
+            };
+        }
+    }
+
+    public sealed class PersonDTO
+    {
+        public int Index { get; set; }
+        public string Address { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public Guid Id { get; set; }
+        public string LastName { get; set; }
+        public string Nickname { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Phone { get; set; }
+    }
+
+
+Basic object map with no extra conditions; Person -> PersonDTO. 
+Set size increase per iteration by 10
+    
+	------------------------------------
+	Primer call
+
+	Manual: 0.3855ms
+	AutoMapper: 76.4885ms
+	Mapster: 80.5803ms
+	Wayless (new instance): 7.4149ms
+	Wayless (cached instance): 1.8157ms
+
 	------------------------------------
 
 	Test iteration: 1
-	Set size: 1000000
-	Manual: 20.685ms
-	AutoMapper Init: 1.8218ms
-	AutoMapper: 198.8914ms
-	Wayless Init: 0.0419ms
-	Wayless: 28.8407ms
-	Static Wayless: 28.8675ms
-	Mapster: 89.9299ms
+	Set size: 10000
+
+	Manual: 0.3828ms
+	AutoMapper: 15.0775ms
+	Mapster: 0.7932ms
+	Wayless (new instance): 0.8922ms
+	Wayless (cached instance): 0.3779ms
+
 	------------------------------------
 
 	Test iteration: 2
-	Set size: 1000000
-	Manual: 19.8883ms
-	AutoMapper Init: 3.0901ms
-	AutoMapper: 196.2041ms
-	Wayless Init: 0.0713ms
-	Wayless: 32.0796ms
-	Static Wayless: 31.2334ms
-	Mapster: 89.3797ms
+	Set size: 100000
+
+	Manual: 3.6753ms
+	AutoMapper: 22.4071ms
+	Mapster: 8.6711ms
+	Wayless (new instance): 4.0065ms
+	Wayless (cached instance): 3.4095ms
+
 	------------------------------------
 
 	Test iteration: 3
 	Set size: 1000000
-	Manual: 20.219ms
-	AutoMapper Init: 1.6156ms
-	AutoMapper: 202.6883ms
-	Wayless Init: 0.0811ms
-	Wayless: 32.6769ms
-	Static Wayless: 34.1317ms
-	Mapster: 88.2451ms
+
+	Manual: 21.7037ms
+	AutoMapper: 219.0175ms
+	Mapster: 121.2904ms
+	Wayless (new instance): 44.8543ms
+	Wayless (cached instance): 38.5314ms
+
 	------------------------------------
 
 	Test iteration: 4
-	Set size: 1000000
-	Manual: 19.0561ms
-	AutoMapper Init: 1.8003ms
-	AutoMapper: 200.7649ms
-	Wayless Init: 0.0815ms
-	Wayless: 31.4343ms
-	Static Wayless: 31.2402ms
-	Mapster: 87.061ms
+	Set size: 10000000
+
+	Manual: 240.861ms
+	AutoMapper: 1931.9526ms
+	Mapster: 812.197ms
+	Wayless (new instance): 310.1196ms
+	Wayless (cached instance): 327.0016ms
+
 	------------------------------------
 
 	Test iteration: 5
-	Set size: 1000000
-	Manual: 20.5483ms
-	AutoMapper Init: 1.539ms
-	AutoMapper: 198.9182ms
-	Wayless Init: 0.0547ms
-	Wayless: 33.0609ms
-	Static Wayless: 32.3084ms
-	Mapster: 87.6965ms
+	Set size: 100000000
+
+	Manual: 1910.7348ms
+	AutoMapper: 18015.3245ms
+	Mapster: 8560.8589ms
+	Wayless (new instance): 3153.4913ms
+	Wayless (cached instance): 3105.1496ms
+
 	------------------------------------
 
-	Test iteration: 6
-	Set size: 1000000
-	Manual: 20.8043ms
-	AutoMapper Init: 1.5907ms
-	AutoMapper: 200.7853ms
-	Wayless Init: 0.0407ms
-	Wayless: 35.7531ms
-	Static Wayless: 29.5094ms
-	Mapster: 92.2999ms
-	------------------------------------
 
-	Test iteration: 7
-	Set size: 1000000
-	Manual: 20.5921ms
-	AutoMapper Init: 1.6549ms
-	AutoMapper: 208.605ms
-	Wayless Init: 0.0849ms
-	Wayless: 29.708ms
-	Static Wayless: 29.5766ms
-	Mapster: 87.9861ms
-	------------------------------------
-
-	Test iteration: 8
-	Set size: 1000000
-	Manual: 47.7605ms
-	AutoMapper Init: 1.8992ms
-	AutoMapper: 200.4353ms
-	Wayless Init: 0.057ms
-	Wayless: 29.1348ms
-	Static Wayless: 29.3652ms
-	Mapster: 88.6835ms
-	------------------------------------
-
-	Test iteration: 9
-	Set size: 1000000
-	Manual: 22.9569ms
-	AutoMapper Init: 2.219ms
-	AutoMapper: 200.8589ms
-	Wayless Init: 0.0566ms
-	Wayless: 29.759ms
-	Static Wayless: 30.0565ms
-	Mapster: 87.5926ms
-	------------------------------------
