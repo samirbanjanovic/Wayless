@@ -14,12 +14,7 @@ namespace Wayless
         where TSource : class
     {
         /// Type activator. Using static compiled expression for improved performance
-        private static readonly Func<TDestination> _instanceCreate = Extensions.CreateInstanceLambda<TDestination>();
-
-        /// <summary>
-        /// Generates mapping expressions that will be eventually compiled into map
-        /// </summary>
-        private readonly AggregateExpressionBuilder _expressionBuilder = new AggregateExpressionBuilder(typeof(TDestination), typeof(TSource));
+        private static readonly Func<TDestination> _createDestinationInstance = Helpers.LambdaCreateInstance<TDestination>();
 
         private readonly IDictionary<string, MemberInfo> _destinationFields;
         private readonly IDictionary<string, MemberInfo> _sourceFields;
@@ -36,29 +31,41 @@ namespace Wayless
 
         private Action<TDestination, TSource> _map;
 
-        public Wayless()
+        /// <summary>
+        /// Generates mapping expressions that will be eventually compiled into map
+        /// </summary>
+        private IExpressionBuilder _expressionBuilder;
+
+        public Wayless(IExpressionBuilder expressionBuilder)
         {
-            DestinationType = typeof(TDestination);
-            SourceType = typeof(TSource);
+            _expressionBuilder = expressionBuilder;
 
             _isMapUpToDate = false;
             _attemptAutoMatchMembers = true;
 
+
             _fieldExpressions = new Dictionary<string, Expression>();
             _fieldSkips = new List<string>();
+
             _destinationFields = DestinationType.ToMemberInfoDictionary();
             _sourceFields = SourceType.ToMemberInfoDictionary();
         }
 
+        public Wayless()
+            : this(new ExpressionBuilder(typeof(TDestination), typeof(TSource)))
+        { }
+
+        public Type ExpressionBuilderType => _expressionBuilder.GetType();
+
         /// <summary>
         /// Type to map from
         /// </summary>
-        public Type SourceType { get; }
+        public Type SourceType => typeof(TSource);
 
         /// <summary>
         /// Type to map to
         /// </summary>
-        public Type DestinationType { get; }
+        public Type DestinationType => typeof(TDestination);
 
         /// <summary>
         /// Apply mapping rules to  existing instance of object
@@ -94,7 +101,7 @@ namespace Wayless
         /// <returns>Mapped object</returns>
         public TDestination Map(TSource sourceObject)
         {
-            TDestination destinationObject = _instanceCreate();
+            TDestination destinationObject = _createDestinationInstance();
 
             InternalMap(destinationObject, sourceObject);
 
@@ -120,17 +127,17 @@ namespace Wayless
         /// </summary>
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
-        /// <param name="mapCondition">Conditition to be evaluated for determening if values should be mapped</param>
+        /// <param name="condition">Conditition to be evaluated for determening if values should be mapped</param>
         /// <returns>Current instance of WaylessMap</returns>
         public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
                                                       , Expression<Func<TSource, object>> sourceExpression
-                                                      , Expression<Func<TSource, bool>> mapCondition)
+                                                      , Expression<Func<TSource, bool>> condition)
         {
             var destination = GetInvariantName(destinationExpression);
 
             if (!_fieldSkips.Contains(destination))
             {
-                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, mapCondition);
+                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -148,18 +155,17 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
         {
-            var destination = GetInvariantName(destinationExpression);
-            if (!_fieldSkips.Contains(destination))
-            {
-                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value);
-
-                RegisterFieldExpression(destination, expression);
-
-                _isMapUpToDate = false;
-            }
+            FieldSet(destinationExpression, value, null);
             return this;
         }
 
+        /// <summary>
+        /// Create mapping rule to explicitly assign value to destination property
+        /// </summary>
+        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
+        /// <param name="value">Value to assign</param>
+        /// <param name="condition">Conditition to be evaluated for determening if values should be set</param>
+        /// <returns>Current instance of WaylessMap</returns>
         public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
                                                       , object value
                                                       , Expression<Func<TSource, bool>> setCondition)
@@ -208,6 +214,7 @@ namespace Wayless
         }
 
         #endregion basic mapper configuration
+
         #region helpers
         private void RegisterFieldExpression(string destination, Expression expression)
         {
@@ -238,7 +245,7 @@ namespace Wayless
                     AutomatchMembers();
                 }
 
-                _map = _expressionBuilder.BuildActionMap<TDestination, TSource>(_fieldExpressions.Values);
+                _map = _expressionBuilder.CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
                 _isMapUpToDate = true;
             }
         }

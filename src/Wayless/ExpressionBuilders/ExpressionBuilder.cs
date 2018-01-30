@@ -3,21 +3,45 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using Wayless;
 
 namespace Wayless.ExpressionBuilders
 {
-    internal class ExpressionMapBuilder
+    internal sealed class ExpressionBuilder 
+        : IExpressionBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
 
-        public ExpressionMapBuilder(ParameterExpression destination, ParameterExpression source)
+        
+        public ExpressionBuilder(Type destinationType, Type sourceType)
         {
-            _destination = destination;
-            _source = source;
+             _destination = Expression.Parameter(destinationType, "destination");
+            _source = Expression.Parameter(sourceType, "source");
         }
 
+        /// <summary>
+        /// Build a unified mapping function
+        /// </summary>
+        /// <param name="mappingExpressions">Expressions containting member mappings</param>
+        /// <returns>mapping action</returns>
+        public Action<TDestination, TSource> CompileExpressionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
+            where TDestination : class
+            where TSource : class
+        {
+            var expressionMap = Expression.Lambda<Action<TDestination, TSource>>(
+                                   Expression.Block(mappingExpressions)
+                                   , new ParameterExpression[]
+                                    {
+                                        _destination
+                                        , _source
+                                    });
+
+
+            return expressionMap.Compile();
+        }
+
+
+        #region create assignment map
         // get expression for mapping property to property or property to function output
         public Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                                 , Expression<Func<TSource, object>> sourceExpression
@@ -78,5 +102,36 @@ namespace Wayless.ExpressionBuilders
         }
 
         #endregion helpers
+        #endregion create assignment map
+
+        #region create set map
+        public Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
+            where TDestination : class
+        {
+            return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
+        }
+
+        public Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
+            where TDestination : class
+        {
+            var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
+
+            return expression;
+        }
+
+        public Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
+        {
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
+                                              , ExpressionBuilderHelpers.BuildCastExpression(Expression.Constant(value), destinationProperty));
+
+
+            if (condition != null)
+            {
+                return expression.AsIfThenExpression(condition, _source);
+            }
+
+            return expression;
+        }
+        #endregion create set map
     }
 }

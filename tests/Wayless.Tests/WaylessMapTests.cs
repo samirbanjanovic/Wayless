@@ -63,7 +63,7 @@ namespace Wayless.Tests
             Assert.AreEqual(person.LastName, personDto.LastName);
             Assert.AreEqual(person.Nickname, personDto.Nickname);
             Assert.AreEqual(person.CreateTime, personDto.CreateTime);
-            Assert.AreEqual(person.Phone, personDto.Phone);            
+            Assert.AreEqual(person.Phone, personDto.Phone);
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@ namespace Wayless.Tests
             var person = Person.Create();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
             mapper.FieldMap(x => x.Nickname, s => s.FirstName)
-                  .FieldMap(x => x.FirstName, s => s.Nickname);                  
+                  .FieldMap(x => x.FirstName, s => s.Nickname);
 
             var personDto = mapper.Map(person);
 
@@ -83,7 +83,7 @@ namespace Wayless.Tests
         [TestMethod]
         public void TestFieldMapWithCondition()
         {
-            var person = Person.Create();            
+            var person = Person.Create();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
             mapper.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
 
@@ -97,10 +97,10 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.DontAutoMatchMembers() 
+            mapper.DontAutoMatchMembers()
                   .FieldMap(x => x.Nickname, s => s.FirstName)
                   .FieldMap(x => x.FirstName, s => s.Nickname)
-                  .FieldMap(x => x.Phone, s => s.Nickname == "Jenny");
+                  .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -109,10 +109,10 @@ namespace Wayless.Tests
             Assert.AreEqual(person.Phone, personDto.Phone);
 
             Assert.AreNotEqual(person.Address, personDto.Address);
-            Assert.AreNotEqual(person.Email, personDto.Email);            
+            Assert.AreNotEqual(person.Email, personDto.Email);
             Assert.AreNotEqual(person.Id, personDto.Id);
-            Assert.AreNotEqual(person.LastName, personDto.LastName);            
-            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);            
+            Assert.AreNotEqual(person.LastName, personDto.LastName);
+            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);
         }
         #endregion FieldMap Tests
 
@@ -155,7 +155,7 @@ namespace Wayless.Tests
             Assert.AreEqual("8675309", personDto.Phone);
 
             Assert.AreNotEqual(person.FirstName, personDto.Nickname);
-            Assert.AreNotEqual(person.Nickname, personDto.FirstName);            
+            Assert.AreNotEqual(person.Nickname, personDto.FirstName);
             Assert.AreNotEqual(person.Address, personDto.Address);
             Assert.AreNotEqual(person.Email, personDto.Email);
             Assert.AreNotEqual(person.Id, personDto.Id);

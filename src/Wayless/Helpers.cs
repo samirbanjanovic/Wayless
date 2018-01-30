@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Wayless
 {
-    internal static class Extensions
+    internal static class Helpers
     {
         public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type, bool readOnly = false)
         {
@@ -44,7 +44,7 @@ namespace Wayless
             return instanceExpression.Compile();
         }
 
-        public static Func<T> CreateInstanceLambda<T>()
+        public static Func<T> LambdaCreateInstance<T>()
         {
             var instanceCreator = Expression.Lambda<Func<T>>(Expression.New(typeof(T)
                                                                .GetConstructor(Type.EmptyTypes)))
@@ -57,12 +57,12 @@ namespace Wayless
         {
             switch (member.MemberType)
             {
-                //case MemberTypes.Event:
-                //    return ((EventInfo)member).EventHandlerType;
+                case MemberTypes.Event:
+                    return ((EventInfo)member).EventHandlerType;
                 case MemberTypes.Field:
                     return ((FieldInfo)member).FieldType;
-                //case MemberTypes.Method:
-                //    return ((MethodInfo)member).ReturnType;
+                case MemberTypes.Method:
+                    return ((MethodInfo)member).ReturnType;
                 case MemberTypes.Property:
                     return ((PropertyInfo)member).PropertyType;
                 default:
