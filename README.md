@@ -1,30 +1,30 @@
 Wayless is a basic, lightweight object-to-object mapper.
 
-There are multiple ways to get or reuse an instance of mapper. The most basic 
+There are multiple ways to get an instance of a Wayless mapper. The most basic 
 way is to use the `WayMore` singleton.  It keeps track of all requested mappers
 based on destinatoin type, source type, and expression builder.  
 
-`Wayless` has an overloaded constructor. Using the empty constructor tells Wayless
-to use the default ExpressionBuilder. You can also pass your own implementation of 
+`Wayless` has an overloaded constructor; the default constructor initializes with all default
+settings, such as the built in ExpressionBuilder. You can also pass your own implementation of 
 `IExpressionBuilder` for Wayless to use.  If you need to only change a few thigns you 
 can inherit from `ExpressionBuilder` and override its implementations.
 
 # WayMore
 `WayMore` is the prefered way of getting `Wayless` instances.  It uses Lazy<T> and stores instances in a 
-ConcurrentDictionary; Wayless, however, is not thread-safe.  
+ConcurrentDictionary; Keep in mind that an instance of Wayless is not thread-safe.  
 
 It's best to use the overloaded `Get` method to get instances of Wayless. `Get` checks if 
-an instance of the mapper has been requested, if it has it's reused. If an instance doesn't exist it's created
-and cached for reuse.
+an instance of the mapper has been cached. If there is one it's re-used, if not, 
+a new instance is created and cached.
 
-You can use the overloaded `GetNew` method to get a clean, new instance, without caching, of `Wayless`. 
+You can use the overloaded `GetNew` method to get new instance, without caching it, of `Wayless`. 
 
 # Usage
 
 By default `Wayless` will attempt the most basic property name matching by ignoring the casing of each property.
-There are plans to make this configurable in future relases. 
+Future releases will allow you to inject your own matching algorithm.
 
-To prevent automatic matching make a call to `DontAutoMatchMembers` before calling the `Map` method.
+`DontAutoMatchMembers` disables automatic match making.
 
 Example:
 
