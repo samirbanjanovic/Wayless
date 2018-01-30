@@ -44,7 +44,7 @@ namespace Wayless.Performance.Tests
         public string LastName { get; set; }
         public string Nickname { get; set; }
         public DateTime CreateTime { get; set; }
-        public string Phone;
+        public string Phone { get; set; }
     }
 
     class Program
@@ -56,15 +56,15 @@ namespace Wayless.Performance.Tests
             // primer call to cache and compile expressions
             Console.WriteLine("Basic mapping\r\n");
             Console.WriteLine("------------------------------------");
-            Console.WriteLine("Primer call");
+            Console.WriteLine("Primer call\r\n");
             RunMappers();
 
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= 5; i++)
             {
-                //Iterations = Iterations * 10;
+                Iterations = Iterations * 10;
 
                 Console.WriteLine($"Test iteration: {i}");
-                Console.WriteLine($"Set size: {Iterations}");
+                Console.WriteLine($"Set size: {Iterations}\r\n");
                 RunMappers();
             }
 
@@ -74,12 +74,12 @@ namespace Wayless.Performance.Tests
         private static void RunMappers()
         {
             MeasureManualMap();
-            MeasureAutoMapper();
-            MeasureWayless();
-            MeasureWaylessWithWayMore();
+            MeasureAutoMapper();            
             MesaureMapster();
+            MeasureNewWaylessInstance();
+            MeasureCachedWaylessInstance();
 
-            Console.WriteLine("------------------------------------");
+            Console.WriteLine("\r\n------------------------------------\r\n");
         }
 
         private static void MeasureManualMap()
@@ -102,8 +102,6 @@ namespace Wayless.Performance.Tests
             Stopwatch stopwatch = Stopwatch.StartNew();
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Person, PersonDTO>());
             var mapper = config.CreateMapper();
-            stopwatch.Stop();
-            Console.WriteLine("AutoMapper Init: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
 
             stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
@@ -114,16 +112,13 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("AutoMapper: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        private static void MeasureWayless()
+        private static void MeasureNewWaylessInstance()
         {
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = new Wayless<PersonDTO, Person>();
-
-            stopwatch.Stop();
-            Console.WriteLine("Wayless Init: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
-
+            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            
             stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
             {
@@ -131,10 +126,10 @@ namespace Wayless.Performance.Tests
             }
 
             stopwatch.Stop();
-            Console.WriteLine("Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Wayless (new instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        private static void MeasureWaylessWithWayMore()
+        private static void MeasureCachedWaylessInstance()
         {
             Person person = Person.Create();            
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -147,7 +142,7 @@ namespace Wayless.Performance.Tests
             }
 
             stopwatch.Stop();
-            Console.WriteLine("Static Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Wayless (cached instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private static void MesaureMapster()
