@@ -1,5 +1,3 @@
-# Wayless
-
 Wayless is a basic, lightweight object-to-object mapper.
 
 There are multiple ways to get or reuse an instance of mapper. The most basic 
