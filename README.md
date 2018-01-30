@@ -66,7 +66,7 @@ with a call to `WayMore`
 `Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
 type.
                         
-# Perfromance
+# Performance
 Some basic performance tests show that Wayless is nearly as fast as doing manual mappings
 
 A primer call was made for .NET to spin up all its caches. This was also done to let mapping 
