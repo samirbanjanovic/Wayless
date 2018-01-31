@@ -134,7 +134,11 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();            
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            var config = WaylessConfigurationBuilder.GetDefaultConfiguration<PersonDTO, Person>();
+            var config = WaylessConfigurationBuilder.GetEmptyConfiguration()
+                                                    .UseDefaultExpressionBuilder(typeof(PersonDTO), typeof(Person))
+                                                    .UseDefaultMatchMaker();
+                                                    //.OmitAutoMatch();
+
             var mapper = WayMore.Mappers.Get<PersonDTO, Person>(config);
 
             for (int i = 0; i < Iterations; i++)

@@ -26,9 +26,9 @@ namespace Wayless
             return GetDefaultConfiguration(typeof(TDestination), typeof(TSource));
         }
 
-        public static IWaylessConfiguration DontAutoMatchMembers(this IWaylessConfiguration waylessConfiguration)
+        public static IWaylessConfiguration OmitAutoMatch(this IWaylessConfiguration waylessConfiguration)
         {
-            waylessConfiguration.DontAutoMatchMembers = true;
+            waylessConfiguration.AutoMatchMembers = false;
 
             return waylessConfiguration;
         }
