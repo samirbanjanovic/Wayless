@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
-using Wayless.ExpressionBuilders;
+using Wayless.Core;
 
 namespace Wayless
 {
@@ -21,71 +21,21 @@ namespace Wayless
             }
         }
 
-        
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>()
-            where TDestination : class
-            where TSource : class
+        public IWaylessConfiguration WithEmptyConfiguration()
         {
-            var key = (typeof((TDestination, TSource)), typeof(ExpressionBuilder));
-
-            if (!_mappers.TryGetValue(key, out object mapper))
-            {
-                mapper = GetNew<TDestination, TSource>();
-                _mappers.TryAdd((typeof((TDestination, TSource)), typeof(ExpressionBuilder)), mapper);
-            }
-
-            return (IWayless<TDestination, TSource>)mapper;
-        }
-
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(IExpressionBuilder expressionBuilder)
-            where TDestination : class
-            where TSource : class
-        {
-            var key = (typeof((TDestination, TSource)), expressionBuilder.GetType());
-
-            if (!_mappers.TryGetValue(key, out object mapper))
-            {
-                mapper = GetNew<TDestination, TSource>(expressionBuilder);
-                _mappers.TryAdd((typeof((TDestination, TSource)), expressionBuilder.GetType()), mapper);
-            }
-
-            return (IWayless<TDestination, TSource>)mapper;
+            return WaylessConfigurationBuilder.EmptyConfiguration();
         }
         
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destination, TSource source)
-            where TDestination : class
-            where TSource : class
+        public IWaylessConfiguration WithDefaultConfiguration<TDestination, TSource>()
         {
-            return Get<TDestination, TSource>();
+            return WaylessConfigurationBuilder.DefaultConfiguration<TDestination, TSource>();
         }
 
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destination, TSource source, IExpressionBuilder expressionBuilder)
-            where TDestination : class
-            where TSource : class
+        public IWaylessConfiguration WithDefaultConfiguration(Type destinationType, Type sourceType)
         {
-            return Get<TDestination, TSource>(expressionBuilder);
+            return WaylessConfigurationBuilder.DefaultConfiguration(destinationType, sourceType);
         }
 
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
-            where TDestination : class
-            where TSource : class
-        {
-            return new Wayless<TDestination, TSource>();
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(IExpressionBuilder expressionBuilder)
-           where TDestination : class
-           where TSource : class
-        {
-            return new Wayless<TDestination, TSource>(expressionBuilder);
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destination, TSource source)
-            where TDestination : class
-            where TSource : class
-        {
-            return GetNew<TDestination, TSource>();
-        }             
+        public 
     }
 }
