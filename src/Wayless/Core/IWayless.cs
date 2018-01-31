@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace Wayless
+namespace Wayless.Core
 {
     public interface IWayless<TDestination, TSource>
         where TDestination : class
         where TSource : class
-    {
-        Type ExpressionBuilderType { get; }
+    {        
         Type DestinationType { get; }
         Type SourceType { get; }
-        IWayless<TDestination, TSource> DontAutoMatchMembers();
         IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression);
         IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression, Expression<Func<TSource, bool>> mapOnCondition);
         IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object fieldValue);

@@ -16,7 +16,7 @@ namespace Wayless
 
             members.AddRange(type.GetProperties().Cast<MemberInfo>());
 
-            return members.ToDictionary(p => p.Name.ToLowerInvariant());
+            return members.ToDictionary(p => p.Name);
         }
 
         public static MemberInfo GetMemberInfo<T>(this Expression<Func<T, object>> expression)

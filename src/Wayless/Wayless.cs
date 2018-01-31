@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Wayless.ExpressionBuilders;
+using Wayless.Core;
 
 namespace Wayless
 {
@@ -27,22 +27,19 @@ namespace Wayless
         // to false, letting Wayless know to compile a new 
         // mapping function from it's collected expressions
         private bool _isMapUpToDate;
-        private bool _attemptAutoMatchMembers;
 
         private Action<TDestination, TSource> _map;
 
         /// <summary>
         /// Generates mapping expressions that will be eventually compiled into map
         /// </summary>
-        private IExpressionBuilder _expressionBuilder;
-
-        public Wayless(IExpressionBuilder expressionBuilder)
+        private IWaylessConfiguration _waylessConfiguration;
+        
+        public Wayless(IWaylessConfiguration waylessConfiguration)
         {
-            _expressionBuilder = expressionBuilder;
+            _waylessConfiguration = waylessConfiguration;
 
             _isMapUpToDate = false;
-            _attemptAutoMatchMembers = true;
-
 
             _fieldExpressions = new Dictionary<string, Expression>();
             _fieldSkips = new List<string>();
@@ -52,10 +49,8 @@ namespace Wayless
         }
 
         public Wayless()
-            : this(new ExpressionBuilder(typeof(TDestination), typeof(TSource)))
+            : this(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>())
         { }
-
-        public Type ExpressionBuilderType => _expressionBuilder.GetType();
 
         /// <summary>
         /// Type to map from
@@ -133,11 +128,11 @@ namespace Wayless
                                                       , Expression<Func<TSource, object>> sourceExpression
                                                       , Expression<Func<TSource, bool>> condition)
         {
-            var destination = GetInvariantName(destinationExpression);
+            var destination = GetMemberName(destinationExpression);
 
             if (!_fieldSkips.Contains(destination))
             {
-                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
+                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -170,10 +165,10 @@ namespace Wayless
                                                       , object value
                                                       , Expression<Func<TSource, bool>> setCondition)
         {
-            var destination = GetInvariantName(destinationExpression);
+            var destination = GetMemberName(destinationExpression);
             if (!_fieldSkips.Contains(destination))
             {
-                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
+                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -188,7 +183,7 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
         {
-            var ignore = GetInvariantName(skipperName);
+            var ignore = GetMemberName(skipperName);
 
             if (!_fieldSkips.Contains(ignore))
             {
@@ -203,17 +198,6 @@ namespace Wayless
             _isMapUpToDate = false;
             return this;
         }
-
-        #region basic mapper configuration
-
-        public IWayless<TDestination, TSource> DontAutoMatchMembers()
-        {
-            _attemptAutoMatchMembers = false;
-
-            return this;
-        }
-
-        #endregion basic mapper configuration
 
         #region helpers
         private void RegisterFieldExpression(string destination, Expression expression)
@@ -240,12 +224,13 @@ namespace Wayless
         {
             if (!_isMapUpToDate)
             {
-                if (_attemptAutoMatchMembers)
+                if (!_waylessConfiguration.DontAutoMatchMembers)
                 {
                     AutomatchMembers();
                 }
 
-                _map = _expressionBuilder.CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
+                _map = _waylessConfiguration.ExpressionBuilder
+                                            .CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
                 _isMapUpToDate = true;
             }
         }
@@ -254,30 +239,25 @@ namespace Wayless
         private void AutomatchMembers()
         {
             var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)
-                                                                  && !_fieldSkips.Contains(x.Key)).ToList();
+                                                                  && !_fieldSkips.Contains(x.Key))
+                                                         .Select(x => x.Value)
+                                                         .ToList();
 
-            foreach (var destination in unmappedDestinations)
+            var matchedPairs = _waylessConfiguration.MatchMaker.FindMemberPairs(unmappedDestinations, _sourceFields.Values);
+            foreach (var pair in matchedPairs)
             {
-                FindAndSetDestinationToSource(destination);
-            }
-        }
-
-        private void FindAndSetDestinationToSource(KeyValuePair<string, MemberInfo> destination)
-        {
-            if (_sourceFields.TryGetValue(destination.Key, out MemberInfo source))
-            {
-                var expression = _expressionBuilder.GetMapExpression<TSource>(destination.Value, source);
-                _fieldExpressions.Add(destination.Key, expression);
+                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
+                _fieldExpressions.Add(pair.DestinationMember.Name, expression);
             }
         }
 
         // get property name
-        private static string GetInvariantName<T>(Expression<Func<T, object>> expression)
+        private static string GetMemberName<T>(Expression<Func<T, object>> expression)
             where T : class
         {
             var propertyInfo = expression.GetMemberInfo();
 
-            return propertyInfo.Name.ToLowerInvariant();
+            return propertyInfo.Name;
         }
 
         #endregion helpers

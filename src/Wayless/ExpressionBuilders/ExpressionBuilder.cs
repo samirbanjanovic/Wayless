@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Wayless.Core;
 
-namespace Wayless.ExpressionBuilders
+namespace Wayless
 {
     public class ExpressionBuilder 
         : IExpressionBuilder

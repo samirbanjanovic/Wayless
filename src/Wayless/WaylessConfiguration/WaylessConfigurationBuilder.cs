@@ -7,29 +7,28 @@ namespace Wayless
 {
     public static class WaylessConfigurationBuilder
     {
-        public static IWaylessConfiguration EmptyConfiguration()
+        public static IWaylessConfiguration GetEmptyConfiguration()
         {
             return new WaylessConfiguration();
         }
 
-        public static IWaylessConfiguration DefaultConfiguration(Type destinationType, Type sourcetype)
+        public static IWaylessConfiguration GetDefaultConfiguration(Type destinationType, Type sourcetype)
         {
-            var configuration = EmptyConfiguration()
+            var configuration = GetEmptyConfiguration()
                                     .UseDefaultExpressionBuilder(destinationType, sourcetype)
-                                    .UseDefaultMatchMaker()
-                                    .AutoMatchMembers();
+                                    .UseDefaultMatchMaker();
 
             return configuration;
         }
 
-        public static IWaylessConfiguration DefaultConfiguration<TDestination, TSource>()
+        public static IWaylessConfiguration GetDefaultConfiguration<TDestination, TSource>()
         {
-            return DefaultConfiguration(typeof(TDestination), typeof(TSource));
+            return GetDefaultConfiguration(typeof(TDestination), typeof(TSource));
         }
 
-        public static IWaylessConfiguration AutoMatchMembers(this IWaylessConfiguration waylessConfiguration)
+        public static IWaylessConfiguration DontAutoMatchMembers(this IWaylessConfiguration waylessConfiguration)
         {
-            waylessConfiguration.AutoMatchMembers = true;
+            waylessConfiguration.DontAutoMatchMembers = true;
 
             return waylessConfiguration;
         }

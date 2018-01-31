@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Wayless.ExpressionBuilders
+namespace Wayless.Core
 {
     public interface IExpressionBuilder
     {

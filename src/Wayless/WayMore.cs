@@ -21,21 +21,41 @@ namespace Wayless
             }
         }
 
-        public IWaylessConfiguration WithEmptyConfiguration()
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>()
+            where TDestination : class
+            where TSource : class
         {
-            return WaylessConfigurationBuilder.EmptyConfiguration();
-        }
-        
-        public IWaylessConfiguration WithDefaultConfiguration<TDestination, TSource>()
-        {
-            return WaylessConfigurationBuilder.DefaultConfiguration<TDestination, TSource>();
+            return Get<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
         }
 
-        public IWaylessConfiguration WithDefaultConfiguration(Type destinationType, Type sourceType)
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(IWaylessConfiguration configuration)
+            where TDestination : class
+            where TSource : class
         {
-            return WaylessConfigurationBuilder.DefaultConfiguration(destinationType, sourceType);
+            var key = (typeof(TDestination), typeof(TSource), configuration.ExpressionBuilder.GetType(), configuration.MatchMaker.GetType()).GetHashCode();
+            if (!_mappers.TryGetValue(key, out object mapper))
+            {
+                mapper = GetNew<TDestination, TSource>();
+                _mappers.TryAdd(key, mapper);
+            }
+
+            return (IWayless<TDestination, TSource>)mapper;
         }
 
-        public 
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
+            where TDestination : class
+            where TSource : class
+        {
+            return GetNew<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
+        }
+
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(IWaylessConfiguration configuration)
+           where TDestination : class
+           where TSource : class
+        {
+            var mapper = new Wayless<TDestination, TSource>(configuration);
+            return mapper;
+        }
+
     }
 }
