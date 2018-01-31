@@ -19,8 +19,7 @@ namespace Wayless
             return members.ToDictionary(p => p.Name);
         }
 
-        public static MemberInfo GetMemberInfo<T>(this Expression<Func<T, object>> expression)
-           where T : class           
+        public static MemberInfo GetMemberInfo<T>(this Expression<Func<T, object>> expression)           
         {
             var lambda = expression as LambdaExpression;
             MemberExpression memberExpression = null;

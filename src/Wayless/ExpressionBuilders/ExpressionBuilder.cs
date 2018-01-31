@@ -26,8 +26,6 @@ namespace Wayless
         /// <param name="mappingExpressions">Expressions containting member mappings</param>
         /// <returns>mapping action</returns>
         public virtual Action<TDestination, TSource> CompileExpressionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
-            where TDestination : class
-            where TSource : class
         {
             var expressionMap = Expression.Lambda<Action<TDestination, TSource>>(
                                    Expression.Block(mappingExpressions)
@@ -47,8 +45,6 @@ namespace Wayless
         public virtual Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                                 , Expression<Func<TSource, object>> sourceExpression
                                                                 , Expression<Func<TSource, bool>> mapOnCondition = null)
-            where TDestination : class
-            where TSource : class
         {
             return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);
         }
@@ -56,7 +52,6 @@ namespace Wayless
         public virtual Expression GetMapExpression<TSource>(MemberInfo destinationMember
                                                   , Expression<Func<TSource, object>> sourceExpression
                                                   , Expression<Func<TSource, bool>> condition = null)
-            where TSource : class
         {
             MemberInfo sourceProperty = sourceExpression.GetMemberInfo();
 
@@ -107,13 +102,11 @@ namespace Wayless
 
         #region create set map
         public virtual Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
-            where TDestination : class
         {
             return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
         }
 
         public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
-            where TDestination : class
         {
             var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
 
