@@ -97,8 +97,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.DontAutoMatchMembers()
-                  .FieldMap(x => x.Nickname, s => s.FirstName)
+            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
                   .FieldMap(x => x.FirstName, s => s.Nickname)
                   .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
 
@@ -147,8 +146,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.DontAutoMatchMembers()
-                  .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 

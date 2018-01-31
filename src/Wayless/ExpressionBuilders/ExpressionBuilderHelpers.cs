@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Wayless.ExpressionBuilders
+namespace Wayless
 {
     internal static class ExpressionBuilderHelpers
     {
