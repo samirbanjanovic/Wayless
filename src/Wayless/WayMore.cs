@@ -22,15 +22,11 @@ namespace Wayless
         }
 
         public IWayless<TDestination, TSource> Get<TDestination, TSource>()
-            where TDestination : class
-            where TSource : class
         {
             return Get<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
         }
 
         public IWayless<TDestination, TSource> Get<TDestination, TSource>(IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
         {
             var key = (typeof(TDestination), typeof(TSource), configuration.ExpressionBuilder?.GetType(), configuration.MatchMaker?.GetType()).GetHashCode();
             if (!_mappers.TryGetValue(key, out object mapper))
@@ -42,20 +38,36 @@ namespace Wayless
             return (IWayless<TDestination, TSource>)mapper;
         }
 
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
+        {
+            return Get<TDestination, TSource>();
+        }
+
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destinationObject, TSource sourceObject, IWaylessConfiguration configuration)
+        {
+            return Get<TDestination, TSource>(configuration);
+        }
+
         public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
-            where TDestination : class
-            where TSource : class
         {
             return GetNew<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
         }
 
         public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(IWaylessConfiguration configuration)
-           where TDestination : class
-           where TSource : class
         {
-            var mapper = new Wayless<TDestination, TSource>(configuration);
-            return mapper;
+            return new Wayless<TDestination, TSource>(configuration);            
         }
+
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
+        {
+            return GetNew<TDestination, TSource>();
+        }
+
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject, TSource sourceObject, IWaylessConfiguration configuration)
+        {
+            return GetNew<TDestination, TSource>(configuration);
+        }
+
 
     }
 }

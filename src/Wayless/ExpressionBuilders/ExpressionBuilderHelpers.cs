@@ -35,7 +35,6 @@ namespace Wayless
                                                                   , MemberInfo destinationMember
                                                                   , ParameterExpression destination
                                                                   , ParameterExpression source)
-            where TSource : class
         {
             var expression = Expression.Assign(Expression.PropertyOrField(destination, destinationMember.Name)
                                              , BuildCastExpression(Expression.Invoke(sourceExpression, source), destinationMember));

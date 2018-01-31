@@ -10,8 +10,6 @@ namespace Wayless
 {
     public sealed class Wayless<TDestination, TSource>
         : IWayless<TDestination, TSource>
-        where TDestination : class
-        where TSource : class
     {
         /// Type activator. Using static compiled expression for improved performance
         private static readonly Func<TDestination> _createDestinationInstance = Helpers.LambdaCreateInstance<TDestination>();
@@ -22,6 +20,11 @@ namespace Wayless
         private readonly IList<string> _fieldSkips;
         private readonly IDictionary<string, Expression> _fieldExpressions;
 
+        /// <summary>
+        /// object containing expression builder and field match maker
+        /// </summary>
+        private readonly IWaylessConfiguration _waylessConfiguration;
+
         // Indicates if the _compiledMap action has the latest rules
         // each time mapping is modified this flag will be switched
         // to false, letting Wayless know to compile a new 
@@ -29,8 +32,6 @@ namespace Wayless
         private bool _isMapUpToDate;
 
         private Action<TDestination, TSource> _map;
-            
-        private IWaylessConfiguration _waylessConfiguration;
         
         public Wayless(IWaylessConfiguration waylessConfiguration)
         {
@@ -249,8 +250,7 @@ namespace Wayless
         }
 
         // get property name
-        private static string GetMemberName<T>(Expression<Func<T, object>> expression)
-            where T : class
+        private static string GetMemberName<T>(Expression<Func<T, object>> expression)         
         {
             var propertyInfo = expression.GetMemberInfo();
 
