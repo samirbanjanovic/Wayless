@@ -32,7 +32,7 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var key = (typeof(TDestination), typeof(TSource), configuration.ExpressionBuilder.GetType(), configuration.MatchMaker.GetType()).GetHashCode();
+            var key = (typeof(TDestination), typeof(TSource), configuration.ExpressionBuilder?.GetType(), configuration.MatchMaker?.GetType()).GetHashCode();
             if (!_mappers.TryGetValue(key, out object mapper))
             {
                 mapper = GetNew<TDestination, TSource>();

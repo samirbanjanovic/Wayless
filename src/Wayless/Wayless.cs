@@ -224,7 +224,7 @@ namespace Wayless
         {
             if (!_isMapUpToDate)
             {
-                if (!_waylessConfiguration.DontAutoMatchMembers)
+                if (_waylessConfiguration.MatchMaker != null && _waylessConfiguration.AutoMatchMembers)
                 {
                     AutomatchMembers();
                 }

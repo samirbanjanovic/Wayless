@@ -6,7 +6,7 @@ namespace Wayless.Core
 {
     public interface IWaylessConfiguration
     {
-        bool DontAutoMatchMembers { get; set; }
+        bool AutoMatchMembers { get; set; }
 
         IExpressionBuilder ExpressionBuilder { get; set; }
 

@@ -8,7 +8,7 @@ namespace Wayless
     public class WaylessConfiguration
         : IWaylessConfiguration
     {
-        public bool DontAutoMatchMembers { get; set; }
+        public bool AutoMatchMembers { get; set; } = true;
         public IExpressionBuilder ExpressionBuilder { get; set; }
         public IMatchMaker MatchMaker { get; set; }
     }
