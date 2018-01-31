@@ -29,10 +29,7 @@ namespace Wayless
         private bool _isMapUpToDate;
 
         private Action<TDestination, TSource> _map;
-
-        /// <summary>
-        /// Generates mapping expressions that will be eventually compiled into map
-        /// </summary>
+            
         private IWaylessConfiguration _waylessConfiguration;
         
         public Wayless(IWaylessConfiguration waylessConfiguration)
