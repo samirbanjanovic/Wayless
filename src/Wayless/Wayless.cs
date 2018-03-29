@@ -80,10 +80,13 @@ namespace Wayless
         /// <returns>Collection of mapped objects</returns>
         public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList)
         {
+            IList<TDestination> mappedObjects = new List<TDestination>();
             foreach (var sourceObject in sourceList)
             {
-                yield return Map(sourceObject);
+                mappedObjects.Add(Map(sourceObject));
             }
+
+            return mappedObjects;
         }
 
         /// <summary>
