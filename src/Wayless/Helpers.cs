@@ -10,11 +10,21 @@ namespace Wayless
 {
     internal static class Helpers
     {
-        public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type, bool readOnly = false)
+        public static IDictionary<string, MemberInfo> ToMemberInfoDictionary(this Type type, bool forWrite = false)
         {
             var members = type.GetFields().Cast<MemberInfo>().ToList();
+            
+            members.AddRange(type.GetProperties()
+                                 .Where(x =>
+                                 {
+                                     if(forWrite)
+                                     {
+                                         return x.CanWrite;
+                                     }
 
-            members.AddRange(type.GetProperties().Cast<MemberInfo>());
+                                     return x.CanRead;
+                                 })
+                                 .Cast<MemberInfo>());
 
             return members.ToDictionary(p => p.Name);
         }
