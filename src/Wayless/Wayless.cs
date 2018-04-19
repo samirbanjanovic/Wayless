@@ -42,7 +42,7 @@ namespace Wayless
             _fieldExpressions = new Dictionary<string, Expression>();
             _fieldSkips = new List<string>();
 
-            _destinationFields = DestinationType.ToMemberInfoDictionary();
+            _destinationFields = DestinationType.ToMemberInfoDictionary(true);
             _sourceFields = SourceType.ToMemberInfoDictionary();
         }
 
@@ -243,7 +243,7 @@ namespace Wayless
                                                                   && !_fieldSkips.Contains(x.Key))
                                                          .Select(x => x.Value)
                                                          .ToList();
-
+            
             var matchedPairs = _waylessConfiguration.MatchMaker.FindMemberPairs(unmappedDestinations, _sourceFields.Values);
             foreach (var pair in matchedPairs)
             {
