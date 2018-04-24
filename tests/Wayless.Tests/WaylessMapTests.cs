@@ -70,9 +70,10 @@ namespace Wayless.Tests
         public void TestFieldMap()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
-                  .FieldMap(x => x.FirstName, s => s.Nickname);
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldMap(x => x.Nickname, s => s.FirstName)
+                                .FieldMap(x => x.FirstName, s => s.Nickname);
 
             var personDto = mapper.Map(person);
 
@@ -84,8 +85,9 @@ namespace Wayless.Tests
         public void TestFieldMapWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
 
             var personDto = mapper.Map(person);
 
@@ -96,10 +98,11 @@ namespace Wayless.Tests
         public void TestFieldMapWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
-                  .FieldMap(x => x.FirstName, s => s.Nickname)
-                  .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldMap(x => x.Nickname, s => s.FirstName)
+                                .FieldMap(x => x.FirstName, s => s.Nickname)
+                                .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -121,8 +124,9 @@ namespace Wayless.Tests
         public void TestFieldSet()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSet(x => x.Nickname, "Jacqueline");
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldSet(x => x.Nickname, "Jacqueline");
 
             var personDto = mapper.Map(person);
 
@@ -133,8 +137,9 @@ namespace Wayless.Tests
         public void TestFieldSetWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -145,8 +150,9 @@ namespace Wayless.Tests
         public void TestFieldSetWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -169,8 +175,9 @@ namespace Wayless.Tests
         public void TestFieldSkip()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSkip(d => d.Nickname);
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .FieldSkip(d => d.Nickname);
 
             var personDto = mapper.Map(person);
 

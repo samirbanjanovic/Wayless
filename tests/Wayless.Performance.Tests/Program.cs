@@ -47,6 +47,66 @@ namespace Wayless.Performance.Tests
         public string Phone { get; set; }
     }
 
+    public sealed class PersonDTONested
+    {
+        public int Index { get; set; }
+        public string Address { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public Guid Id { get; set; }
+        public string LastName { get; set; }
+        public string Nickname { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Phone { get; set; }
+
+        public PersonDTO NestedPersonDTO { get; set; }
+
+        public static PersonDTONested Create()
+        {
+            return new PersonDTONested
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Jane",
+                LastName = "Doe",
+                Email = "tests@gitTest.com",
+                Address = "Test Street",
+                CreateTime = DateTime.Now,
+                Nickname = "Jenny",
+                Phone = "8675309 "
+            };
+        }
+    }
+
+    public sealed class PersonNested
+    {
+        public int Index { get; set; }
+        public string Address { get; set; }
+        public string Email { get; set; }
+        public string FirstName { get; set; }
+        public Guid Id { get; set; }
+        public string LastName { get; set; }
+        public string Nickname { get; set; }
+        public DateTime CreateTime { get; set; }
+        public string Phone { get; set; }
+
+        public Person NestedPerson { get; set; }
+
+        public static PersonNested Create()
+        {
+            return new PersonNested
+            {
+                Id = Guid.NewGuid(),
+                FirstName = "Jane",
+                LastName = "Doe",
+                Email = "tests@gitTest.com",
+                Address = "Test Street",
+                CreateTime = DateTime.Now,
+                Nickname = "Jenny",
+                Phone = "8675309 "
+            };
+        }
+    }
+
     class Program
     {
         private static int Iterations = 1000;
@@ -74,10 +134,11 @@ namespace Wayless.Performance.Tests
         private static void RunMappers()
         {
             MeasureManualMap();
-            MeasureAutoMapper();            
+            MeasureAutoMapper();
             MesaureMapster();
             MeasureNewWaylessInstance();
             MeasureCachedWaylessInstance();
+            MeasureCachedWaylessInstanceNestedMap();
 
             Console.WriteLine("\r\n------------------------------------\r\n");
         }
@@ -117,8 +178,9 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>();
+
             stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
             {
@@ -131,13 +193,13 @@ namespace Wayless.Performance.Tests
 
         private static void MeasureCachedWaylessInstance()
         {
-            Person person = Person.Create();            
-            Stopwatch stopwatch = Stopwatch.StartNew();
 
+            Person person = Person.Create();
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
             var config = WaylessConfigurationBuilder.GetEmptyConfiguration()
                                                     .UseDefaultExpressionBuilder(typeof(PersonDTO), typeof(Person))
                                                     .UseDefaultMatchMaker();
-                                                    //.OmitAutoMatch();
 
             var mapper = WayMore.Mappers.Get<PersonDTO, Person>(config);
 
@@ -148,6 +210,39 @@ namespace Wayless.Performance.Tests
 
             stopwatch.Stop();
             Console.WriteLine("Wayless (cached instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private static void MeasureCachedWaylessInstanceNestedMap()
+        {
+            PersonNested person = PersonNested.Create();
+            person.NestedPerson = Person.Create();
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            var mapper = WayMore.Mappers
+                                .Get<PersonDTONested, PersonNested>()
+                                .FieldMap(x => x.NestedPersonDTO, x => WayMore.Mappers.Get<PersonDTO, Person>().Map(x.NestedPerson));
+
+            for (int i = 0; i < Iterations; i++)
+            {
+                var personDtoNested = mapper.Map(person);
+            }
+
+            stopwatch.Stop();
+            Console.WriteLine("Wayless (Nested): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+
+            Stopwatch stopwatch2 = Stopwatch.StartNew();
+            var nestedMapper = WayMore.Mappers.Get<PersonDTO, Person>();
+            var mapper2 = WayMore.Mappers
+                                .Get<PersonDTONested, PersonNested>()
+                                .FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+
+            for (int i = 0; i < Iterations; i++)
+            {
+                var personDtoNested = mapper2.Map(person);
+            }
+
+            stopwatch2.Stop();
+            Console.WriteLine("Wayless (Nested2): {0}ms", stopwatch2.Elapsed.TotalMilliseconds);
         }
 
         private static void MesaureMapster()
