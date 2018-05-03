@@ -102,7 +102,12 @@ namespace Wayless.Tests
                                 .GetNew<PersonDTO, Person>()
                                 .FieldMap(x => x.Nickname, s => s.FirstName)
                                 .FieldMap(x => x.FirstName, s => s.Nickname)
-                                .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
+                                .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny")
+                                .FieldSet(x => x.Address, "1234 ABC")
+                                .FieldSet(x => x.Id, Guid.NewGuid())
+                                .FieldMap(x => x.LastName, s => s.FirstName)
+                                .FieldSet(x => x.CreateTime, DateTime.Now)
+                                .FieldSkip(x => x.Email);
 
             var personDto = mapper.Map(person);
 
@@ -157,14 +162,6 @@ namespace Wayless.Tests
             var personDto = mapper.Map(person);
 
             Assert.AreEqual("8675309", personDto.Phone);
-
-            Assert.AreNotEqual(person.FirstName, personDto.Nickname);
-            Assert.AreNotEqual(person.Nickname, personDto.FirstName);
-            Assert.AreNotEqual(person.Address, personDto.Address);
-            Assert.AreNotEqual(person.Email, personDto.Email);
-            Assert.AreNotEqual(person.Id, personDto.Id);
-            Assert.AreNotEqual(person.LastName, personDto.LastName);
-            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);
         }
 
         #endregion FieldSet Tests
