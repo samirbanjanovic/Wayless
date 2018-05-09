@@ -113,6 +113,8 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
+            TypeApplyTest();
+
             // primer call to cache and compile expressions
             Console.WriteLine("Basic mapping\r\n");
             Console.WriteLine("------------------------------------");
@@ -129,6 +131,18 @@ namespace Wayless.Performance.Tests
             }
 
             Console.ReadLine();
+        }
+
+        private static void TypeApplyTest()
+        {
+            Person person = Person.Create();
+            var mapper = WayMore.Mappers
+                                .GetNew<PersonDTO, Person>()
+                                .TypeApply<string>(x => x.ToUpper())
+                                .FieldMap(x => x.Address, y => y.Address);
+
+            var result = mapper.Map(person);
+                                
         }
 
         private static void RunMappers()

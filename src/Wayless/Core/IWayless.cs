@@ -13,6 +13,7 @@ namespace Wayless.Core
         IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object fieldValue);
         IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> setCondition);
         IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression);
+        IWayless<TDestination, TSource> TypeApply<T>(Expression<Func<T, T>> typeApplyExpression);
         IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList);
         void Map(TDestination destinationObject, TSource sourceObject);
         TDestination Map(TSource sourceObject);        
