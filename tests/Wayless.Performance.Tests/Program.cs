@@ -149,9 +149,10 @@ namespace Wayless.Performance.Tests
         {
             Person person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .TypeApply<string>(x => x.ToUpper())
-                                .FieldMap(x => x.Address, y => y.Address);
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.TypeApply<string>(x => x.ToUpper())
+                  .FieldMap(x => x.Address, y => y.Address);
 
             var result = mapper.Map(person);
                                 
@@ -245,8 +246,9 @@ namespace Wayless.Performance.Tests
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Wayless
-                                .Get<PersonDTONested, PersonNested>()
-                                .FieldMap(x => x.NestedPersonDTO, x => WayMore.Wayless.Get<PersonDTO, Person>().Map(x.NestedPerson));
+                                .Get<PersonDTONested, PersonNested>();
+
+            mapper.FieldMap(x => x.NestedPersonDTO, x => WayMore.Wayless.Get<PersonDTO, Person>().Map(x.NestedPerson));
 
             for (int i = 0; i < Iterations; i++)
             {
@@ -259,8 +261,8 @@ namespace Wayless.Performance.Tests
             Stopwatch stopwatch2 = Stopwatch.StartNew();
             var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
             var mapper2 = WayMore.Wayless
-                                .Get<PersonDTONested, PersonNested>()
-                                .FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+                                .Get<PersonDTONested, PersonNested>();
+            mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 
             for (int i = 0; i < Iterations; i++)
             {

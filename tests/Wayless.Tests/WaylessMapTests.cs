@@ -71,9 +71,10 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldMap(x => x.Nickname, s => s.FirstName)
-                                .FieldMap(x => x.FirstName, s => s.Nickname);
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
+                  .FieldMap(x => x.FirstName, s => s.Nickname);
 
             var personDto = mapper.Map(person);
 
@@ -86,8 +87,9 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
 
             var personDto = mapper.Map(person);
 
@@ -99,15 +101,16 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldMap(x => x.Nickname, s => s.FirstName)
-                                .FieldMap(x => x.FirstName, s => s.Nickname)
-                                .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny")
-                                .FieldSet(x => x.Address, "1234 ABC")
-                                .FieldSet(x => x.Id, Guid.NewGuid())
-                                .FieldMap(x => x.LastName, s => s.FirstName)
-                                .FieldSet(x => x.CreateTime, DateTime.Now)
-                                .FieldSkip(x => x.Email);
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
+                  .FieldMap(x => x.FirstName, s => s.Nickname)
+                  .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny")
+                  .FieldSet(x => x.Address, "1234 ABC")
+                  .FieldSet(x => x.Id, Guid.NewGuid())
+                  .FieldMap(x => x.LastName, s => s.FirstName)
+                  .FieldSet(x => x.CreateTime, DateTime.Now)
+                  .FieldSkip(x => x.Email);
 
             var personDto = mapper.Map(person);
 
@@ -130,8 +133,9 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldSet(x => x.Nickname, "Jacqueline");
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldSet(x => x.Nickname, "Jacqueline");
 
             var personDto = mapper.Map(person);
 
@@ -143,8 +147,9 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -156,8 +161,9 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
 
@@ -173,8 +179,9 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>()
-                                .FieldSkip(d => d.Nickname);
+                                .GetNew<PersonDTO, Person>();
+
+            mapper.FieldSkip(d => d.Nickname);
 
             var personDto = mapper.Map(person);
 

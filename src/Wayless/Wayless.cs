@@ -112,7 +112,7 @@ namespace Wayless
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
+        public IFieldMutator<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
                                                       , Expression<Func<TSource, object>> sourceExpression)
         {
             FieldMap(destinationExpression, sourceExpression, null);
@@ -127,7 +127,7 @@ namespace Wayless
         /// <param name="sourceExpression">Expression for property to be read in source type</param>
         /// <param name="condition">Conditition to be evaluated for determening if values should be mapped</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
+        public IFieldMutator<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
                                                       , Expression<Func<TSource, object>> sourceExpression
                                                       , Expression<Func<TSource, bool>> condition)
         {
@@ -151,7 +151,7 @@ namespace Wayless
         /// <param name="destinationExpression">Expression for property to be set in destination type</param>
         /// <param name="value">Value to assign</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
+        public IFieldMutator<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
         {
             FieldSet(destinationExpression, value, null);
             return this;
@@ -164,7 +164,7 @@ namespace Wayless
         /// <param name="value">Value to assign</param>
         /// <param name="condition">Conditition to be evaluated for determening if values should be set</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
+        public IFieldMutator<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
                                                       , object value
                                                       , Expression<Func<TSource, bool>> setCondition)
         {
@@ -184,7 +184,7 @@ namespace Wayless
         /// </summary>
         /// <param name="ignoreAtDestinationExpression">Expression for property to be skipped in destination type</param>
         /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
+        public IFieldMutator<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
         {
             var ignore = GetMemberName(skipperName);
 
@@ -202,7 +202,7 @@ namespace Wayless
             return this;
         }
 
-        public IWayless<TDestination, TSource> TypeApply<T>(Expression<Func<T, T>> typeApplyExpression)
+        public IFieldMutator<TDestination, TSource> TypeApply<T>(Expression<Func<T, T>> typeApplyExpression)
         {
             var typeKey = typeof(T);
             if(_typeApplyExpressions.ContainsKey(typeKey))
@@ -217,7 +217,7 @@ namespace Wayless
             return this;
         }
         #region helpers
-        private IWayless<TDestination, TSource> RegisterFieldExpression(string destination, Expression expression)
+        private IFieldMutator<TDestination, TSource> RegisterFieldExpression(string destination, Expression expression)
         {
             if (_fieldExpressions.ContainsKey(destination))
             {

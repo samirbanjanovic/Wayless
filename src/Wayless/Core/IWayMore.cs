@@ -6,11 +6,11 @@ namespace Wayless.Core
 {
     public interface IWayMore
     {
-        IWayMore ConfigureWayless<TDestination, TSource>(Action<IWayless<TDestination, TSource>> config)
+        IWayMore ConfigureWayless<TDestination, TSource>(Action<IFieldMutator<TDestination, TSource>> config)
             where TDestination : class
             where TSource : class;
 
-        IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IWayless<TDestination, TSource>> config)
+        IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IFieldMutator<TDestination, TSource>> config)
             where TDestination : class
             where TSource : class;
 
