@@ -137,7 +137,7 @@ namespace Wayless.Performance.Tests
         private static void TypeApplyTest()
         {
             Person person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .TypeApply<string>(x => x.ToUpper())
                                 .FieldMap(x => x.Address, y => y.Address);
