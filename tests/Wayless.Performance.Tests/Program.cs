@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Mapster;
+using Wayless.Core;
 
 namespace Wayless.Performance.Tests
 {
@@ -178,7 +179,7 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>();
 
             stopwatch.Restart();
@@ -201,7 +202,7 @@ namespace Wayless.Performance.Tests
                                                     .UseDefaultExpressionBuilder(typeof(PersonDTO), typeof(Person))
                                                     .UseDefaultMatchMaker();
 
-            var mapper = WayMore.Mappers.Get<PersonDTO, Person>(config);
+            var mapper = WayMore.Wayless.Get<PersonDTO, Person>(config);
 
             for (int i = 0; i < Iterations; i++)
             {
@@ -218,9 +219,9 @@ namespace Wayless.Performance.Tests
             person.NestedPerson = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .Get<PersonDTONested, PersonNested>()
-                                .FieldMap(x => x.NestedPersonDTO, x => WayMore.Mappers.Get<PersonDTO, Person>().Map(x.NestedPerson));
+                                .FieldMap(x => x.NestedPersonDTO, x => WayMore.Wayless.Get<PersonDTO, Person>().Map(x.NestedPerson));
 
             for (int i = 0; i < Iterations; i++)
             {
@@ -231,8 +232,8 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless (Nested): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
 
             Stopwatch stopwatch2 = Stopwatch.StartNew();
-            var nestedMapper = WayMore.Mappers.Get<PersonDTO, Person>();
-            var mapper2 = WayMore.Mappers
+            var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+            var mapper2 = WayMore.Wayless
                                 .Get<PersonDTONested, PersonNested>()
                                 .FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 

@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+
 using Wayless.Core;
 
 namespace Wayless
 {
     public sealed class Wayless<TDestination, TSource>
         : IWayless<TDestination, TSource>
+        where TDestination : class
+        where TSource : class
     {
         /// Type activator. Using static compiled expression for improved performance
         private static readonly Func<TDestination> _createDestinationInstance = Helpers.LambdaCreateInstance<TDestination>();

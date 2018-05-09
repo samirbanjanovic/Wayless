@@ -52,7 +52,7 @@ namespace Wayless.Tests
         public void TestDefaultInitializeAndMap()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            var mapper = WayMore.Wayless.GetNew<PersonDTO, Person>();
 
             var personDto = mapper.Map(person);
 
@@ -70,7 +70,7 @@ namespace Wayless.Tests
         public void TestFieldMap()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldMap(x => x.Nickname, s => s.FirstName)
                                 .FieldMap(x => x.FirstName, s => s.Nickname);
@@ -85,7 +85,7 @@ namespace Wayless.Tests
         public void TestFieldMapWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
 
@@ -98,7 +98,7 @@ namespace Wayless.Tests
         public void TestFieldMapWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldMap(x => x.Nickname, s => s.FirstName)
                                 .FieldMap(x => x.FirstName, s => s.Nickname)
@@ -129,7 +129,7 @@ namespace Wayless.Tests
         public void TestFieldSet()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldSet(x => x.Nickname, "Jacqueline");
 
@@ -142,7 +142,7 @@ namespace Wayless.Tests
         public void TestFieldSetWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
@@ -155,7 +155,7 @@ namespace Wayless.Tests
         public void TestFieldSetWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
@@ -172,7 +172,7 @@ namespace Wayless.Tests
         public void TestFieldSkip()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers
+            var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>()
                                 .FieldSkip(d => d.Nickname);
 
