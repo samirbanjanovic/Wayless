@@ -134,6 +134,17 @@ namespace Wayless.Performance.Tests
             Console.ReadLine();
         }
 
+        private static void ConfigureMapper()
+        {
+            WayMore.Wayless
+                   .ConfigureWayless<PersonDTO, Person>(cfg =>
+                   {
+                       cfg.FieldMap(d => d.FirstName, s => s.Nickname)
+                          .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+                          .FieldSet(d => d.CreateTime, DateTime.Now);
+                   });
+        }
+
         private static void TypeApplyTest()
         {
             Person person = Person.Create();
