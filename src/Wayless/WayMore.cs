@@ -31,7 +31,8 @@ namespace Wayless
             return this;
         }
 
-        public IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IWayless<TDestination, TSource>> mapperConfiguration)
+        public IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration
+                                                              , Action<IWayless<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
@@ -78,7 +79,8 @@ namespace Wayless
             return mapper.Map(sourceObject);
         }
 
-        public IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceObject, IWaylessConfiguration configuration)
+        public IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceObject
+                                                                  , IWaylessConfiguration configuration)
             where TDestination : class
             where TSource : class
         {
@@ -87,7 +89,9 @@ namespace Wayless
             return mapper.Map(sourceObject);
         }
 
-        public void Map<TDestination, TSource>(TDestination destinationObject, TSource sourceObject, IWaylessConfiguration configuration)
+        public void Map<TDestination, TSource>(TDestination destinationObject
+                                             , TSource sourceObject
+                                             , IWaylessConfiguration configuration)
             where TDestination : class
             where TSource : class
         {
@@ -107,7 +111,11 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var key = (typeof(TDestination), typeof(TSource), configuration.ExpressionBuilder?.GetType(), configuration.MatchMaker?.GetType()).GetHashCode();
+            var key = (typeof(TDestination)
+                     , typeof(TSource)
+                     , configuration.ExpressionBuilder?.GetType()
+                     , configuration.MatchMaker?.GetType()).GetHashCode();
+
             if (!_mappers.TryGetValue(key, out object mapper))
             {
                 mapper = GetNew<TDestination, TSource>();
@@ -124,7 +132,9 @@ namespace Wayless
             return Get<TDestination, TSource>();
         }
 
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destinationObject, TSource sourceObject, IWaylessConfiguration configuration)
+        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destinationObject
+                                                                        , TSource sourceObject
+                                                                        , IWaylessConfiguration configuration)
             where TDestination : class
             where TSource : class
         {
@@ -152,7 +162,9 @@ namespace Wayless
             return GetNew<TDestination, TSource>();
         }
 
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject, TSource sourceObject, IWaylessConfiguration configuration)
+        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject
+                                                                           , TSource sourceObject
+                                                                           , IWaylessConfiguration configuration)
             where TDestination : class
             where TSource : class
         {
