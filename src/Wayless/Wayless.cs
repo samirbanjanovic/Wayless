@@ -15,12 +15,11 @@ namespace Wayless
     {
         /// Type activator. Using static compiled expression for improved performance
         private static readonly Func<TDestination> _createDestinationInstance = Helpers.LambdaCreateInstance<TDestination>();
-
         private readonly IDictionary<string, MemberInfo> _destinationFields;
         private readonly IDictionary<string, MemberInfo> _sourceFields;
-
         private readonly IList<string> _fieldSkips;
         private readonly IDictionary<string, Expression> _fieldExpressions;
+        private readonly IDictionary<Type, Expression> _typeApplyExpressions;
 
         /// <summary>
         /// object containing expression builder and field match maker
@@ -46,6 +45,7 @@ namespace Wayless
 
             _destinationFields = DestinationType.ToMemberInfoDictionary(true);
             _sourceFields = SourceType.ToMemberInfoDictionary();
+            _typeApplyExpressions = new Dictionary<Type, Expression>();
         }
 
         public Wayless()
@@ -202,8 +202,22 @@ namespace Wayless
             return this;
         }
 
+        public IWayless<TDestination, TSource> TypeApply<T>(Expression<Func<T, T>> typeApplyExpression)
+        {
+            var typeKey = typeof(T);
+            if(_typeApplyExpressions.ContainsKey(typeKey))
+            {
+                _typeApplyExpressions[typeKey] = typeApplyExpression;
+            }
+            else
+            {
+                _typeApplyExpressions.Add(typeKey, typeApplyExpression);
+            }
+
+            return this;
+        }
         #region helpers
-        private void RegisterFieldExpression(string destination, Expression expression)
+        private IWayless<TDestination, TSource> RegisterFieldExpression(string destination, Expression expression)
         {
             if (_fieldExpressions.ContainsKey(destination))
             {
@@ -213,6 +227,10 @@ namespace Wayless
             {
                 _fieldExpressions.Add(destination, expression);
             }
+
+            _isMapUpToDate = false;
+
+            return this;
         }
 
         // apply all mapping rules
@@ -232,11 +250,34 @@ namespace Wayless
                     AutomatchMembers();
                 }
 
+                WrapTypeApplyExpressions();
+
                 _map = _waylessConfiguration.ExpressionBuilder
                                             .CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
                 _isMapUpToDate = true;
             }
         }
+
+        private void WrapTypeApplyExpressions()
+        {
+            foreach(var expression in _fieldExpressions.ToArray())
+            {
+                BinaryExpression binaryExpression = null;
+                
+                if(expression.Value is BinaryExpression)
+                {
+                    binaryExpression = expression.Value as BinaryExpression;
+                }
+        
+                var right = binaryExpression.Right;
+                if(_typeApplyExpressions.TryGetValue(_destinationFields[expression.Key].GetUnderlyingType(), out Expression value))
+                {
+                    right = Expression.Invoke(value, right);
+                    var assignExpression = Expression.Assign(binaryExpression.Left, right);
+                    _fieldExpressions[expression.Key] = assignExpression;
+                }                       
+            }
+        } 
 
         // try to automatically map any unmapped members
         private void AutomatchMembers()
