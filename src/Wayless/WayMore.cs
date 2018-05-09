@@ -21,22 +21,22 @@ namespace Wayless
             }
         }
 
-        public IWayMore ConfigureWayless<TDestination, TSource>(Action<IWayless<TDestination, TSource>> configuration)
+        public IWayMore ConfigureWayless<TDestination, TSource>(Action<IWayless<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
             var mapperInstance = Get<TDestination, TSource>();
-            configuration(mapperInstance);
+            mapperConfiguration(mapperInstance);
 
             return this;
         }
 
-        public IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IWayless<TDestination, TSource>> config)
+        public IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IWayless<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
-            var mapperInstance = Get<TDestination, TSource>(configuration);
-            config(mapperInstance);
+            var mapper = Get<TDestination, TSource>(configuration);
+            mapperConfiguration(mapper);
 
             return this;
         }
