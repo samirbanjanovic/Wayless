@@ -10,13 +10,13 @@ Mapping rules are applied via a call to the `Map` methods.
 
 	PersonDTO personDTO = mapper.Map(person);
 
+
 # Usage
 
 Values can be mapped or set using the overloaded `FieldMap` and `FieldSet` methods. If auto matching is enabled 
 you can use `FieldSkip` to ignore a field.  
 
 Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
-
 
 	WayMore
 	.Wayless
@@ -25,18 +25,12 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 		// set phone number to '8675309' if First
 		cfg.FieldMap(dest => dest.FirstName
 			   , src => src.Nickname
-			   , src => src.Phone == "8675309"); 						
-	}
-
-	WayMore
-	.Wayless
-	.SetRules<PersonDTO, Person>(cfg =>
-	{
-		// set phone number to '8675309' if First
-		cfg.FieldSet(dest => dest.FirstName
+			   , src => src.Phone == "8675309")
+		    .FieldSet(dest => dest.FirstName
 			    , "Jenny"
 			    , src => src.Phone == "8675309"); 
 	}
+
 
 # WayMore
 
@@ -68,10 +62,10 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 		   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
 		   .FieldSet(d => d.CreateTime, DateTime.Now);
 	})
-	.SetRules<StudentDTO, Student>(cfg =>
+	.SetRules<PersonDTONested, PersonNested>(cfg =>
 	{
-		cfg.FieldSet(d => d.RegisterDate, DateTime.Now)
-		   .FieldMap(d => d.DOB, s => s.DateOfBirth);
+		var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+		cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 	});
 
 
@@ -89,7 +83,6 @@ Once you have a mapper instance you can further set rules or call the map functi
 	mapper.Map(person);
 
 
-
 # Complex Map
 `Wayless` currently does not support complex mappings directly. To perform a nested complex map you can use `FieldMap`
 with a call to `WayMore`. To achieve better performance assign the nested mapper and pass the reference, instead of 
@@ -101,7 +94,8 @@ passing the call to `WayMore`
 
 	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 	var personDtoNested = mapper.Map(personNested);
-	
+
+
 # More
 
 You can use waymore with any dependency injection API by registering the `IWayMore` interface as a singleton 
