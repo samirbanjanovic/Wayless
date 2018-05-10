@@ -50,6 +50,19 @@ namespace Wayless
             : this(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>())
         { }
 
+        internal Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
+        {
+            _waylessConfiguration = setRuleBuilder.WaylessConfiguration;
+
+            _isMapUpToDate = setRuleBuilder.IsMapUpToDate;
+
+            _fieldExpressions = setRuleBuilder.FieldExpressions;
+            _fieldSkips = setRuleBuilder.FieldSkips;
+
+            _destinationFields = setRuleBuilder.DestinationFields;
+            _sourceFields = setRuleBuilder.SourceFields;
+        }
+
         /// <summary>
         /// Type to map from
         /// </summary>

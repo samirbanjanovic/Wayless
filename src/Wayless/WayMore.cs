@@ -21,25 +21,25 @@ namespace Wayless
             }
         }
 
-        public IWayMore SetRules<TDestination, TSource>(Action<IWayless<TDestination, TSource>> mapperConfiguration)
+        public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
-            SetRules(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
+            return SetRules(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
                               , mapperConfiguration);
-
-            return this;
         }
 
-        public IWayMore SetRules<TDestination, TSource>(IWaylessConfiguration configuration
-                                                              , Action<IWayless<TDestination, TSource>> mapperConfiguration)
+        public IWayMore SetRules<TDestination, TSource>(IWaylessConfiguration waylessConfiguration
+                                                              , Action<ISetRuleBuilder<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
-            var mapper = Get<TDestination, TSource>(configuration);
-            mapperConfiguration(mapper);
+            var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>(waylessConfiguration);
+            mapperConfiguration(setRuleBuilder);
 
-            AddOrUpdateMapper(configuration, mapper);
+            var mapper = new Wayless<TDestination, TSource>(setRuleBuilder);
+
+            AddOrUpdateMapper(waylessConfiguration, mapper);
 
             return this;
         }
