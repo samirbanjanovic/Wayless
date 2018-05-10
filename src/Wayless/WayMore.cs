@@ -21,6 +21,8 @@ namespace Wayless
             }
         }
 
+        private WayMore() { }
+
         public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
