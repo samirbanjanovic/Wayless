@@ -204,7 +204,7 @@ namespace Wayless.Performance.Tests
             var mapper = config.CreateMapper();
             var personDto = mapper.Map<Person, PersonDTO>(person);
             stopwatch.Stop();
-            Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Automapper: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
 
             Console.WriteLine("\r\n------------------------------------\r\n");
         }
