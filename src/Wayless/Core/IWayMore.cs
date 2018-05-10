@@ -13,7 +13,13 @@ namespace Wayless.Core
         IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IFieldMutator<TDestination, TSource>> config)
             where TDestination : class
             where TSource : class;
+        IWayMore ConfigureNewWayless<TDestination, TSource>(Action<IFieldMutator<TDestination, TSource>> config)
+            where TDestination : class
+            where TSource : class;
 
+        IWayMore ConfigureNewWayless<TDestination, TSource>(IWaylessConfiguration configuration, Action<IFieldMutator<TDestination, TSource>> config)
+            where TDestination : class
+            where TSource : class;
         IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceObject)
             where TDestination : class
             where TSource : class;

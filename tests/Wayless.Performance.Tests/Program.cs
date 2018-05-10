@@ -114,6 +114,8 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
+            TestNewConfiguration();
+
             // primer call to cache and compile expressions
             Console.WriteLine("Basic mapping\r\n");
             Console.WriteLine("------------------------------------");
@@ -130,6 +132,37 @@ namespace Wayless.Performance.Tests
             }
 
             Console.ReadLine();
+        }
+
+        private static void TestNewConfiguration()
+        {
+            var person = Person.Create();
+            WayMore.Wayless
+            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            });
+
+            var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+
+
+            WayMore.Wayless
+            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+                   .FieldMap(x => x.FirstName, s => s.Nickname);
+            });
+
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
+
+            WayMore.Wayless
+            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname)
+                   .FieldMap(x => x.Nickname, s => s.FirstName);
+            });
+
+            var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
         }
 
         private static void RunMappers()

@@ -25,8 +25,8 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var mapper = Get<TDestination, TSource>();
-            mapperConfiguration((IFieldMutator<TDestination, TSource>)mapper);
+            ConfigureNewWayless(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
+                              , mapperConfiguration);
 
             return this;
         }
@@ -38,6 +38,32 @@ namespace Wayless
         {
             var mapper = Get<TDestination, TSource>(configuration);
             mapperConfiguration((IFieldMutator<TDestination, TSource>)mapper);
+
+            AddOrUpdateMapper(configuration, mapper);
+
+            return this;
+        }
+
+
+        public IWayMore ConfigureNewWayless<TDestination, TSource>(Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
+            where TDestination : class
+            where TSource : class
+        {
+            ConfigureNewWayless(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
+                              , mapperConfiguration);
+
+            return this;
+        }
+
+        public IWayMore ConfigureNewWayless<TDestination, TSource>(IWaylessConfiguration configuration
+                                                              , Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
+            where TDestination : class
+            where TSource : class
+        {
+            var mapper = GetNew<TDestination, TSource>(configuration);
+            mapperConfiguration((IFieldMutator<TDestination, TSource>)mapper);
+
+            AddOrUpdateMapper(configuration, mapper);
 
             return this;
         }
@@ -111,10 +137,7 @@ namespace Wayless
             where TDestination : class
             where TSource : class
         {
-            var key = (typeof(TDestination)
-                     , typeof(TSource)
-                     , configuration.ExpressionBuilder?.GetType()
-                     , configuration.MatchMaker?.GetType()).GetHashCode();
+            var key = GenerateKey<TDestination, TSource>(configuration);
 
             if (!_mappers.TryGetValue(key, out object mapper))
             {
@@ -171,6 +194,27 @@ namespace Wayless
             return GetNew<TDestination, TSource>(configuration);
         }
 
+        private static void AddOrUpdateMapper<TDestination, TSource>(IWaylessConfiguration configuration, IWayless<TDestination, TSource> mapper)
+            where TDestination : class
+            where TSource : class
+        {
+            var key = GenerateKey<TDestination, TSource>(configuration);
+            if (_mappers.ContainsKey(key))
+            {
+                _mappers[key] = mapper;
+            }
+            else
+            {
+                _mappers.TryAdd(key, mapper);
+            }
+        }
 
+        private static int GenerateKey<TDestination, TSource>(IWaylessConfiguration configuration)
+        {
+            return (typeof(TDestination)
+                     , typeof(TSource)
+                     , configuration.ExpressionBuilder?.GetType()
+                     , configuration.MatchMaker?.GetType()).GetHashCode();
+        }
     }
 }
