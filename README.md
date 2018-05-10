@@ -95,7 +95,7 @@ passing the call to `WayMore`
 			.Get<PersonDTONested, PersonNested>();
 
 	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
-	var personDtoNested = 
+	var personDtoNested = mapper.Map(personNested);
 	
 #More
 
