@@ -39,17 +39,8 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 # WayMore
 
 `WayMore` is a thread-safe singletong that stores previously configured and requested instances of `Wayless`.
-Via the singleton you can configure and cache mappings for future use, or request a mapper by calling the
+Via the singleton you can configure and cache mappings for future use by calling `SetRules` or request a mapper by calling the
 overloaded `Get` method.
-
-	var mapper = WayMore.Wayless
-			.Get<PersonDTONested, PersonNested>();
-
-Once you have a mapper instance you can extend mappings the same way as if the Wayless constructor 
-was called the directly. 
-
-	mapper.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-			.FieldSet(d => d.CreateTime, DateTime.Now);
 
 To cache an instance of a mapper you can configure it ahead of time (application startup) and use it 
 later by calling the `Get` method, or directly use the mapper by calling the generic `Map` from `WayMore`.
@@ -79,6 +70,21 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 			   .FieldMap(d => d.DOB, s => s.DateOfBirth);
 		});
 
+
+To request a cached instance (for repetative calls and better performance) use the overlaoded `Get` method
+
+	var mapper = WayMore.Wayless
+			.Get<PersonDTONested, PersonNested>();
+
+Once you have a mapper instance you can further set rules or call the map function
+
+	mapper.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+		  .FieldSet(d => d.CreateTime, DateTime.Now);
+
+	mapper.Map(person);
+
+
+
 # Complex Map
 `Wayless` currently does not support complex mappings directly. To perform a nested complex map you can use `FieldMap`
 with a call to `WayMore`. To achieve better performance assign the nested mapper and pass the reference, instead of 
@@ -89,7 +95,7 @@ passing the call to `WayMore`
 			.Get<PersonDTONested, PersonNested>();
 
 	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
-	var personDtoNested = mapper.Map(person);
+	var personDtoNested = 
 	
 #More
 
