@@ -26,7 +26,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 		cfg.FieldMap(dest => dest.FirstName
 			   , src => src.Nickname
 			   , src => src.Phone == "8675309")
-		    .FieldSet(dest => dest.FirstName
+		    .FieldSet(dest => dest.Nickname
 			    , "Jenny"
 			    , src => src.Phone == "8675309"); 
 	}
