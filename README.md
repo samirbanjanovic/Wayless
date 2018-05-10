@@ -19,7 +19,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
 
 	WayMore.Wayless
-	.ConfigureWayless<PersonDTO, Person>(cfg =>
+	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		// set phone number to '8675309' if First
 		cfg.FieldMap(dest => dest.FirstName
@@ -28,7 +28,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 	}
 
 	WayMore.Wayless
-	.ConfigureWayless<PersonDTO, Person>(cfg =>
+	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		// set phone number to '8675309' if First
 		cfg.FieldSet(dest => dest.FirstName
@@ -55,7 +55,7 @@ To cache an instance of a mapper you can configure it ahead of time (application
 later by calling the `Get` method, or directly use the mapper by calling the generic `Map` from `WayMore`.
 
 	WayMore.Wayless
-		.ConfigureWayless<PersonDTO, Person>(cfg =>
+		.SetRules<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 				.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
@@ -64,16 +64,16 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 
 	var personDTO = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
-`ConfigureWayless` returns a reference to `WayMore` to enable chained configurations 
+`SetRules` returns a reference to `WayMore` to enable chained configurations 
 
 	WayMore.Wayless
-		.ConfigureWayless<PersonDTO, Person>(cfg =>
+		.SetRules<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 				.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
 				.FieldSet(d => d.CreateTime, DateTime.Now);
 		})
-		.ConfigureWayless<StudentDTO, Student>(cfg =>
+		.SetRules<StudentDTO, Student>(cfg =>
 		{
 			cfg.FieldSet(d => d.RegisterDate, DateTime.Now)
 			   .FieldMap(d => d.DOB, s => s.DateOfBirth);
@@ -104,13 +104,13 @@ Once registered you can change your `Configure` method to expect `IWayMore`.
 	public void Configure(IApplicationBuilder app, IHostingEnvironment env, IWayMore waymore)
 	{
 		waymore
-		.ConfigureWayless<PersonDTO, Person>(cfg =>
+		.SetRules<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 			   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
 			   .FieldSet(d => d.CreateTime, DateTime.Now);
 		})
-		.ConfigureWayless<PersonDTONested, PersonNested>(cfg =>
+		.SetRules<PersonDTONested, PersonNested>(cfg =>
 		{
 			var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
 			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));

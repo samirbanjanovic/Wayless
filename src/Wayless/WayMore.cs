@@ -21,47 +21,23 @@ namespace Wayless
             }
         }
 
-        public IWayMore ConfigureWayless<TDestination, TSource>(Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
+        public IWayMore SetRules<TDestination, TSource>(Action<IWayless<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
-            ConfigureNewWayless(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
+            SetRules(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
                               , mapperConfiguration);
 
             return this;
         }
 
-        public IWayMore ConfigureWayless<TDestination, TSource>(IWaylessConfiguration configuration
-                                                              , Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
+        public IWayMore SetRules<TDestination, TSource>(IWaylessConfiguration configuration
+                                                              , Action<IWayless<TDestination, TSource>> mapperConfiguration)
             where TDestination : class
             where TSource : class
         {
             var mapper = Get<TDestination, TSource>(configuration);
-            mapperConfiguration((IFieldMutator<TDestination, TSource>)mapper);
-
-            AddOrUpdateMapper(configuration, mapper);
-
-            return this;
-        }
-
-
-        public IWayMore ConfigureNewWayless<TDestination, TSource>(Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
-            where TDestination : class
-            where TSource : class
-        {
-            ConfigureNewWayless(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
-                              , mapperConfiguration);
-
-            return this;
-        }
-
-        public IWayMore ConfigureNewWayless<TDestination, TSource>(IWaylessConfiguration configuration
-                                                              , Action<IFieldMutator<TDestination, TSource>> mapperConfiguration)
-            where TDestination : class
-            where TSource : class
-        {
-            var mapper = GetNew<TDestination, TSource>(configuration);
-            mapperConfiguration((IFieldMutator<TDestination, TSource>)mapper);
+            mapperConfiguration(mapper);
 
             AddOrUpdateMapper(configuration, mapper);
 

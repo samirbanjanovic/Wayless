@@ -114,7 +114,7 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
-            TestNewConfiguration();
+            //TestNewConfiguration();
 
             // primer call to cache and compile expressions
             Console.WriteLine("Basic mapping\r\n");
@@ -122,7 +122,7 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Primer call\r\n");
             RunMappers();
 
-            for (int i = 1; i <= 5; i++)
+            for (int i = 1; i <= 100; i++)
             {
                 //Iterations = Iterations * 10;
 
@@ -134,36 +134,36 @@ namespace Wayless.Performance.Tests
             Console.ReadLine();
         }
 
-        private static void TestNewConfiguration()
-        {
-            var person = Person.Create();
-            WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
-            {
-                cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
-            });
+        //private static void TestNewConfiguration()
+        //{
+        //    var person = Person.Create();
+        //    WayMore.Wayless
+        //    .ConfigureNew<PersonDTO, Person>(cfg =>
+        //    {
+        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+        //    });
 
-            var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+        //    var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
 
-            WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
-            {
-                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
-                   .FieldMap(x => x.FirstName, s => s.Nickname);
-            });
+        //    WayMore.Wayless
+        //    .ConfigureNew<PersonDTO, Person>(cfg =>
+        //    {
+        //        cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+        //           .FieldMap(x => x.FirstName, s => s.Nickname);
+        //    });
 
-            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
+        //    var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
-            WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
-            {
-                cfg.FieldMap(x => x.FirstName, s => s.Nickname)
-                   .FieldMap(x => x.Nickname, s => s.FirstName);
-            });
+        //    WayMore.Wayless
+        //    .ConfigureNew<PersonDTO, Person>(cfg =>
+        //    {
+        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname)
+        //           .FieldMap(x => x.Nickname, s => s.FirstName);
+        //    });
 
-            var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
-        }
+        //    var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+        //}
 
         private static void RunMappers()
         {
@@ -173,6 +173,32 @@ namespace Wayless.Performance.Tests
             MeasureNewWaylessInstance();
             MeasureCachedWaylessInstance();
             MeasureCachedWaylessInstanceNestedMap();
+
+            var person = Person.Create();
+            Stopwatch stopwatch = new Stopwatch();
+
+            Console.WriteLine("\r\n------------------------------------\r\n");
+
+            stopwatch.Start();
+            person.Adapt<PersonDTO>();
+            stopwatch.Stop();
+            Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch.Reset();
+            
+
+            stopwatch.Start();
+            WayMore.Wayless.Map<PersonDTO, Person>(person);
+            stopwatch.Stop();
+            Console.WriteLine("WayMore.Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            stopwatch.Reset();
+            
+
+            stopwatch.Start();
+            var config = new MapperConfiguration(cfg => cfg.CreateMap<Person, PersonDTO>());
+            var mapper = config.CreateMapper();
+            var personDto = mapper.Map<Person, PersonDTO>(person);
+            stopwatch.Stop();
+            Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
 
             Console.WriteLine("\r\n------------------------------------\r\n");
         }

@@ -70,7 +70,7 @@ namespace Wayless.Tests
             var person = Person.Create();
 
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.Nickname, s => s.FirstName)
                    .FieldMap(x => x.FirstName, s => s.Nickname);
@@ -87,7 +87,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
             });
@@ -104,7 +104,7 @@ namespace Wayless.Tests
             var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>();
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.Nickname, s => s.FirstName)
                     .FieldMap(x => x.FirstName, s => s.Nickname)
@@ -137,7 +137,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldSet(x => x.Nickname, "Jacqueline");
             });
@@ -166,7 +166,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
             });
@@ -185,7 +185,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             WayMore.Wayless
-            .ConfigureNewWayless<PersonDTO, Person>(cfg =>
+            .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldSkip(d => d.Nickname);
             });
