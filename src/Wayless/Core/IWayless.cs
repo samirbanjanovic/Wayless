@@ -4,8 +4,6 @@ using System.Linq.Expressions;
 
 namespace Wayless.Core
 {
-
-
     public interface IWayless<TDestination, TSource>
         : IFieldMutator<TDestination, TSource>
         where TDestination : class
@@ -13,7 +11,6 @@ namespace Wayless.Core
     {        
         Type DestinationType { get; }
         Type SourceType { get; }
-
         IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList);
         void Map(TDestination destinationObject, TSource sourceObject);
         TDestination Map(TSource sourceObject);        
