@@ -40,7 +40,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
 # WayMore
 
-`WayMore` is a thread-safe singletong that stores previously configured and requested instances of `Wayless`.
+`WayMore` is a thread-safe singleton that stores previously configured and requested instances of `Wayless`.
 Via the singleton you can configure and cache mappings for future use by calling `SetRules` or request a mapper by calling the
 overloaded `Get` method.
 
