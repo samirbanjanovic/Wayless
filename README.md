@@ -107,13 +107,8 @@ Once registered you can change your `Configure` method to expect `IWayMore`.
 		.ConfigureWayless<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
-				.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-				.FieldSet(d => d.CreateTime, DateTime.Now);
-		})
-		.ConfigureWayless<StudentDTO, Student>(cfg =>
-		{
-			cfg.FieldSet(d => d.RegisterDate, DateTime.Now)
-			   .FieldMap(d => d.DOB, s => s.DateOfBirth);
+			   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+			   .FieldSet(d => d.CreateTime, DateTime.Now);
 		})
 		.ConfigureWayless<PersonDTONested, PersonNested>(cfg =>
 		{
