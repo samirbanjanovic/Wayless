@@ -18,7 +18,8 @@ you can use `FieldSkip` to ignore a field.
 Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
 
-	WayMore.Wayless
+	WayMore
+	.Wayless
 	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		// set phone number to '8675309' if First
@@ -27,7 +28,8 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 			   , src => src.Phone == "8675309"); 						
 	}
 
-	WayMore.Wayless
+	WayMore
+	.Wayless
 	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		// set phone number to '8675309' if First
