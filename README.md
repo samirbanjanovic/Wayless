@@ -102,7 +102,7 @@ passing the call to `WayMore`
 	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 	var personDtoNested = mapper.Map(personNested);
 	
-#More
+# More
 
 You can use waymore with any dependency injection API by registering the `IWayMore` interface as a singleton 
 implemented through `WayMore.Wayless`. If using ASP.NET Core this enables you to configure all your mappers in your `Startup.cs`
