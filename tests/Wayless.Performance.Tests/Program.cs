@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -173,6 +175,10 @@ namespace Wayless.Performance.Tests
             MeasureNewWaylessInstance();
             MeasureCachedWaylessInstance();
             MeasureCachedWaylessInstanceNestedMap();
+            Console.WriteLine("\r\n------------------------------------\r\n");
+            MeasureWaylessEnumerableMap();
+            MeasureMapsterEnumerableMap();
+
 
             var person = Person.Create();
             Stopwatch stopwatch = new Stopwatch();
@@ -184,14 +190,14 @@ namespace Wayless.Performance.Tests
             stopwatch.Stop();
             Console.WriteLine("Mapster: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
             stopwatch.Reset();
-            
+
 
             stopwatch.Start();
             WayMore.Wayless.Map<PersonDTO, Person>(person);
             stopwatch.Stop();
             Console.WriteLine("WayMore.Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
             stopwatch.Reset();
-            
+
 
             stopwatch.Start();
             var config = new MapperConfiguration(cfg => cfg.CreateMap<Person, PersonDTO>());
@@ -234,14 +240,13 @@ namespace Wayless.Performance.Tests
         }
 
         private static void MeasureNewWaylessInstance()
-        {   
+        {
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Wayless
                                 .GetNew<PersonDTO, Person>();
 
-            stopwatch.Restart();
             for (int i = 0; i < Iterations; i++)
             {
                 var personDto = mapper.Map(person);
@@ -257,11 +262,8 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var config = WaylessConfigurationBuilder.GetEmptyConfiguration()
-                                                    .UseDefaultExpressionBuilder(typeof(PersonDTO), typeof(Person))
-                                                    .UseDefaultMatchMaker();
 
-            var mapper = WayMore.Wayless.Get<PersonDTO, Person>(config);
+            var mapper = WayMore.Wayless.Get<PersonDTO, Person>();
 
             for (int i = 0; i < Iterations; i++)
             {
@@ -272,6 +274,38 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless (cached instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
+        private static void MeasureWaylessEnumerableMap()
+        {
+            var persons = new List<Person>();
+            for (int i = 0; i < Iterations; i++)
+            {
+                persons.Add(Person.Create());
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            var personDtos = WayMore.Wayless.Map<PersonDTO, Person>(persons);
+
+            stopwatch.Stop();
+            Console.WriteLine("Wayless Set Map: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
+        private static void MeasureMapsterEnumerableMap()
+        {
+            var persons = new List<Person>();
+            for (int i = 0; i < Iterations; i++)
+            {
+                persons.Add(Person.Create());
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            var personDtos = persons.Adapt<IEnumerable<PersonDTO>>().ToList();
+
+            stopwatch.Stop();
+            Console.WriteLine("Mapster Set Map: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+        }
+
         private static void MeasureCachedWaylessInstanceNestedMap()
         {
             PersonNested person = PersonNested.Create();
@@ -279,9 +313,12 @@ namespace Wayless.Performance.Tests
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             var mapper = WayMore.Wayless
+                                .SetRules<PersonDTONested, PersonNested>(rules =>
+                                {
+                                    var nm = WayMore.Wayless.Get<PersonDTO, Person>();
+                                    rules.FieldMap(x => x.NestedPersonDTO, x => nm.Map(x.NestedPerson));
+                                })
                                 .Get<PersonDTONested, PersonNested>();
-
-            mapper.FieldMap(x => x.NestedPersonDTO, x => WayMore.Wayless.Get<PersonDTO, Person>().Map(x.NestedPerson));
 
             for (int i = 0; i < Iterations; i++)
             {
@@ -292,10 +329,15 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless (Nested): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
 
             Stopwatch stopwatch2 = Stopwatch.StartNew();
+
             var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
             var mapper2 = WayMore.Wayless
-                                .Get<PersonDTONested, PersonNested>();
-            mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+                                 .SetRules<PersonDTONested, PersonNested>(rules =>
+                                 {
+                                     rules.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+                                 })
+                                 .Get<PersonDTONested, PersonNested>();
+
 
             for (int i = 0; i < Iterations; i++)
             {
