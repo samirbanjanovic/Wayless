@@ -1,76 +1,135 @@
-Wayless is a basic, lightweight object-to-object mapper.
+# Wayless
 
-There are multiple ways to get an instance of a Wayless mapper. The most basic 
-way is to use the `WayMore` singleton.  It keeps track of all requested mappers
-based on destinatoin type, source type, and expression builder.  
+A basic object-to-object mapper.
+To map from a source to destination object create an instance of the Wayless mapper.
+By default the mapper will match source and destination properties by name. 
 
-`Wayless` has an overloaded constructor; the default constructor initializes with all default
-settings, such as the built in ExpressionBuilder. You can also pass your own implementation of 
-`IExpressionBuilder` for Wayless to use.  If you need to only change a few thigns you 
-can inherit from `ExpressionBuilder` and override its implementations.
+	var mapper = new Wayless<PersonDTO, Person>();
 
-# WayMore
-`WayMore` is the prefered way of getting `Wayless` instances.  It uses Lazy<T> and stores instances in a 
-ConcurrentDictionary; Keep in mind that an instance of Wayless is not thread-safe.  
+Mapping rules are applied via a call to the `Map` methods.
 
-It's best to use the overloaded `Get` method to get instances of Wayless. `Get` checks if 
-an instance of the mapper has been cached. If there is one it's re-used, if not, 
-a new instance is created and cached.
-
-You can use the overloaded `GetNew` method to get new instance, without caching it, of `Wayless`. 
+	PersonDTO personDTO = mapper.Map(person);
 
 # Usage
-
-By default `Wayless` will attempt the most basic property name matching by ignoring the casing of each property.
-Future releases will allow you to inject your own matching algorithm.
-
-`DontAutoMatchMembers` disables automatic match making.
-
-Example:
-
-	// you can also call GetNew for an uncached instance
-	var mapper = WayMore.Get<PerstonDTO, Perston>(); 
-	mapper.DontAutoMatchMembers()
-	      .FieldMap(dest => dest.Phone
-	      	       , src => src.Phone);
-
 
 Values can be mapped or set using the overloaded `FieldMap` and `FieldSet` methods. If auto matching is enabled 
 you can use `FieldSkip` to ignore a field.  
 
-Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping. Meaning, a value will
-only  be mapped/set if the supplied condition is met.
+Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
-	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-	// set phone number to '8675309' if First
-	mapper.FieldMap(dest => dest.FirstName
-		       , src => src.Nickname
-		       , src => src.Phone == "8675309"); 
 
-	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-	// set phone number to '8675309' if First
-	mapper.FieldSet(dest => dest.Phone
-			      , "8675309"
-		       , src => src.FirstName == "Jenny"); 
+	WayMore.Wayless
+	.SetRules<PersonDTO, Person>(cfg =>
+	{
+		// set phone number to '8675309' if First
+		cfg.FieldMap(dest => dest.FirstName
+				, src => src.Nickname
+				, src => src.Phone == "8675309"); 						
+	}
 
-A call to `Map` applies all the generated rules
+	WayMore.Wayless
+	.SetRules<PersonDTO, Person>(cfg =>
+	{
+		// set phone number to '8675309' if First
+		cfg.FieldSet(dest => dest.FirstName
+				, "Jenny"
+				, src => src.Phone == "8675309"); 
+	}
+
+# WayMore
+
+`WayMore` is a thread-safe singletong that stores previously configured and requested instances of `Wayless`.
+Via the singleton you can configure and cache mappings for future use, or request a mapper by calling the
+overloaded `Get` method.
+
+	var mapper = WayMore.Wayless
+			.Get<PersonDTONested, PersonNested>();
+
+Once you have a mapper instance you can extend mappings the same way as if the Wayless constructor 
+was called the directly. 
+
+	mapper.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+			.FieldSet(d => d.CreateTime, DateTime.Now);
+
+To cache an instance of a mapper you can configure it ahead of time (application startup) and use it 
+later by calling the `Get` method, or directly use the mapper by calling the generic `Map` from `WayMore`.
+
+	WayMore.Wayless
+		.SetRules<PersonDTO, Person>(cfg =>
+		{
+			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
+				.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+				.FieldSet(d => d.CreateTime, DateTime.Now);
+		});
+
+	var personDTO = WayMore.Wayless.Map<PersonDTO, Person>(person);
+
+`SetRules` returns a reference to `WayMore` to enable chained configurations 
+
+	WayMore.Wayless
+		.SetRules<PersonDTO, Person>(cfg =>
+		{
+			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
+				.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+				.FieldSet(d => d.CreateTime, DateTime.Now);
+		})
+		.SetRules<StudentDTO, Student>(cfg =>
+		{
+			cfg.FieldSet(d => d.RegisterDate, DateTime.Now)
+			   .FieldMap(d => d.DOB, s => s.DateOfBirth);
+		});
 
 # Complex Map
-`Wayless` does not currently support complex mappings. To perform a nested complex map you can use `FieldMap`
-with a call to `WayMore`
+`Wayless` currently does not support complex mappings directly. To perform a nested complex map you can use `FieldMap`
+with a call to `WayMore`. To achieve better performance assign the nested mapper and pass the reference, instead of 
+passing the call to `WayMore`
 
-	var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-	// For best performance use a cached version of a mapper
-	mapper.FieldMap(dest => dest.Sibling
-		       , src => WayMore.Mappers
-		       		       .Get<PerstonDTO, Person>()
-		       		       .Map(src.Sibling)
-			); 
+	var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+	var mapper = WayMore.Wayless
+			.Get<PersonDTONested, PersonNested>();
+
+	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+	var personDtoNested = mapper.Map(person);
 	
+#More
 
-`Map` has several self-explanatory overloads   that can be used to create a new instance of the specified 
-type.
-                        
+You can use waymore with any dependency injection API by registering the `IWayMore` interface as a singleton 
+implemented through `WayMore.Wayless`. If using ASP.NET Core this enables you to configure all your mappers in your `Startup.cs`
+
+	services.AddSingleton<IWayMore>(x => WayMore.Wayless);
+
+Once registered you can change your `Configure` method to expect `IWayMore`. 
+
+
+	public void Configure(IApplicationBuilder app, IHostingEnvironment env, IWayMore waymore)
+	{
+		waymore
+		.SetRules<PersonDTO, Person>(cfg =>
+		{
+			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
+			   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
+			   .FieldSet(d => d.CreateTime, DateTime.Now);
+		})
+		.SetRules<PersonDTONested, PersonNested>(cfg =>
+		{
+			var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+		});
+		
+		if (env.IsDevelopment())
+		{
+			app.UseDeveloperExceptionPage();
+			app.UseBrowserLink();
+		}
+		else
+		{
+			app.UseExceptionHandler("/Error");
+		}
+
+		app.UseStaticFiles();
+		app.UseMvc();
+	}
+
 # Performance
 Some basic performance tests show that Wayless is nearly as fast as doing manual mappings
 

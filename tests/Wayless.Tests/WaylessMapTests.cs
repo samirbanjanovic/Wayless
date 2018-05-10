@@ -52,9 +52,7 @@ namespace Wayless.Tests
         public void TestDefaultInitializeAndMap()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual(person.Address, personDto.Address);
             Assert.AreEqual(person.Email, personDto.Email);
@@ -70,11 +68,15 @@ namespace Wayless.Tests
         public void TestFieldMap()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
-                  .FieldMap(x => x.FirstName, s => s.Nickname);
 
-            var personDto = mapper.Map(person);
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+                   .FieldMap(x => x.FirstName, s => s.Nickname);
+            });
+           
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual(person.Nickname, personDto.FirstName);
             Assert.AreEqual(person.FirstName, personDto.Nickname);
@@ -84,10 +86,13 @@ namespace Wayless.Tests
         public void TestFieldMapWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            });
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual(person.Nickname, personDto.Nickname);
         }
@@ -96,12 +101,22 @@ namespace Wayless.Tests
         public void TestFieldMapWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldMap(x => x.Nickname, s => s.FirstName)
-                  .FieldMap(x => x.FirstName, s => s.Nickname)
-                  .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny");
+            var mapper = WayMore.Wayless
+                                .GetNew<PersonDTO, Person>();
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+                    .FieldMap(x => x.FirstName, s => s.Nickname)
+                    .FieldMap(x => x.Phone, s => s.Phone, s => s.Nickname == "Jenny")
+                    .FieldSet(x => x.Address, "1234 ABC")
+                    .FieldSet(x => x.Id, Guid.NewGuid())
+                    .FieldMap(x => x.LastName, s => s.FirstName)
+                    .FieldSet(x => x.CreateTime, DateTime.Now)
+                    .FieldSkip(x => x.Email);
+            });
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual(person.FirstName, personDto.Nickname);
             Assert.AreEqual(person.Nickname, personDto.FirstName);
@@ -121,10 +136,13 @@ namespace Wayless.Tests
         public void TestFieldSet()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSet(x => x.Nickname, "Jacqueline");
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldSet(x => x.Nickname, "Jacqueline");
+            });
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual("Jacqueline", personDto.Nickname);
         }
@@ -133,7 +151,9 @@ namespace Wayless.Tests
         public void TestFieldSetWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
+            var mapper = WayMore.Wayless
+                                .GetNew<PersonDTO, Person>();
+
             mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
             var personDto = mapper.Map(person);
@@ -145,20 +165,15 @@ namespace Wayless.Tests
         public void TestFieldSetWithoutAutoMatch()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
+            });
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual("8675309", personDto.Phone);
-
-            Assert.AreNotEqual(person.FirstName, personDto.Nickname);
-            Assert.AreNotEqual(person.Nickname, personDto.FirstName);
-            Assert.AreNotEqual(person.Address, personDto.Address);
-            Assert.AreNotEqual(person.Email, personDto.Email);
-            Assert.AreNotEqual(person.Id, personDto.Id);
-            Assert.AreNotEqual(person.LastName, personDto.LastName);
-            Assert.AreNotEqual(person.CreateTime, personDto.CreateTime);
         }
 
         #endregion FieldSet Tests
@@ -169,10 +184,13 @@ namespace Wayless.Tests
         public void TestFieldSkip()
         {
             var person = Person.Create();
-            var mapper = WayMore.Mappers.GetNew<PersonDTO, Person>();
-            mapper.FieldSkip(d => d.Nickname);
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldSkip(d => d.Nickname);
+            });
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreNotEqual(person.Nickname, personDto.Nickname);
         }
