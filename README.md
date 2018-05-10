@@ -19,22 +19,22 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
 
 	WayMore.Wayless
-			.ConfigureWayless<PersonDTO, Person>(cfg =>
-			{
-				// set phone number to '8675309' if First
-				cfg.FieldMap(dest => dest.FirstName
-						, src => src.Nickname
-						, src => src.Phone == "8675309"); 						
-			}
+		.ConfigureWayless<PersonDTO, Person>(cfg =>
+		{
+			// set phone number to '8675309' if First
+			cfg.FieldMap(dest => dest.FirstName
+					, src => src.Nickname
+					, src => src.Phone == "8675309"); 						
+		}
 
 	WayMore.Wayless
-			.ConfigureWayless<PersonDTO, Person>(cfg =>
-			{
-				// set phone number to '8675309' if First
-				cfg.FieldSet(dest => dest.FirstName
-						, "Jenny"
-						, src => src.Phone == "8675309"); 
-			}
+		.ConfigureWayless<PersonDTO, Person>(cfg =>
+		{
+			// set phone number to '8675309' if First
+			cfg.FieldSet(dest => dest.FirstName
+					, "Jenny"
+					, src => src.Phone == "8675309"); 
+		}
 
 # WayMore
 
@@ -43,7 +43,7 @@ Via the singleton you can configure and cache mappings for future use, or reques
 overloaded `Get` method.
 
 	var mapper = WayMore.Wayless
-						.Get<PersonDTONested, PersonNested>();
+			.Get<PersonDTONested, PersonNested>();
 
 Once you have a mapper instance you can extend mappings the same way as if the Wayless constructor 
 was called the directly. 
