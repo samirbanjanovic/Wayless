@@ -136,36 +136,36 @@ namespace Wayless.Performance.Tests
             Console.ReadLine();
         }
 
-        //private static void TestNewConfiguration()
-        //{
-        //    var person = Person.Create();
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
-        //    });
+        private static void TestNewConfiguration()
+        {
+            var person = Person.Create();
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            });
 
-        //    var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
 
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.Nickname, s => s.FirstName)
-        //           .FieldMap(x => x.FirstName, s => s.Nickname);
-        //    });
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+                   .FieldMap(x => x.FirstName, s => s.Nickname);
+            });
 
-        //    var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname)
-        //           .FieldMap(x => x.Nickname, s => s.FirstName);
-        //    });
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname)
+                   .FieldMap(x => x.Nickname, s => s.FirstName);
+            });
 
-        //    var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
-        //}
+            var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+        }
 
         private static void RunMappers()
         {

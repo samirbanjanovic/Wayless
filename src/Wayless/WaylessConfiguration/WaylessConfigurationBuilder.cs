@@ -15,8 +15,8 @@ namespace Wayless
         public static IWaylessConfiguration GetDefaultConfiguration(Type destinationType, Type sourcetype)
         {
             var configuration = GetEmptyConfiguration()
-                                    .UseDefaultExpressionBuilder(destinationType, sourcetype)
-                                    .UseDefaultMatchMaker();
+                                    .WithDefaultExpressionBuilder(destinationType, sourcetype)
+                                    .WithDefaultMatchMaker();
 
             return configuration;
         }
@@ -33,21 +33,21 @@ namespace Wayless
             return waylessConfiguration;
         }
 
-        public static IWaylessConfiguration UseDefaultExpressionBuilder(this IWaylessConfiguration waylessConfiguration, Type destinationType, Type sourceType)
+        public static IWaylessConfiguration WithDefaultExpressionBuilder(this IWaylessConfiguration waylessConfiguration, Type destinationType, Type sourceType)
         {
             waylessConfiguration.ExpressionBuilder = new ExpressionBuilder(destinationType, sourceType);
 
             return waylessConfiguration;
         }
 
-        public static IWaylessConfiguration UseDefaultExpressionBuilder<TDestination, TSource>(this IWaylessConfiguration waylessConfiguration)
+        public static IWaylessConfiguration WithDefaultExpressionBuilder<TDestination, TSource>(this IWaylessConfiguration waylessConfiguration)
         {
             waylessConfiguration.ExpressionBuilder = new ExpressionBuilder(typeof(TDestination), typeof(TSource));
 
             return waylessConfiguration;
         }
 
-        public static IWaylessConfiguration UseDefaultMatchMaker(this IWaylessConfiguration waylessConfiguration)
+        public static IWaylessConfiguration WithDefaultMatchMaker(this IWaylessConfiguration waylessConfiguration)
         {
             waylessConfiguration.MatchMaker = new MatchMaker();
 

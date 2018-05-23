@@ -59,7 +59,8 @@ namespace Wayless
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
             {
-                expression = sourceExpression.AsExpressionWithInvokeSet(destinationMember, _destination, _source);
+                expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationMember.Name)
+                                          , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationMember));                
             }
             else
             {
@@ -68,7 +69,7 @@ namespace Wayless
 
             if (condition != null)
             {
-                return expression.AsIfThenExpression(condition, _source);
+                WrapInIfThenExpression(expression, condition);
             }
 
             return expression;
@@ -80,24 +81,13 @@ namespace Wayless
 
             if (condition != null)
             {
-                return expression.AsIfThenExpression(condition, _source);
+                WrapInIfThenExpression(expression, condition);
             }
 
             return expression;
         }
 
-        #region helpers
-
-        private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
-        {
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                                 , ExpressionBuilderHelpers.BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
-
-
-            return expression;
-        }
-
-        #endregion helpers
+       
         #endregion create assignment map
 
         #region create set map
@@ -116,16 +106,56 @@ namespace Wayless
         public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                              , ExpressionBuilderHelpers.BuildCastExpression(Expression.Constant(value), destinationProperty));
+                                              , BuildCastExpression(Expression.Constant(value), destinationProperty));
 
 
             if (condition != null)
             {
-                return expression.AsIfThenExpression(condition, _source);
+                WrapInIfThenExpression(expression, condition);                
             }
 
             return expression;
         }
         #endregion create set map
+
+        #region helpers
+
+        private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
+        {
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
+                                                 , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
+
+
+            return expression;
+        }
+
+        public Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
+        {
+            var destinationType = destinationProperty.GetUnderlyingType();
+
+            if (destinationType.IsValueType)
+            {
+                return Expression.Convert(valueExpression, destinationType);
+            }
+
+            return Expression.TypeAs(valueExpression, destinationType);
+        }
+
+        public Expression WrapInIfThenExpression<TSource>(Expression statement, Expression<Func<TSource, bool>> condition)
+        {
+            var member = (condition.Body as MemberExpression)?.Member as MemberInfo;
+            Expression booleanExpression;
+            if (member == null)
+            {
+                booleanExpression = Expression.Invoke(condition, _source);
+            }
+            else
+            {
+                booleanExpression = Expression.PropertyOrField(_source, member.Name);
+            }
+
+            return Expression.IfThen(booleanExpression, statement);
+        }
+        #endregion helpers
     }
 }
