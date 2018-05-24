@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.25.1</Version>
+    <Version>0.30.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -15,16 +15,10 @@
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
-    <PackageReleaseNotes>Breaking change update!
-Mappers static property is now named Wayless 
-
-Fixed a gross oversight of WayMore having public constructor. 
-Added ability to configure mappers through WayMore prior to first use
-Added ability to map objects through WayMore; incures slight peformance hit
-Extracted interface for WayMore for DI
-More details on GitHub page</PackageReleaseNotes>
-    <AssemblyVersion>0.25.1.0</AssemblyVersion>
-    <FileVersion>0.25.1.0</FileVersion>
+    <PackageReleaseNotes>Removed several WayMore methods to simplify usage of API.  Went ahead removed ability to request mapper with new configuration, this should be done via regular instanciation.  To edit a configuration through WayMore use the SetRules method. More details available on 
+</PackageReleaseNotes>
+    <AssemblyVersion>0.30.0.0</AssemblyVersion>
+    <FileVersion>0.30.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -102,7 +102,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>();
+                                .Get<PersonDTO, Person>();
             WayMore.Wayless
             .SetRules<PersonDTO, Person>(cfg =>
             {
@@ -152,7 +152,7 @@ namespace Wayless.Tests
         {
             var person = Person.Create();
             var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>();
+                                .Get<PersonDTO, Person>();
 
             mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 

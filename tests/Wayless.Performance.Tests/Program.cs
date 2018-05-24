@@ -136,36 +136,36 @@ namespace Wayless.Performance.Tests
             Console.ReadLine();
         }
 
-        //private static void TestNewConfiguration()
-        //{
-        //    var person = Person.Create();
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
-        //    });
+        private static void TestNewConfiguration()
+        {
+            var person = Person.Create();
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344");
+            });
 
-        //    var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
 
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.Nickname, s => s.FirstName)
-        //           .FieldMap(x => x.FirstName, s => s.Nickname);
-        //    });
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.Nickname, s => s.FirstName)
+                   .FieldMap(x => x.FirstName, s => s.Nickname);
+            });
 
-        //    var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
-        //    WayMore.Wayless
-        //    .ConfigureNew<PersonDTO, Person>(cfg =>
-        //    {
-        //        cfg.FieldMap(x => x.FirstName, s => s.Nickname)
-        //           .FieldMap(x => x.Nickname, s => s.FirstName);
-        //    });
+            WayMore.Wayless
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldMap(x => x.FirstName, s => s.Nickname)
+                   .FieldMap(x => x.Nickname, s => s.FirstName);
+            });
 
-        //    var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
-        //}
+            var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+        }
 
         private static void RunMappers()
         {
@@ -173,9 +173,9 @@ namespace Wayless.Performance.Tests
             MeasureAutoMapper();
             MesaureMapster();
             MeasureNewWaylessInstance();
-            MeasureCachedWaylessInstance();
             MeasureCachedWaylessInstanceNestedMap();
-            Console.WriteLine("\r\n------------------------------------\r\n");
+
+            Console.WriteLine("\r\n-------------ENUMERABLE MAP-----------------------\r\n");
             MeasureWaylessEnumerableMap();
             MeasureMapsterEnumerableMap();
 
@@ -183,7 +183,7 @@ namespace Wayless.Performance.Tests
             var person = Person.Create();
             Stopwatch stopwatch = new Stopwatch();
 
-            Console.WriteLine("\r\n------------------------------------\r\n");
+            Console.WriteLine("\r\n------------------SINGLE OBJECT------------------\r\n");
 
             stopwatch.Start();
             person.Adapt<PersonDTO>();
@@ -244,25 +244,6 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Wayless
-                                .GetNew<PersonDTO, Person>();
-
-            for (int i = 0; i < Iterations; i++)
-            {
-                var personDto = mapper.Map(person);
-            }
-
-            stopwatch.Stop();
-            Console.WriteLine("Wayless (new instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
-        }
-
-        private static void MeasureCachedWaylessInstance()
-        {
-
-            Person person = Person.Create();
-
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
             var mapper = WayMore.Wayless.Get<PersonDTO, Person>();
 
             for (int i = 0; i < Iterations; i++)
@@ -271,7 +252,7 @@ namespace Wayless.Performance.Tests
             }
 
             stopwatch.Stop();
-            Console.WriteLine("Wayless (cached instance): {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Wayless : {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
         private static void MeasureWaylessEnumerableMap()
