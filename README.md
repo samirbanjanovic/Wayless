@@ -84,14 +84,15 @@ Once you have a mapper instance you can further set rules or call the map functi
 
 
 # Complex Map
+
 `Wayless` currently does not support complex mappings directly. To perform a nested complex map you can use `FieldMap`
 with a call to `WayMore`. To achieve better performance assign the nested mapper and pass the reference, instead of 
 passing the call to `WayMore`
-
-	var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+	
 	var mapper = WayMore.Wayless
 			.Get<PersonDTONested, PersonNested>();
 
+	var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
 	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
 	var personDtoNested = mapper.Map(personNested);
 

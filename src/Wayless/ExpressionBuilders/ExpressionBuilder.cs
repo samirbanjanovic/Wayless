@@ -7,16 +7,16 @@ using Wayless.Core;
 
 namespace Wayless
 {
-    public class ExpressionBuilder 
-        : IExpressionBuilder
+    public class ExpressionBuilder
+       : IExpressionBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
 
-        
+
         public ExpressionBuilder(Type destinationType, Type sourceType)
         {
-             _destination = Expression.Parameter(destinationType, "destination");
+            _destination = Expression.Parameter(destinationType, "destination");
             _source = Expression.Parameter(sourceType, "source");
         }
 
@@ -26,6 +26,8 @@ namespace Wayless
         /// <param name="mappingExpressions">Expressions containting member mappings</param>
         /// <returns>mapping action</returns>
         public virtual Action<TDestination, TSource> CompileExpressionMap<TDestination, TSource>(IEnumerable<Expression> mappingExpressions)
+            where TDestination : class
+            where TSource : class
         {
             var expressionMap = Expression.Lambda<Action<TDestination, TSource>>(
                                    Expression.Block(mappingExpressions)
@@ -45,6 +47,8 @@ namespace Wayless
         public virtual Expression GetMapExpression<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression
                                                                 , Expression<Func<TSource, object>> sourceExpression
                                                                 , Expression<Func<TSource, bool>> mapOnCondition = null)
+            where TDestination : class
+            where TSource : class
         {
             return GetMapExpression(destinationExpression.GetMemberInfo(), sourceExpression, mapOnCondition);
         }
@@ -52,6 +56,7 @@ namespace Wayless
         public virtual Expression GetMapExpression<TSource>(MemberInfo destinationMember
                                                   , Expression<Func<TSource, object>> sourceExpression
                                                   , Expression<Func<TSource, bool>> condition = null)
+            where TSource : class
         {
             MemberInfo sourceProperty = sourceExpression.GetMemberInfo();
 
@@ -60,7 +65,8 @@ namespace Wayless
             if (sourceProperty == null)
             {
                 expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationMember.Name)
-                                          , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationMember));                
+                                             , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationMember));
+
             }
             else
             {
@@ -69,34 +75,37 @@ namespace Wayless
 
             if (condition != null)
             {
-                WrapInIfThenExpression(expression, condition);
+                return AsIfThenExpression(expression, condition);
             }
 
             return expression;
         }
 
         public virtual Expression GetMapExpression<TSource>(MemberInfo destinationMember, MemberInfo sourceMember, Expression<Func<TSource, bool>> condition = null)
+            where TSource : class
         {
             var expression = BuildMapExpressionForValueMap(destinationMember, sourceMember);
 
             if (condition != null)
             {
-                WrapInIfThenExpression(expression, condition);
+                return AsIfThenExpression(expression, condition);
             }
 
             return expression;
         }
 
-       
         #endregion create assignment map
 
         #region create set map
         public virtual Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
+            where TDestination : class
         {
             return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
         }
 
         public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
+            where TDestination : class
+            where TSource : class
         {
             var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
 
@@ -104,6 +113,7 @@ namespace Wayless
         }
 
         public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
+            where TSource : class
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
                                               , BuildCastExpression(Expression.Constant(value), destinationProperty));
@@ -111,27 +121,28 @@ namespace Wayless
 
             if (condition != null)
             {
-                WrapInIfThenExpression(expression, condition);                
+                return AsIfThenExpression(expression, condition);
             }
 
             return expression;
         }
         #endregion create set map
 
+
         #region helpers
 
         private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                                 , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
+                                                , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
 
 
             return expression;
         }
 
-        public Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
+        private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
         {
-            var destinationType = destinationProperty.GetUnderlyingType();
+            Type destinationType = destinationProperty.GetUnderlyingType();
 
             if (destinationType.IsValueType)
             {
@@ -141,7 +152,9 @@ namespace Wayless
             return Expression.TypeAs(valueExpression, destinationType);
         }
 
-        public Expression WrapInIfThenExpression<TSource>(Expression statement, Expression<Func<TSource, bool>> condition)
+        public Expression AsIfThenExpression<TSource>(Expression statement
+                                                           , Expression<Func<TSource, bool>> condition)
+            where TSource : class
         {
             var member = (condition.Body as MemberExpression)?.Member as MemberInfo;
             Expression booleanExpression;

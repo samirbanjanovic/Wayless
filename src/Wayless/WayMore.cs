@@ -23,25 +23,17 @@ namespace Wayless
 
         private WayMore() { }
 
-        public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperConfiguration)
-            where TDestination : class
-            where TSource : class
-        {
-            return SetRules(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>()
-                              , mapperConfiguration);
-        }
-
-        public IWayMore SetRules<TDestination, TSource>(IWaylessConfiguration waylessConfiguration
-                                                              , Action<ISetRuleBuilder<TDestination, TSource>> mapperConfiguration)
-            where TDestination : class
-            where TSource : class
-        {
-            var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>(waylessConfiguration);
-            mapperConfiguration(setRuleBuilder);
+        public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperRules)
+                    where TDestination : class
+                    where TSource : class
+        {            
+            var objectMapperConfiguration = WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>();
+            var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>(objectMapperConfiguration);
+            mapperRules(setRuleBuilder);
 
             var mapper = new Wayless<TDestination, TSource>(setRuleBuilder);
 
-            AddOrUpdateMapper(waylessConfiguration, mapper);
+            AddOrUpdateMapper(mapper);
 
             return this;
         }
@@ -74,52 +66,14 @@ namespace Wayless
         }
 
 
-        public TDestination Map<TDestination, TSource>(TSource sourceObject, IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            var mapper = Get<TDestination, TSource>(configuration);
-
-            return mapper.Map(sourceObject);
-        }
-
-        public IEnumerable<TDestination> Map<TDestination, TSource>(IEnumerable<TSource> sourceObject
-                                                                  , IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            var mapper = Get<TDestination, TSource>(configuration);
-
-            return mapper.Map(sourceObject);
-        }
-
-        public void Map<TDestination, TSource>(TDestination destinationObject
-                                             , TSource sourceObject
-                                             , IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            var mapper = Get<TDestination, TSource>(configuration);
-
-            mapper.Map(destinationObject, sourceObject);
-        }
-
         public IWayless<TDestination, TSource> Get<TDestination, TSource>()
             where TDestination : class
             where TSource : class
         {
-            return Get<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
-        }
-
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            var key = GenerateKey<TDestination, TSource>(configuration);
-
+            var key = GenerateKey<TDestination, TSource>();
             if (!_mappers.TryGetValue(key, out object mapper))
             {
-                mapper = GetNew<TDestination, TSource>();
+                mapper = new Wayless<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
                 _mappers.TryAdd(key, mapper);
             }
 
@@ -133,50 +87,11 @@ namespace Wayless
             return Get<TDestination, TSource>();
         }
 
-        public IWayless<TDestination, TSource> Get<TDestination, TSource>(TDestination destinationObject
-                                                                        , TSource sourceObject
-                                                                        , IWaylessConfiguration configuration)
+        private void AddOrUpdateMapper<TDestination, TSource>(IWayless<TDestination, TSource> mapper)
             where TDestination : class
             where TSource : class
         {
-            return Get<TDestination, TSource>(configuration);
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>()
-            where TDestination : class
-            where TSource : class
-        {
-            return GetNew<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            return new Wayless<TDestination, TSource>(configuration);            
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject, TSource sourceObject)
-            where TDestination : class
-            where TSource : class
-        {
-            return GetNew<TDestination, TSource>();
-        }
-
-        public IWayless<TDestination, TSource> GetNew<TDestination, TSource>(TDestination destinationObject
-                                                                           , TSource sourceObject
-                                                                           , IWaylessConfiguration configuration)
-            where TDestination : class
-            where TSource : class
-        {
-            return GetNew<TDestination, TSource>(configuration);
-        }
-
-        private static void AddOrUpdateMapper<TDestination, TSource>(IWaylessConfiguration configuration, IWayless<TDestination, TSource> mapper)
-            where TDestination : class
-            where TSource : class
-        {
-            var key = GenerateKey<TDestination, TSource>(configuration);
+            var key = GenerateKey<TDestination, TSource>();
             if (_mappers.ContainsKey(key))
             {
                 _mappers[key] = mapper;
@@ -187,12 +102,10 @@ namespace Wayless
             }
         }
 
-        private static int GenerateKey<TDestination, TSource>(IWaylessConfiguration configuration)
+        private static int GenerateKey<TDestination, TSource>()
         {
             return (typeof(TDestination)
-                     , typeof(TSource)
-                     , configuration.ExpressionBuilder?.GetType()
-                     , configuration.MatchMaker?.GetType()).GetHashCode();
+                     , typeof(TSource)).GetHashCode();
         }
     }
 }
