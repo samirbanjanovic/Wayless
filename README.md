@@ -38,8 +38,8 @@ Using a simple Json file you can pair destination and source properties using th
 	.Wayless
 	.SetRules<PersonDTO, Person>(cfg =>
     {
-        cfg.UseJsonMappingMatchMaker(JSON_MAPPING_PATH)
-	   .FinalizeRules(); 
+        cfg.UseJsonMappingMatchMaker(jsonMappingPath)
+	       .FinalizeRules(); 
     });
 
 A call to `FinalizeRules()` is optional. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
