@@ -4,7 +4,7 @@ A basic object-to-object mapper.
 To map from a source to destination object create an instance of the Wayless mapper.
 By default the mapper will match source and destination properties by name. 
 
-	var mapper = new Wayless<PersonDTO, Person>();
+	var mapper = new Wayless<PersonDTO, Person>(new SetRuleBuilder<PerstonDTO, Person>().UseDefault());
 
 Mapping rules are applied via a call to the `Map` methods.
 
@@ -31,6 +31,14 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 			    , src => src.Phone == "8675309"); 
 	}
 
+Using a simple Json file you can pair destination and source properties using the `JsonFileMatchMaker`
+
+	WayMore
+	.Wayless
+	.SetRules<PersonDTO, Person>(cfg =>
+    {
+        cfg.UseJsonMappingMatchMaker(JSON_MAPPING_PATH);
+    });
 
 # WayMore
 
