@@ -30,6 +30,7 @@ namespace Wayless
            where TDestination : class
            where TSource : class
         {
+            setRuleBuilder.AutoMatchMembers = true;
             setRuleBuilder.MatchMaker = new MatchMaker();
 
             return setRuleBuilder;

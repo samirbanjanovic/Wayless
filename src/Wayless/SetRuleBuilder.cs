@@ -23,13 +23,13 @@ namespace Wayless
             SourceFields = typeof(TSource).ToMemberInfoDictionary();
         }
 
-        public IDictionary<string, MemberInfo> DestinationFields { get; }
-        public IDictionary<string, MemberInfo> SourceFields { get; }
-        public IList<string> FieldSkips { get; }
-        public IDictionary<string, Expression> FieldExpressions { get; }
-        public bool IsMapUpToDate { get; private set; }
         public IExpressionBuilder ExpressionBuilder { get; set; }
         public IMatchMaker MatchMaker { get; set; }
+        public IDictionary<string, MemberInfo> DestinationFields { get; }
+        public IDictionary<string, MemberInfo> SourceFields { get; }
+        public IDictionary<string, Expression> FieldExpressions { get; }
+        public IList<string> FieldSkips { get; }        
+        public bool IsMapUpToDate { get; private set; }        
         public bool AutoMatchMembers { get; set; } = true;
 
         /// <summary>
