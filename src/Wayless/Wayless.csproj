@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -17,8 +17,8 @@
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
     <PackageReleaseNotes>Removed Configuration builder. Mappers now have a single point of configuration, ISetRuleBuilder.  Added JsonFileMatchMaker that read a simple "Destination":"Source" json file to map objects based on member names. Added extension methdos for SetRuleBuilder for easier configuration
 </PackageReleaseNotes>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
