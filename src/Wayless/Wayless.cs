@@ -36,10 +36,13 @@ namespace Wayless
         private bool _isMapUpToDate;
 
         private Action<TDestination, TSource> _map;
-        
-        internal Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
+       
+        public Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
         {
-            // add null check to expression and match maker
+            if(setRuleBuilder.ExpressionBuilder == null)
+            {
+                throw new NullReferenceException("SetRuleBuilder.ExpressionBuilder");
+            }
 
             _matchMaker = setRuleBuilder.MatchMaker;
             _expressionBuilder = setRuleBuilder.ExpressionBuilder;
@@ -265,6 +268,11 @@ namespace Wayless
         // try to automatically map any unmapped members
         private void AutomatchMembers()
         {
+            if (_matchMaker == null)
+            {
+                throw new NullReferenceException("MatchMaker is null");
+            }
+
             var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)
                                                                   && !_fieldSkips.Contains(x.Key))
                                                          .Select(x => x.Value)

@@ -12,6 +12,10 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
+        /// <summary>
+        /// New instance of set rule builder. By default not MatchMaker and ExpressionBuilder
+        /// are assigned. Use the "UseDefault()" extension method to assign built-in types
+        /// </summary>
         public SetRuleBuilder()
         {
             IsMapUpToDate = false;

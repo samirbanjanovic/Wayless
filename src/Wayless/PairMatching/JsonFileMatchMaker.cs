@@ -31,7 +31,10 @@ namespace Wayless.PairMatching
 
             IList<IMemberPair> memberPairs = new List<IMemberPair>();
 
+            // create dictionary to look up source properties
             IDictionary<string, MemberInfo> sources = sourceMembers.ToDictionary(x => x.Name);
+
+            // create dictionary to look up remaining desitnation properties
             IDictionary<string, MemberInfo> destinations = unassignedMembers.ToDictionary(x => x.Name);
 
             JsonSerializerSettings jsonSerializer = new JsonSerializerSettings()
@@ -43,6 +46,8 @@ namespace Wayless.PairMatching
 
             foreach (var destination in destinations)
             {
+                // if mapping file contains destination property 
+                // find source property to use
                 if (mappingDictionary.TryGetValue(destination.Value.Name, out string source))
                 {
                     if (sources.TryGetValue(source, out MemberInfo sourceMember))
