@@ -29,7 +29,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 		    .FieldSet(dest => dest.Nickname
 			    , "Jenny"
 			    , src => src.Phone == "8675309")
-			.FinalizeRules(); 
+		    .FinalizeRules(); 
 	}
 
 Using a simple Json file you can pair destination and source properties using the `JsonFileMatchMaker`
@@ -39,7 +39,7 @@ Using a simple Json file you can pair destination and source properties using th
 	.SetRules<PersonDTO, Person>(cfg =>
     {
         cfg.UseJsonMappingMatchMaker(JSON_MAPPING_PATH)
-		   .FinalizeRules(); 
+	   .FinalizeRules(); 
     });
 
 A call to `FinalizeRules()` is optional. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
@@ -61,7 +61,7 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 		cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 		    .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
 		    .FieldSet(d => d.CreateTime, DateTime.Now)
-			.FinalizeRules(); 
+		    .FinalizeRules(); 
 	});
 
 	var personDTO = WayMore.Wayless.Map<PersonDTO, Person>(person);
