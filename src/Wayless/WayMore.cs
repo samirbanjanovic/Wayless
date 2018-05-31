@@ -26,9 +26,8 @@ namespace Wayless
         public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperRules)
                     where TDestination : class
                     where TSource : class
-        {            
-            var objectMapperConfiguration = WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>();
-            var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>(objectMapperConfiguration);
+        {
+            var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>().UseDefaults();
             mapperRules(setRuleBuilder);
 
             var mapper = new Wayless<TDestination, TSource>(setRuleBuilder);
@@ -73,7 +72,9 @@ namespace Wayless
             var key = GenerateKey<TDestination, TSource>();
             if (!_mappers.TryGetValue(key, out object mapper))
             {
-                mapper = new Wayless<TDestination, TSource>(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>());
+                var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>().UseDefaults();
+
+                mapper = new Wayless<TDestination, TSource>(setRuleBuilder);
                 _mappers.TryAdd(key, mapper);
             }
 
@@ -104,8 +105,7 @@ namespace Wayless
 
         private static int GenerateKey<TDestination, TSource>()
         {
-            return (typeof(TDestination)
-                     , typeof(TSource)).GetHashCode();
+            return (typeof(TDestination), typeof(TSource)).GetHashCode();
         }
     }
 }

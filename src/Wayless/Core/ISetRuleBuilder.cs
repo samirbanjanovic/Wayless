@@ -9,15 +9,15 @@ namespace Wayless.Core
     public interface ISetRuleBuilder<TDestination, TSource>
         where TDestination : class
         where TSource : class
-    {
-        IWaylessConfiguration WaylessConfiguration { get; }
-
+    {        
         IDictionary<string, MemberInfo> DestinationFields { get; }
         IDictionary<string, MemberInfo> SourceFields { get; }
         IList<string> FieldSkips { get; }
         IDictionary<string, Expression> FieldExpressions { get; }
-
         bool IsMapUpToDate { get; }
+        IExpressionBuilder ExpressionBuilder { get; set; }
+        IMatchMaker MatchMaker { get; set; }
+        bool AutoMatchMembers { get; set; }
 
         ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression);
         ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression, Expression<Func<TSource, bool>> mapOnCondition);
