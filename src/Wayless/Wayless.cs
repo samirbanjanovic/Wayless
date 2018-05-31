@@ -20,10 +20,14 @@ namespace Wayless
         private readonly IList<string> _fieldSkips;
         private readonly IDictionary<string, Expression> _fieldExpressions;
 
+        private readonly bool _autoMatchMembers;
+        private readonly IExpressionBuilder _expressionBuilder;
+        private readonly IMatchMaker _matchMaker;
+
         /// <summary>
         /// object containing expression builder and field match maker
         /// </summary>
-        private readonly IWaylessConfiguration _waylessConfiguration;
+        //private readonly IWaylessConfiguration _waylessConfiguration;
 
         // Indicates if the _compiledMap action has the latest rules
         // each time mapping is modified this flag will be switched
@@ -33,27 +37,36 @@ namespace Wayless
 
         private Action<TDestination, TSource> _map;
         
-        public Wayless(IWaylessConfiguration waylessConfiguration)
-        {
-            _waylessConfiguration = waylessConfiguration;
+        //public Wayless(IWaylessConfiguration waylessConfiguration)
+        //{
+        //    // add null check to expression and match maker
+        //    _expressionBuilder = waylessConfiguration.ExpressionBuilder;
+        //    _matchMaker = waylessConfiguration.MatchMaker;
 
-            _isMapUpToDate = false;
+        //    _autoMatchMembers = waylessConfiguration.AutoMatchMembers;
+            
+        //    _isMapUpToDate = false;
 
-            _fieldExpressions = new Dictionary<string, Expression>();
-            _fieldSkips = new List<string>();
+        //    _fieldExpressions = new Dictionary<string, Expression>();
+        //    _fieldSkips = new List<string>();
 
-            _destinationFields = DestinationType.ToMemberInfoDictionary(true);
-            _sourceFields = SourceType.ToMemberInfoDictionary();
-        }
+        //    _destinationFields = DestinationType.ToMemberInfoDictionary(true);
+        //    _sourceFields = SourceType.ToMemberInfoDictionary();
+        //}
 
-        public Wayless()
-            : this(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>())
-        { }
+        //public Wayless()
+        //    : this(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>())
+        //{ }
 
         internal Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
         {
-            _waylessConfiguration = setRuleBuilder.WaylessConfiguration;
+            // add null check to expression and match maker
 
+            _matchMaker = setRuleBuilder.MatchMaker;
+            _expressionBuilder = setRuleBuilder.ExpressionBuilder;
+
+            _autoMatchMembers = setRuleBuilder.AutoMatchMembers;
+            
             _isMapUpToDate = setRuleBuilder.IsMapUpToDate;
 
             _fieldExpressions = setRuleBuilder.FieldExpressions;
@@ -146,7 +159,7 @@ namespace Wayless
 
             if (!_fieldSkips.Contains(destination))
             {
-                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
+                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -182,7 +195,7 @@ namespace Wayless
             var destination = GetMemberName(destinationExpression);
             if (!_fieldSkips.Contains(destination))
             {
-                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
+                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -242,13 +255,12 @@ namespace Wayless
         {
             if (!_isMapUpToDate)
             {
-                if (_waylessConfiguration.MatchMaker != null && _waylessConfiguration.AutoMatchMembers)
+                if (_matchMaker != null && _autoMatchMembers)
                 {
                     AutomatchMembers();
                 }
                 
-                _map = _waylessConfiguration.ExpressionBuilder
-                                            .CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
+                _map = _expressionBuilder.CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
                 _isMapUpToDate = true;
             }
         }
@@ -261,10 +273,10 @@ namespace Wayless
                                                          .Select(x => x.Value)
                                                          .ToList();
             
-            var matchedPairs = _waylessConfiguration.MatchMaker.FindMemberPairs(unmappedDestinations, _sourceFields.Values);
+            var matchedPairs = _matchMaker.FindMemberPairs(unmappedDestinations, _sourceFields.Values);
             foreach (var pair in matchedPairs)
             {
-                var expression = _waylessConfiguration.ExpressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
+                var expression = _expressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
                 _fieldExpressions.Add(pair.DestinationMember.Name, expression);
             }
         }

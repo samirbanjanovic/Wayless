@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.30.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -17,9 +17,15 @@
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
     <PackageReleaseNotes>Removed several WayMore methods to simplify usage of API.  Went ahead removed ability to request mapper with new configuration, this should be done via regular instanciation.  To edit a configuration through WayMore use the SetRules method. More details available on https://samirbanjanovic.github.io/Wayless/
 </PackageReleaseNotes>
-    <AssemblyVersion>0.30.0.0</AssemblyVersion>
-    <FileVersion>0.30.0.0</FileVersion>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="WaylessConfiguration\**" />
+    <EmbeddedResource Remove="WaylessConfiguration\**" />
+    <None Remove="WaylessConfiguration\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="WaylessGeneric.cs" />

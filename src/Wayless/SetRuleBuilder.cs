@@ -12,10 +12,8 @@ namespace Wayless
         where TDestination : class
         where TSource : class
     {
-        public SetRuleBuilder(IWaylessConfiguration waylessConfiguration)
+        public SetRuleBuilder()
         {
-            WaylessConfiguration = waylessConfiguration;
-
             IsMapUpToDate = false;
 
             FieldExpressions = new Dictionary<string, Expression>();
@@ -29,14 +27,10 @@ namespace Wayless
         public IDictionary<string, MemberInfo> SourceFields { get; }
         public IList<string> FieldSkips { get; }
         public IDictionary<string, Expression> FieldExpressions { get; }
-
         public bool IsMapUpToDate { get; private set; }
-
-
-        /// <summary>
-        /// object containing expression builder and field match maker
-        /// </summary>
-        public IWaylessConfiguration WaylessConfiguration { get; }
+        public IExpressionBuilder ExpressionBuilder { get; set; }
+        public IMatchMaker MatchMaker { get; set; }
+        public bool AutoMatchMembers { get; set; } = true;
 
         /// <summary>
         /// Create a mapping rule between destination property and 
@@ -67,7 +61,7 @@ namespace Wayless
 
             if (!FieldSkips.Contains(destination))
             {
-                var expression = WaylessConfiguration.ExpressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
+                var expression = ExpressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
 
                 RegisterFieldExpression(destination, expression);
 
@@ -103,7 +97,7 @@ namespace Wayless
             var destination = GetMemberName(destinationExpression);
             if (!FieldSkips.Contains(destination))
             {
-                var expression = WaylessConfiguration.ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
+                var expression = ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
 
                 RegisterFieldExpression(destination, expression);
 
