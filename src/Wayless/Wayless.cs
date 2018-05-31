@@ -37,27 +37,6 @@ namespace Wayless
 
         private Action<TDestination, TSource> _map;
         
-        //public Wayless(IWaylessConfiguration waylessConfiguration)
-        //{
-        //    // add null check to expression and match maker
-        //    _expressionBuilder = waylessConfiguration.ExpressionBuilder;
-        //    _matchMaker = waylessConfiguration.MatchMaker;
-
-        //    _autoMatchMembers = waylessConfiguration.AutoMatchMembers;
-            
-        //    _isMapUpToDate = false;
-
-        //    _fieldExpressions = new Dictionary<string, Expression>();
-        //    _fieldSkips = new List<string>();
-
-        //    _destinationFields = DestinationType.ToMemberInfoDictionary(true);
-        //    _sourceFields = SourceType.ToMemberInfoDictionary();
-        //}
-
-        //public Wayless()
-        //    : this(WaylessConfigurationBuilder.GetDefaultConfiguration<TDestination, TSource>())
-        //{ }
-
         internal Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
         {
             // add null check to expression and match maker
@@ -93,6 +72,11 @@ namespace Wayless
         /// <param name="sourceObject">Object to read values from</param>
         public void Map(TDestination destinationObject, TSource sourceObject)
         {
+            if(destinationObject == null || sourceObject == null)
+            {
+                return;
+            }
+
             InternalMap(destinationObject, sourceObject);
         }
 
@@ -106,10 +90,18 @@ namespace Wayless
         /// <returns>Collection of mapped objects</returns>
         public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList)
         {
+            if(sourceList == null)
+            {
+                return null;
+            }
+
             IList<TDestination> mappedObjects = new List<TDestination>();
             foreach (var sourceObject in sourceList)
             {
-                mappedObjects.Add(Map(sourceObject));
+                if(sourceObject != null)
+                {
+                    mappedObjects.Add(Map(sourceObject));
+                }                
             }
 
             return mappedObjects;
@@ -123,6 +115,11 @@ namespace Wayless
         /// <returns>Mapped object</returns>
         public TDestination Map(TSource sourceObject)
         {
+            if(sourceObject == null)
+            {
+                return null;
+            }
+
             TDestination destinationObject = _createDestinationInstance();
 
             InternalMap(destinationObject, sourceObject);
