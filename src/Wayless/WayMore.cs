@@ -26,7 +26,7 @@ namespace Wayless
         public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperRules)
                     where TDestination : class
                     where TSource : class
-        {
+        {            
             var setRuleBuilder = new SetRuleBuilder<TDestination, TSource>().UseDefaults();
             mapperRules(setRuleBuilder);
 

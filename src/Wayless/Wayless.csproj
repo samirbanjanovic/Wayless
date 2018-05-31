@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1</Version>
+    <Version>1.5.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -15,10 +15,15 @@
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
     <PackageIconUrl></PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
-    <PackageReleaseNotes>Removed Configuration builder. Mappers now have a single point of configuration, ISetRuleBuilder.  Added JsonFileMatchMaker that read a simple "Destination":"Source" json file to map objects based on member names. Added extension methdos for SetRuleBuilder for easier configuration
+    <PackageReleaseNotes>Major changes to how mapper functions.
+Split expression building further from mapper to SetRuleBuilder.
+Mapper is now only responsible for mapping objects.
+Removed Configuration builder. Mappers now have a single point of configuration, ISetRuleBuilder.  Added JsonFileMatchMaker that read a simple "Destination":"Source" json file to map objects based on member names. Added extension methdos for SetRuleBuilder for easier configuration
+Updated documentation available at https://samirbanjanovic.github.io/Wayless/
 </PackageReleaseNotes>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>

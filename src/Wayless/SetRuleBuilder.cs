@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -18,8 +19,6 @@ namespace Wayless
         /// </summary>
         public SetRuleBuilder()
         {
-            IsMapUpToDate = false;
-
             FieldExpressions = new Dictionary<string, Expression>();
             FieldSkips = new List<string>();
 
@@ -32,10 +31,10 @@ namespace Wayless
         public IDictionary<string, MemberInfo> DestinationFields { get; }
         public IDictionary<string, MemberInfo> SourceFields { get; }
         public IDictionary<string, Expression> FieldExpressions { get; }
-        public IList<string> FieldSkips { get; }        
-        public bool IsMapUpToDate { get; private set; }        
+        public IList<string> FieldSkips { get; }           
         public bool AutoMatchMembers { get; set; } = true;
 
+        public bool IsFinalized { get; private set; }
         /// <summary>
         /// Create a mapping rule between destination property and 
         /// </summary>
@@ -44,7 +43,7 @@ namespace Wayless
         /// <returns>Current instance of WaylessMap</returns>
         public ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
                                                       , Expression<Func<TSource, object>> sourceExpression)
-        {
+        {            
             FieldMap(destinationExpression, sourceExpression, null);
 
             return this;
@@ -65,11 +64,10 @@ namespace Wayless
 
             if (!FieldSkips.Contains(destination))
             {
+                IsFinalized = false;
                 var expression = ExpressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
 
                 RegisterFieldExpression(destination, expression);
-
-                IsMapUpToDate = false;
             }
 
             return this;
@@ -82,7 +80,7 @@ namespace Wayless
         /// <param name="value">Value to assign</param>
         /// <returns>Current instance of WaylessMap</returns>
         public ISetRuleBuilder<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
-        {
+        {            
             FieldSet(destinationExpression, value, null);
             return this;
         }
@@ -101,11 +99,10 @@ namespace Wayless
             var destination = GetMemberName(destinationExpression);
             if (!FieldSkips.Contains(destination))
             {
+                IsFinalized = false;
                 var expression = ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
 
                 RegisterFieldExpression(destination, expression);
-
-                IsMapUpToDate = false;
             }
             return this;
         }
@@ -120,6 +117,7 @@ namespace Wayless
 
             if (!FieldSkips.Contains(ignore))
             {
+                IsFinalized = false;
                 FieldSkips.Add(ignore);
             }
 
@@ -128,9 +126,31 @@ namespace Wayless
                 FieldExpressions.Remove(ignore);
             }
 
-            IsMapUpToDate = false;
             return this;
         }
+
+        public void FinalizeRules()
+        {
+            if (MatchMaker == null)
+            {
+                throw new NullReferenceException(nameof(MatchMaker));
+            }
+
+            var unmappedDestinations = DestinationFields.Where(x => !FieldExpressions.Keys.Contains(x.Key)
+                                                                  && !FieldSkips.Contains(x.Key))
+                                                         .Select(x => x.Value)
+                                                         .ToList();
+
+            var matchedPairs = MatchMaker.FindMemberPairs(unmappedDestinations, SourceFields.Values);
+            foreach (var pair in matchedPairs)
+            {
+                var expression = ExpressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
+                FieldExpressions.Add(pair.DestinationMember.Name, expression);
+            }
+
+            IsFinalized = true;
+        }
+
 
         private static string GetMemberName<T>(Expression<Func<T, object>> expression)
         {
@@ -149,8 +169,6 @@ namespace Wayless
             {
                 FieldExpressions.Add(destination, expression);
             }
-
-            IsMapUpToDate = false;
 
             return this;
         }

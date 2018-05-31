@@ -75,7 +75,7 @@ namespace Wayless.Tests
                 cfg.FieldMap(x => x.Nickname, s => s.FirstName)
                    .FieldMap(x => x.FirstName, s => s.Nickname);
             });
-           
+
             var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual(person.Nickname, personDto.FirstName);
@@ -151,12 +151,12 @@ namespace Wayless.Tests
         public void TestFieldSetWithCondition()
         {
             var person = Person.Create();
-            var mapper = WayMore.Wayless
-                                .Get<PersonDTO, Person>();
+            WayMore
+                .Wayless
+                .SetRules<PersonDTO, Person>(cfg => cfg.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny"));
 
-            mapper.FieldSet(x => x.Phone, "8675309", x => x.Nickname == "Jenny");
 
-            var personDto = mapper.Map(person);
+            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
 
             Assert.AreEqual("8675309", personDto.Phone);
         }

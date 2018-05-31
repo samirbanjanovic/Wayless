@@ -15,47 +15,22 @@ namespace Wayless
     {
         /// Type activator. Using static compiled expression for improved performance
         private static readonly Func<TDestination> _createDestinationInstance = Helpers.LambdaCreateInstance<TDestination>();
-        private readonly IDictionary<string, MemberInfo> _destinationFields;
-        private readonly IDictionary<string, MemberInfo> _sourceFields;
-        private readonly IList<string> _fieldSkips;
-        private readonly IDictionary<string, Expression> _fieldExpressions;
-
-        private readonly bool _autoMatchMembers;
-        private readonly IExpressionBuilder _expressionBuilder;
-        private readonly IMatchMaker _matchMaker;
-
-        /// <summary>
-        /// object containing expression builder and field match maker
-        /// </summary>
-        //private readonly IWaylessConfiguration _waylessConfiguration;
-
-        // Indicates if the _compiledMap action has the latest rules
-        // each time mapping is modified this flag will be switched
-        // to false, letting Wayless know to compile a new 
-        // mapping function from it's collected expressions
-        private bool _isMapUpToDate;
 
         private Action<TDestination, TSource> _map;
-       
+
         public Wayless(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
         {
-            if(setRuleBuilder.ExpressionBuilder == null)
+            if (setRuleBuilder.ExpressionBuilder == null)
             {
                 throw new NullReferenceException("SetRuleBuilder.ExpressionBuilder");
             }
 
-            _matchMaker = setRuleBuilder.MatchMaker;
-            _expressionBuilder = setRuleBuilder.ExpressionBuilder;
+            if (!setRuleBuilder.IsFinalized)
+            {
+                setRuleBuilder.FinalizeRules();
+            }
 
-            _autoMatchMembers = setRuleBuilder.AutoMatchMembers;
-            
-            _isMapUpToDate = setRuleBuilder.IsMapUpToDate;
-
-            _fieldExpressions = setRuleBuilder.FieldExpressions;
-            _fieldSkips = setRuleBuilder.FieldSkips;
-
-            _destinationFields = setRuleBuilder.DestinationFields;
-            _sourceFields = setRuleBuilder.SourceFields;
+            _map = CompileMap(setRuleBuilder);
         }
 
         /// <summary>
@@ -75,12 +50,12 @@ namespace Wayless
         /// <param name="sourceObject">Object to read values from</param>
         public void Map(TDestination destinationObject, TSource sourceObject)
         {
-            if(destinationObject == null || sourceObject == null)
+            if (destinationObject == null || sourceObject == null)
             {
                 return;
             }
 
-            InternalMap(destinationObject, sourceObject);
+            _map(destinationObject, sourceObject);
         }
 
         /// <summary>
@@ -93,7 +68,7 @@ namespace Wayless
         /// <returns>Collection of mapped objects</returns>
         public IEnumerable<TDestination> Map(IEnumerable<TSource> sourceList)
         {
-            if(sourceList == null)
+            if (sourceList == null)
             {
                 return null;
             }
@@ -101,10 +76,7 @@ namespace Wayless
             IList<TDestination> mappedObjects = new List<TDestination>();
             foreach (var sourceObject in sourceList)
             {
-                if(sourceObject != null)
-                {
-                    mappedObjects.Add(Map(sourceObject));
-                }                
+                mappedObjects.Add(Map(sourceObject));
             }
 
             return mappedObjects;
@@ -118,182 +90,22 @@ namespace Wayless
         /// <returns>Mapped object</returns>
         public TDestination Map(TSource sourceObject)
         {
-            if(sourceObject == null)
+            if (sourceObject == null)
             {
                 return null;
             }
 
             TDestination destinationObject = _createDestinationInstance();
 
-            InternalMap(destinationObject, sourceObject);
+            _map(destinationObject, sourceObject);
 
             return destinationObject;
         }
 
-        /// <summary>
-        /// Create a mapping rule between destination property and 
-        /// </summary>
-        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
-        /// <param name="sourceExpression">Expression for property to be read in source type</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
-                                                      , Expression<Func<TSource, object>> sourceExpression)
+
+        private static Action<TDestination, TSource> CompileMap(ISetRuleBuilder<TDestination, TSource> setRuleBuilder)
         {
-            FieldMap(destinationExpression, sourceExpression, null);
-
-            return this;
+            return setRuleBuilder.ExpressionBuilder.CompileExpressionMap<TDestination, TSource>(setRuleBuilder.FieldExpressions.Values);
         }
-
-        /// <summary>
-        /// Create a mapping rule between destination property and 
-        /// </summary>
-        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
-        /// <param name="sourceExpression">Expression for property to be read in source type</param>
-        /// <param name="condition">Conditition to be evaluated for determening if values should be mapped</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression
-                                                      , Expression<Func<TSource, object>> sourceExpression
-                                                      , Expression<Func<TSource, bool>> condition)
-        {
-            var destination = GetMemberName(destinationExpression);
-
-            if (!_fieldSkips.Contains(destination))
-            {
-                var expression = _expressionBuilder.GetMapExpression(destinationExpression, sourceExpression, condition);
-
-                RegisterFieldExpression(destination, expression);
-
-                _isMapUpToDate = false;
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Create mapping rule to explicitly assign value to destination property
-        /// </summary>
-        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
-        /// <param name="value">Value to assign</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value)
-        {
-            FieldSet(destinationExpression, value, null);
-            return this;
-        }
-
-        /// <summary>
-        /// Create mapping rule to explicitly assign value to destination property
-        /// </summary>
-        /// <param name="destinationExpression">Expression for property to be set in destination type</param>
-        /// <param name="value">Value to assign</param>
-        /// <param name="condition">Conditition to be evaluated for determening if values should be set</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression
-                                                      , object value
-                                                      , Expression<Func<TSource, bool>> setCondition)
-        {
-            var destination = GetMemberName(destinationExpression);
-            if (!_fieldSkips.Contains(destination))
-            {
-                var expression = _expressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
-
-                RegisterFieldExpression(destination, expression);
-
-                _isMapUpToDate = false;
-            }
-            return this;
-        }
-        /// <summary>
-        /// Create mapping rule for properties to be skipped in destination type
-        /// </summary>
-        /// <param name="ignoreAtDestinationExpression">Expression for property to be skipped in destination type</param>
-        /// <returns>Current instance of WaylessMap</returns>
-        public IWayless<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> skipperName)
-        {
-            var ignore = GetMemberName(skipperName);
-
-            if (!_fieldSkips.Contains(ignore))
-            {
-                _fieldSkips.Add(ignore);
-            }
-
-            if (_fieldExpressions.ContainsKey(ignore))
-            {
-                _fieldExpressions.Remove(ignore);
-            }
-
-            _isMapUpToDate = false;
-            return this;
-        }
-
-        #region helpers
-        private IWayless<TDestination, TSource> RegisterFieldExpression(string destination, Expression expression)
-        {
-            if (_fieldExpressions.ContainsKey(destination))
-            {
-                _fieldExpressions[destination] = expression;
-            }
-            else
-            {
-                _fieldExpressions.Add(destination, expression);
-            }
-
-            _isMapUpToDate = false;
-
-            return this;
-        }
-
-        // apply all mapping rules
-        private void InternalMap(TDestination destinationObject, TSource sourceObject)
-        {
-            CompileMapFunction();
-
-            _map(destinationObject, sourceObject);
-        }
-
-        private void CompileMapFunction()
-        {
-            if (!_isMapUpToDate)
-            {
-                if (_matchMaker != null && _autoMatchMembers)
-                {
-                    AutomatchMembers();
-                }
-                
-                _map = _expressionBuilder.CompileExpressionMap<TDestination, TSource>(_fieldExpressions.Values);
-                _isMapUpToDate = true;
-            }
-        }
-
-        // try to automatically map any unmapped members
-        private void AutomatchMembers()
-        {
-            if (_matchMaker == null)
-            {
-                throw new NullReferenceException("MatchMaker is null");
-            }
-
-            var unmappedDestinations = _destinationFields.Where(x => !_fieldExpressions.Keys.Contains(x.Key)
-                                                                  && !_fieldSkips.Contains(x.Key))
-                                                         .Select(x => x.Value)
-                                                         .ToList();
-            
-            var matchedPairs = _matchMaker.FindMemberPairs(unmappedDestinations, _sourceFields.Values);
-            foreach (var pair in matchedPairs)
-            {
-                var expression = _expressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
-                _fieldExpressions.Add(pair.DestinationMember.Name, expression);
-            }
-        }
-
-        // get property name
-        private static string GetMemberName<T>(Expression<Func<T, object>> expression)         
-        {
-            var propertyInfo = expression.GetMemberInfo();
-
-            return propertyInfo.Name;
-        }
-
-        #endregion helpers
     }
 }
