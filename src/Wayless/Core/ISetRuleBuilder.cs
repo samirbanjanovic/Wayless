@@ -14,16 +14,18 @@ namespace Wayless.Core
         IDictionary<string, MemberInfo> SourceFields { get; }
         IList<string> FieldSkips { get; }
         IDictionary<string, Expression> FieldExpressions { get; }
-        bool IsMapUpToDate { get; }
         IExpressionBuilder ExpressionBuilder { get; set; }
         IMatchMaker MatchMaker { get; set; }
         bool AutoMatchMembers { get; set; }
+        bool IsFinalized { get; }
 
         ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression);
         ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression, Expression<Func<TSource, bool>> mapOnCondition);
         ISetRuleBuilder<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object fieldValue);
         ISetRuleBuilder<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> setCondition);
         ISetRuleBuilder<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression);
+
+        void FinalizeRules();
 
     }
 }

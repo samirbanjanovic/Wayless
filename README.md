@@ -4,7 +4,7 @@ A basic object-to-object mapper.
 To map from a source to destination object create an instance of the Wayless mapper.
 By default the mapper will match source and destination properties by name. 
 
-	var mapper = new Wayless<PersonDTO, Person>();
+	var mapper = new Wayless<PersonDTO, Person>(new SetRuleBuilder<PerstonDTO, Person>().UseDefault());
 
 Mapping rules are applied via a call to the `Map` methods.
 
@@ -28,9 +28,22 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 			   , src => src.Phone == "8675309")
 		    .FieldSet(dest => dest.Nickname
 			    , "Jenny"
-			    , src => src.Phone == "8675309"); 
+			    , src => src.Phone == "8675309")
+			.FinalizeRules(); 
 	}
 
+Using a simple Json file you can pair destination and source properties using the `JsonFileMatchMaker`
+
+	WayMore
+	.Wayless
+	.SetRules<PersonDTO, Person>(cfg =>
+    {
+        cfg.UseJsonMappingMatchMaker(JSON_MAPPING_PATH)
+		   .FinalizeRules(); 
+    });
+
+A call to `FinalizeRules()` is optional. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
+go ahead and make the call prior to compiling the map function.
 
 # WayMore
 
@@ -47,7 +60,8 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 	{
 		cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 		    .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-		    .FieldSet(d => d.CreateTime, DateTime.Now);
+		    .FieldSet(d => d.CreateTime, DateTime.Now)
+			.FinalizeRules(); 
 	});
 
 	var personDTO = WayMore.Wayless.Map<PersonDTO, Person>(person);
@@ -60,12 +74,14 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 	{
 		cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 		   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-		   .FieldSet(d => d.CreateTime, DateTime.Now);
+		   .FieldSet(d => d.CreateTime, DateTime.Now)
+		   .FinalizeRules(); 
 	})
 	.SetRules<PersonDTONested, PersonNested>(cfg =>
 	{
 		var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
-		cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+		cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))
+		   .FinalizeRules(); 
 	});
 
 
@@ -75,26 +91,7 @@ To request a cached instance (for repetative calls and better performance) use t
 		     .Wayless
 		     .Get<PersonDTONested, PersonNested>();
 
-Once you have a mapper instance you can further set rules or call the map function
-
-	mapper.FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-	      .FieldSet(d => d.CreateTime, DateTime.Now);
-
 	mapper.Map(person);
-
-
-# Complex Map
-
-`Wayless` currently does not support complex mappings directly. To perform a nested complex map you can use `FieldMap`
-with a call to `WayMore`. To achieve better performance assign the nested mapper and pass the reference, instead of 
-passing the call to `WayMore`
-	
-	var mapper = WayMore.Wayless
-			.Get<PersonDTONested, PersonNested>();
-
-	var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
-	mapper.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
-	var personDtoNested = mapper.Map(personNested);
 
 
 # More
@@ -114,12 +111,14 @@ Once registered you can change your `Configure` method to expect `IWayMore`.
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
 			   .FieldMap(d => d.Nickname, s => $"{s.LastName}, {s.FirstName}")
-			   .FieldSet(d => d.CreateTime, DateTime.Now);
+			   .FieldSet(d => d.CreateTime, DateTime.Now)
+			   .FinalizeRules(); 
 		})
 		.SetRules<PersonDTONested, PersonNested>(cfg =>
 		{
 			var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
-			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson));
+			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))
+			   .FinalizeRules(); 
 		});
 		
 		if (env.IsDevelopment())

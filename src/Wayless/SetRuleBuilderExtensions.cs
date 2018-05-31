@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Wayless.Core;
+using Wayless.PairMatching;
 
 namespace Wayless
 {
@@ -41,6 +42,16 @@ namespace Wayless
            where TSource : class
         {
             setRuleBuilder.AutoMatchMembers = false;
+
+            return setRuleBuilder;
+        }
+
+        public static ISetRuleBuilder<TDestination, TSource> UseJsonMappingMatchMaker<TDestination, TSource>(this ISetRuleBuilder<TDestination, TSource> setRuleBuilder, string path)
+            where TDestination : class
+            where TSource : class
+        {
+            setRuleBuilder.AutoMatchMembers = true;
+            setRuleBuilder.MatchMaker = new JsonFileMatchMaker(path);
 
             return setRuleBuilder;
         }
