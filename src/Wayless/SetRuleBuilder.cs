@@ -129,25 +129,31 @@ namespace Wayless
             return this;
         }
 
+        /// <summary>
+        /// Performs call to MatchMaker if AutoMatchMembres is True
+        /// </summary>
         public void FinalizeRules()
         {
-            if (MatchMaker == null)
+            if (AutoMatchMembers)
             {
-                throw new NullReferenceException(nameof(MatchMaker));
+                if (MatchMaker == null)
+                {
+                    throw new NullReferenceException(nameof(MatchMaker));
+                }
+
+                var unmappedDestinations = DestinationFields.Where(x => !FieldExpressions.Keys.Contains(x.Key)
+                                                                      && !FieldSkips.Contains(x.Key))
+                                                             .Select(x => x.Value)
+                                                             .ToList();
+
+                var matchedPairs = MatchMaker.FindMemberPairs(unmappedDestinations, SourceFields.Values);
+                foreach (var pair in matchedPairs)
+                {
+                    var expression = ExpressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
+                    FieldExpressions.Add(pair.DestinationMember.Name, expression);
+                }
             }
-
-            var unmappedDestinations = DestinationFields.Where(x => !FieldExpressions.Keys.Contains(x.Key)
-                                                                  && !FieldSkips.Contains(x.Key))
-                                                         .Select(x => x.Value)
-                                                         .ToList();
-
-            var matchedPairs = MatchMaker.FindMemberPairs(unmappedDestinations, SourceFields.Values);
-            foreach (var pair in matchedPairs)
-            {
-                var expression = ExpressionBuilder.GetMapExpression<TSource>(pair.DestinationMember, pair.SourceMember);
-                FieldExpressions.Add(pair.DestinationMember.Name, expression);
-            }
-
+           
             IsFinalized = true;
         }
 
