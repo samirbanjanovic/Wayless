@@ -9,19 +9,9 @@ namespace Wayless
     public sealed class WayMore 
         : IWayMore
     {
-        private static readonly Lazy<WayMore> _instance = new Lazy<WayMore>(() => new WayMore());
+        private readonly ConcurrentDictionary<object, object> _mappers = new ConcurrentDictionary<object, object>();
 
-        private static readonly ConcurrentDictionary<object, object> _mappers = new ConcurrentDictionary<object, object>();
-
-        public static IWayMore Wayless
-        {
-            get
-            {
-                return _instance.Value;
-            }
-        }
-
-        private WayMore() { }
+        public WayMore() { }
 
         public IWayMore SetRules<TDestination, TSource>(Action<ISetRuleBuilder<TDestination, TSource>> mapperRules)
                     where TDestination : class
