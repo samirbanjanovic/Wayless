@@ -118,6 +118,13 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
+            _waymore
+            .SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldSet(x => x.FirstName, () => "1112223344")
+                   .FinalizeRules();
+            });
+
             TestNewConfiguration();
 
             // primer call to cache and compile expressions

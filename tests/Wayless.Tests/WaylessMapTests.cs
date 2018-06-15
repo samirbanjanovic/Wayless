@@ -146,6 +146,20 @@ namespace Wayless.Tests
         }
 
         [TestMethod]
+        public void TestFieldSetFunction()
+        {
+            var person = Person.Create();
+            _waymore.SetRules<PersonDTO, Person>(cfg =>
+            {
+                cfg.FieldSet(x => x.Nickname, () => "Jacqueline");
+            });
+
+            var personDto = _waymore.Map<PersonDTO, Person>(person);
+
+            Assert.AreEqual("Jacqueline", personDto.Nickname);
+        }
+
+        [TestMethod]
         public void TestFieldSetWithCondition()
         {
             var person = Person.Create();

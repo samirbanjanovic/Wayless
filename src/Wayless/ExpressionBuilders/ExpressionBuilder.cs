@@ -115,8 +115,18 @@ namespace Wayless
         public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
             where TSource : class
         {
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                              , BuildCastExpression(Expression.Constant(value), destinationProperty));
+            Expression valueExpression = null;
+
+            if (value is Expression)
+            {
+                valueExpression = Expression.Invoke((Expression)value);
+            }
+            else
+            {
+                valueExpression = BuildCastExpression(Expression.Constant(value), destinationProperty);
+            }
+
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), valueExpression);
 
 
             if (condition != null)
