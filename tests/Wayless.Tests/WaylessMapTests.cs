@@ -137,12 +137,12 @@ namespace Wayless.Tests
             var person = Person.Create();
             _waymore.SetRules<PersonDTO, Person>(cfg =>
             {
-                cfg.FieldSet(x => x.Nickname, "Jacqueline");
+                cfg.FieldSet(x => x.Nickname, "Josef");
             });
 
             var personDto = _waymore.Map<PersonDTO, Person>(person);
 
-            Assert.AreEqual("Jacqueline", personDto.Nickname);
+            Assert.AreEqual("Josef", personDto.Nickname);
         }
 
         [TestMethod]
