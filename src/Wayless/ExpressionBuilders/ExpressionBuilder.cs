@@ -117,7 +117,7 @@ namespace Wayless
         {
             Expression assignmentExpression = Expression.Constant(value);
 
-            if(destinationProperty.DeclaringType.IsAssignableFrom(value.GetType()))
+            if(destinationProperty.GetUnderlyingType().IsAssignableFrom(value.GetType()))
             {
                 assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
             }
@@ -147,6 +147,8 @@ namespace Wayless
         {
             Expression valueExpression = Expression.Invoke(value);
 
+            
+
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), valueExpression);
 
             if (condition != null)
@@ -165,7 +167,7 @@ namespace Wayless
         {
             Expression assignmentExpression = Expression.PropertyOrField(_source, sourceProperty.Name);
 
-            if(!destinationProperty.DeclaringType.IsAssignableFrom(sourceProperty.DeclaringType))
+            if(!destinationProperty.GetUnderlyingType().IsAssignableFrom(sourceProperty.GetUnderlyingType()))
             {
                 assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
             }
