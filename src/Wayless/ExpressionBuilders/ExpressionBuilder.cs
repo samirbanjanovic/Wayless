@@ -115,9 +115,14 @@ namespace Wayless
         public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
             where TSource : class
         {
-            Expression valueExpression = BuildCastExpression(Expression.Constant(value), destinationProperty);
+            Expression assignmentExpression = Expression.Constant(value);
 
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), valueExpression);
+            if(destinationProperty.DeclaringType.IsAssignableFrom(value.GetType()))
+            {
+                assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
+            }
+
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), assignmentExpression);
 
 
             if (condition != null)
@@ -158,8 +163,15 @@ namespace Wayless
 
         private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
+            Expression assignmentExpression = Expression.PropertyOrField(_source, sourceProperty.Name);
+
+            if(!destinationProperty.DeclaringType.IsAssignableFrom(sourceProperty.DeclaringType))
+            {
+                assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
+            }
+
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
-                                                , BuildCastExpression(Expression.PropertyOrField(_source, sourceProperty.Name), destinationProperty));
+                                             , assignmentExpression);
 
 
             return expression;
