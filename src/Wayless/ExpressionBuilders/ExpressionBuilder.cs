@@ -7,8 +7,8 @@ using Wayless.Core;
 
 namespace Wayless
 {
-    public class ExpressionBuilder
-       : IExpressionBuilder
+     public class ExpressionBuilder
+        : IExpressionBuilder
     {
         private readonly ParameterExpression _destination;
         private readonly ParameterExpression _source;
@@ -59,14 +59,12 @@ namespace Wayless
             where TSource : class
         {
             MemberInfo sourceProperty = sourceExpression.GetMemberInfo();
-
             Expression expression = null;
             // assume function is not in form x => x.PropertyName
             if (sourceProperty == null)
             {
                 expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationMember.Name)
-                                             , BuildCastExpression(Expression.Invoke(sourceExpression, _source), destinationMember));
-
+                                             , GetWrapperForLambdaExpression(destinationMember, sourceExpression, true));
             }
             else
             {
@@ -97,11 +95,6 @@ namespace Wayless
         #endregion create assignment map
 
         #region create set map
-        public virtual Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
-            where TDestination : class
-        {
-            return GetMapExressionForExplicitSet<object>(destinationExpression.GetMemberInfo(), value, null);
-        }
 
         public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> condition = null)
             where TDestination : class
@@ -117,9 +110,10 @@ namespace Wayless
         {
             Expression assignmentExpression = Expression.Constant(value);
 
-            if(destinationProperty.GetUnderlyingType().IsAssignableFrom(value.GetType()))
+            Type destinationType = destinationProperty.GetUnderlyingType();
+            if (!destinationType.IsAssignableFrom(value.GetType()))
             {
-                assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
+                assignmentExpression = BuildCastExpression(assignmentExpression, destinationType);
             }
 
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), assignmentExpression);
@@ -133,23 +127,21 @@ namespace Wayless
             return expression;
         }
 
-        public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, Expression value, Expression<Func<TSource, bool>> condition = null)
+        public virtual Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationExpression, Expression setExpression, Expression<Func<TSource, bool>> condition = null)
             where TDestination : class
             where TSource : class
         {
-            var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), value, condition);
+            var expression = GetMapExressionForExplicitSet(destinationExpression.GetMemberInfo(), setExpression, condition);
 
             return expression;
         }
 
-        public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, Expression value, Expression<Func<TSource, bool>> condition = null)
+        public virtual Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationMember, Expression setExpression, Expression<Func<TSource, bool>> condition = null)
             where TSource : class
         {
-            Expression valueExpression = Expression.Invoke(value);
 
-            
-
-            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name), valueExpression);
+            var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationMember.Name)
+                                         , GetWrapperForLambdaExpression(destinationMember, setExpression, false));
 
             if (condition != null)
             {
@@ -162,14 +154,38 @@ namespace Wayless
 
 
         #region helpers
+        private Expression GetWrapperForLambdaExpression(MemberInfo destinationMember, Expression sourceExpression, bool useSourceType)
+        {
+            Expression expression = null;
+
+            if(useSourceType)
+            {
+                expression = Expression.Invoke(sourceExpression, _source);
+            }
+            else
+            {
+                expression = Expression.Invoke(sourceExpression);
+            }
+
+            Type destinationType = destinationMember.GetUnderlyingType();
+            LambdaExpression lambdaExpression = sourceExpression as LambdaExpression;
+
+            if (!destinationType.IsAssignableFrom(lambdaExpression.ReturnType))
+            {
+                return BuildCastExpression(expression, destinationType);
+            }
+
+            return expression;
+        }
 
         private Expression BuildMapExpressionForValueMap(MemberInfo destinationProperty, MemberInfo sourceProperty)
         {
             Expression assignmentExpression = Expression.PropertyOrField(_source, sourceProperty.Name);
 
-            if(!destinationProperty.GetUnderlyingType().IsAssignableFrom(sourceProperty.GetUnderlyingType()))
+            Type destinationType = destinationProperty.GetUnderlyingType();
+            if (!destinationType.IsAssignableFrom(sourceProperty.GetUnderlyingType()))
             {
-                assignmentExpression = BuildCastExpression(assignmentExpression, destinationProperty);
+                assignmentExpression = BuildCastExpression(assignmentExpression, destinationType);
             }
 
             var expression = Expression.Assign(Expression.PropertyOrField(_destination, destinationProperty.Name)
@@ -179,10 +195,8 @@ namespace Wayless
             return expression;
         }
 
-        private Expression BuildCastExpression(Expression valueExpression, MemberInfo destinationProperty)
+        private Expression BuildCastExpression(Expression valueExpression, Type destinationType)
         {
-            Type destinationType = destinationProperty.GetUnderlyingType();
-
             if (destinationType.IsValueType)
             {
                 return Expression.Convert(valueExpression, destinationType);
