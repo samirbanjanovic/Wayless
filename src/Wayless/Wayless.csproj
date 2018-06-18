@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.5.1</Version>
+    <Version>2.0.0</Version>
     <Authors>Samir Banjanovic</Authors>
     <Company />
     <Product>Wayless Object Mapper</Product>
@@ -15,11 +15,9 @@
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/SamirBanjanovic/Wayless/master/wayless-transition-one-way.png</PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
-    <PackageReleaseNotes>Moved expression interaction from Wayless to SetRuleBuilder. Once SetRuleBuilder is passed to mapper there's no turning back. Made API more fluent. Squashed dumb bugs.
-Updated documentation available at https://samirbanjanovic.github.io/Wayless/
-</PackageReleaseNotes>
-    <AssemblyVersion>1.5.1.0</AssemblyVersion>
-    <FileVersion>1.5.1.0</FileVersion>
+    <PackageReleaseNotes>Waymore is no longer a singleton. Added ability to pass funcs to FieldSet. Performance improvements. More at https://samirbanjanovic.github.io/Wayless/</PackageReleaseNotes>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType></RepositoryType>
   </PropertyGroup>

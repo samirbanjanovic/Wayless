@@ -12,14 +12,22 @@ Mapping rules are applied via a call to the `Map` methods.
 
 
 # Usage
+Unlike prior versions (before 2.0), you have to create an instance of the mapping store, WayMore.
+
+	WayMore _waymore = new WayMore();
+
+From here on you can use your WayMore instance to access and modify mappers. This adds flexibility and doesn't
+restrict you to using one set of rules for a pair of mappings. 
+
+By using an instance based store the flow of code is cleaner as well. Instead of calling `WayMore.Wayless.SetRules<TD,TS>` you use 
+your instance to `SetRules` - `_wayMoreInstance.SetRules<TD,TS>`. This makes the mappings only valid for that instance, not globally.
 
 Values can be mapped or set using the overloaded `FieldMap` and `FieldSet` methods. If auto matching is enabled 
 you can use `FieldSkip` to ignore a field.  
 
 Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
-	WayMore
-	.Wayless
+	_waymore
 	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		// set phone number to '8675309' if First
@@ -34,8 +42,7 @@ Both `FieldMap` and `FieldSet` have the ability to perform conditional mapping.
 
 Using a simple Json file you can pair destination and source properties using the `JsonFileMatchMaker`
 
-	WayMore
-	.Wayless
+	_waymore
 	.SetRules<PersonDTO, Person>(cfg =>
     {
         cfg.UseJsonMappingMatchMaker(jsonMappingPath)
@@ -54,8 +61,7 @@ overloaded `Get` method.
 To cache an instance of a mapper you can configure it ahead of time (application startup) and use it 
 later by calling the `Get` method, or directly use the mapper by calling the generic `Map` from `WayMore`.
 
-	WayMore
-	.Wayless
+	_waymore
 	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		cfg.FieldMap(d => d.FirstName, s => s.Nickname)
@@ -64,12 +70,11 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 		    .FinalizeRules(); 
 	});
 
-	var personDTO = WayMore.Wayless.Map<PersonDTO, Person>(person);
+	var personDTO = _waymore.Map<PersonDTO, Person>(person);
 
 `SetRules` returns a reference to `WayMore` to enable chained configurations 
 
-	WayMore
-	.Wayless
+	_waymore
 	.SetRules<PersonDTO, Person>(cfg =>
 	{
 		cfg.FieldMap(d => d.FirstName, s => s.Nickname)
@@ -79,7 +84,7 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 	})
 	.SetRules<PersonDTONested, PersonNested>(cfg =>
 	{
-		var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+		var nestedMapper = _waymore.Get<PersonDTO, Person>();
 		cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))
 		   .FinalizeRules(); 
 	});
@@ -87,9 +92,7 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 
 To request a cached instance (for repetative calls and better performance) use the overlaoded `Get` method
 
-	var mapper = WayMore
-		     .Wayless
-		     .Get<PersonDTONested, PersonNested>();
+	var mapper = _waymore.Get<PersonDTONested, PersonNested>();
 
 	mapper.Map(person);
 
@@ -99,7 +102,7 @@ To request a cached instance (for repetative calls and better performance) use t
 You can use waymore with any dependency injection API by registering the `IWayMore` interface as a singleton 
 implemented through `WayMore.Wayless`. If using ASP.NET Core this enables you to configure all your mappers in your `Startup.cs`
 
-	services.AddSingleton<IWayMore>(x => WayMore.Wayless);
+	services.AddSingleton<IWayMore, WayMore>();
 
 Once registered you can change your `Configure` method to expect `IWayMore`. 
 
@@ -116,7 +119,7 @@ Once registered you can change your `Configure` method to expect `IWayMore`.
 		})
 		.SetRules<PersonDTONested, PersonNested>(cfg =>
 		{
-			var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
+			var nestedMapper = waymore.Get<PersonDTO, Person>();
 			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))
 			   .FinalizeRules(); 
 		});
