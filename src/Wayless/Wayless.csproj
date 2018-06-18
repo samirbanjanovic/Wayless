@@ -13,7 +13,7 @@
     <PackageLicenseUrl>https://github.com/SamirBanjanovic/Wayless/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://samirbanjanovic.github.io/Wayless/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/SamirBanjanovic/Wayless</RepositoryUrl>
-    <PackageIconUrl></PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/SamirBanjanovic/Wayless/master/wayless-transition-one-way.png</PackageIconUrl>
     <PackageTags>object mapper, entity mapper, fluent</PackageTags>
     <PackageReleaseNotes>Moved expression interaction from Wayless to SetRuleBuilder. Once SetRuleBuilder is passed to mapper there's no turning back. Made API more fluent. Squashed dumb bugs.
 Updated documentation available at https://samirbanjanovic.github.io/Wayless/
@@ -21,6 +21,7 @@ Updated documentation available at https://samirbanjanovic.github.io/Wayless/
     <AssemblyVersion>1.5.1.0</AssemblyVersion>
     <FileVersion>1.5.1.0</FileVersion>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RepositoryType></RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

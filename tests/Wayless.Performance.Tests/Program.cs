@@ -113,6 +113,8 @@ namespace Wayless.Performance.Tests
     class Program
     {
         private static int Iterations = 1000;
+        private static readonly WayMore _waymore = new WayMore();
+
 
         static void Main(string[] args)
         {
@@ -139,17 +141,17 @@ namespace Wayless.Performance.Tests
         private static void TestNewConfiguration()
         {
             var person = Person.Create();
-            WayMore.Wayless
+            _waymore
             .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.FirstName, s => s.Nickname, s => s.Phone == "1112223344")
                    .FinalizeRules();
             });
 
-            var personDto0 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto0 = _waymore.Map<PersonDTO, Person>(person);
 
 
-            WayMore.Wayless
+            _waymore
             .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.Nickname, s => s.FirstName)
@@ -157,9 +159,9 @@ namespace Wayless.Performance.Tests
                    .FinalizeRules();
             });
 
-            var personDto = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto = _waymore.Map<PersonDTO, Person>(person);
 
-            WayMore.Wayless
+            _waymore
             .SetRules<PersonDTO, Person>(cfg =>
             {
                 cfg.FieldMap(x => x.FirstName, s => s.Nickname)
@@ -167,7 +169,7 @@ namespace Wayless.Performance.Tests
                    .FinalizeRules();
             });
 
-            var personDto2 = WayMore.Wayless.Map<PersonDTO, Person>(person);
+            var personDto2 = _waymore.Map<PersonDTO, Person>(person);
         }
 
         private static void RunMappers()
@@ -196,9 +198,9 @@ namespace Wayless.Performance.Tests
 
 
             stopwatch.Start();
-            WayMore.Wayless.Map<PersonDTO, Person>(person);
+            _waymore.Map<PersonDTO, Person>(person);
             stopwatch.Stop();
-            Console.WriteLine("WayMore.Wayless: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
+            Console.WriteLine("_waymore: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
             stopwatch.Reset();
 
 
@@ -247,7 +249,7 @@ namespace Wayless.Performance.Tests
             Person person = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Wayless.Get<PersonDTO, Person>();
+            var mapper = _waymore.Get<PersonDTO, Person>();
             for (int i = 0; i < Iterations; i++)
             {
                 var personDto = mapper.Map(person);
@@ -267,7 +269,7 @@ namespace Wayless.Performance.Tests
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
-            var personDtos = WayMore.Wayless.Map<PersonDTO, Person>(persons);
+            var personDtos = _waymore.Map<PersonDTO, Person>(persons);
 
             stopwatch.Stop();
             Console.WriteLine("Wayless Set Map: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
@@ -295,10 +297,10 @@ namespace Wayless.Performance.Tests
             person.NestedPerson = Person.Create();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            var mapper = WayMore.Wayless
+            var mapper = _waymore
                                 .SetRules<PersonDTONested, PersonNested>(rules =>
                                 {
-                                    var nm = WayMore.Wayless.Get<PersonDTO, Person>();
+                                    var nm = _waymore.Get<PersonDTO, Person>();
                                     rules.FieldMap(x => x.NestedPersonDTO, x => nm.Map(x.NestedPerson));
                                 })
                                 .Get<PersonDTONested, PersonNested>();
@@ -313,8 +315,8 @@ namespace Wayless.Performance.Tests
 
             Stopwatch stopwatch2 = Stopwatch.StartNew();
 
-            var nestedMapper = WayMore.Wayless.Get<PersonDTO, Person>();
-            var mapper2 = WayMore.Wayless
+            var nestedMapper = _waymore.Get<PersonDTO, Person>();
+            var mapper2 = _waymore
                                  .SetRules<PersonDTONested, PersonNested>(rules =>
                                  {
                                      rules.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))

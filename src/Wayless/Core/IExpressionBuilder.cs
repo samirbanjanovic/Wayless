@@ -25,10 +25,14 @@ namespace Wayless.Core
             where TDestination : class
             where TSource : class;
 
-        Expression GetMapExressionForExplicitSet<TDestination>(Expression<Func<TDestination, object>> destinationExpression, object value)
-            where TDestination : class;
-
         Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, object value, Expression<Func<TSource, bool>> condition = null)
+            where TSource : class;
+
+         Expression GetMapExressionForExplicitSet<TSource>(MemberInfo destinationProperty, Expression value, Expression<Func<TSource, bool>> condition = null)
+            where TSource : class;
+
+        Expression GetMapExressionForExplicitSet<TDestination, TSource>(Expression<Func<TDestination, object>> destinationProperty, Expression value, Expression<Func<TSource, bool>> condition = null)
+            where TDestination : class
             where TSource : class;
     }
 }

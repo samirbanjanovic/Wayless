@@ -85,6 +85,29 @@ namespace Wayless
             return this;
         }
 
+        public ISetRuleBuilder<TDestination, TSource> FieldSet<T>(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<T>> value)
+        {
+            FieldSet(destinationExpression, value, null);
+            return this;
+        }
+
+        public ISetRuleBuilder<TDestination, TSource> FieldSet<T>(Expression<Func<TDestination, object>> destinationExpression
+                                                                , Expression<Func<T>> value
+                                                                , Expression<Func<TSource, bool>> setCondition)
+        {          
+            // call sub method
+            var destination = GetMemberName(destinationExpression);
+            if (!FieldSkips.Contains(destination))
+            {
+                IsFinalized = false;
+                var expression = ExpressionBuilder.GetMapExressionForExplicitSet(destinationExpression, value, setCondition);
+
+                RegisterFieldExpression(destination, expression);
+            }
+            
+            return this;
+        }
+
         /// <summary>
         /// Create mapping rule to explicitly assign value to destination property
         /// </summary>

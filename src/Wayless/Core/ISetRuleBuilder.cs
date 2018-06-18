@@ -23,6 +23,8 @@ namespace Wayless.Core
         ISetRuleBuilder<TDestination, TSource> FieldMap(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<TSource, object>> sourceExpression, Expression<Func<TSource, bool>> mapOnCondition);
         ISetRuleBuilder<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object fieldValue);
         ISetRuleBuilder<TDestination, TSource> FieldSet(Expression<Func<TDestination, object>> destinationExpression, object value, Expression<Func<TSource, bool>> setCondition);
+        ISetRuleBuilder<TDestination, TSource> FieldSet<T>(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<T>> fieldValue);
+        ISetRuleBuilder<TDestination, TSource> FieldSet<T>(Expression<Func<TDestination, object>> destinationExpression, Expression<Func<T>> fieldValue, Expression<Func<TSource, bool>> setCondition);
         ISetRuleBuilder<TDestination, TSource> FieldSkip(Expression<Func<TDestination, object>> ignoreAtDestinationExpression);
 
         void FinalizeRules();
