@@ -99,17 +99,13 @@ To request a cached instance (for repetative calls and better performance) use t
 
 # More
 
-You can use waymore with any dependency injection API by registering the `IWayMore` interface as a singleton 
-implemented through `WayMore.Wayless`. If using ASP.NET Core this enables you to configure all your mappers in your `Startup.cs`
+You can use `Waymore` with any dependency injection API by registering the `IWayMore` interface. For best performance
+you should register it as a singleton with rule declerations. In the example below we use Microsoft's DI API to 
+register and configure our singleton 
 
-	services.AddSingleton<IWayMore, WayMore>();
-
-Once registered you can change your `Configure` method to expect `IWayMore`. 
-
-
-	public void Configure(IApplicationBuilder app, IHostingEnvironment env, IWayMore waymore)
-	{
-		waymore
+	services.AddSingleton<IWayMore>
+	(
+		new Waymore()
 		.SetRules<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
@@ -122,18 +118,5 @@ Once registered you can change your `Configure` method to expect `IWayMore`.
 			var nestedMapper = waymore.Get<PersonDTO, Person>();
 			cfg.FieldMap(x => x.NestedPersonDTO, x => nestedMapper.Map(x.NestedPerson))
 			   .FinalizeRules(); 
-		});
-		
-		if (env.IsDevelopment())
-		{
-			app.UseDeveloperExceptionPage();
-			app.UseBrowserLink();
-		}
-		else
-		{
-			app.UseExceptionHandler("/Error");
-		}
-
-		app.UseStaticFiles();
-		app.UseMvc();
-	}
+		})
+	);
