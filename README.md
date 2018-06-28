@@ -105,7 +105,7 @@ register and configure our singleton
 
 	services.AddSingleton<IWayMore>
 	(
-		new Waymore()
+		new WayMore()
 		.SetRules<PersonDTO, Person>(cfg =>
 		{
 			cfg.FieldMap(d => d.FirstName, s => s.Nickname)
