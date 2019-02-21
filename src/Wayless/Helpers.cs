@@ -33,7 +33,12 @@ namespace Wayless
         {
             var lambda = expression as LambdaExpression;
             MemberExpression memberExpression = null;
-            if (lambda.Body is UnaryExpression)
+
+            if (lambda.Body.NodeType == ExpressionType.MemberAccess)
+            {
+                return ((MemberExpression)lambda.Body).Member as PropertyInfo;
+            }
+            else if (lambda.Body is UnaryExpression)
             {
                 memberExpression = (lambda.Body as UnaryExpression)?.Operand as MemberExpression;
             }
