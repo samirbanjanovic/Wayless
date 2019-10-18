@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using Mapster;
 using Wayless.Core;
 
@@ -110,7 +112,7 @@ namespace Wayless.Performance.Tests
         }
     }
 
-    class Program
+    public class Program
     {
         private static int Iterations = 1000;
         private static readonly WayMore _waymore = new WayMore();
@@ -118,27 +120,29 @@ namespace Wayless.Performance.Tests
 
         static void Main(string[] args)
         {
-            TestNewConfiguration();
+            BenchmarkRunner.Run<LessBenchmarks>();
+            
+            // TestNewConfiguration();
 
-            // primer call to cache and compile expressions
-            Console.WriteLine("Basic mapping\r\n");
-            Console.WriteLine("------------------------------------");
-            Console.WriteLine("Primer call\r\n");
-            RunMappers();
+            // // primer call to cache and compile expressions
+            // Console.WriteLine("Basic mapping\r\n");
+            // Console.WriteLine("------------------------------------");
+            // Console.WriteLine("Primer call\r\n");
+            // RunMappers();
 
-            for (int i = 1; i <= 100; i++)
-            {
-                //Iterations = Iterations * 10;
+            // for (int i = 1; i <= 100; i++)
+            // {
+            //     //Iterations = Iterations * 10;
 
-                Console.WriteLine($"Test iteration: {i}");
-                Console.WriteLine($"Set size: {Iterations}\r\n");
-                RunMappers();
-            }
+            //     Console.WriteLine($"Test iteration: {i}");
+            //     Console.WriteLine($"Set size: {Iterations}\r\n");
+            //     RunMappers();
+            // }
 
             Console.ReadLine();
         }
 
-        private static void TestNewConfiguration()
+        public static void TestNewConfiguration()
         {
             var person = Person.Create();
             _waymore
@@ -214,7 +218,7 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("\r\n------------------------------------\r\n");
         }
 
-        private static void MeasureManualMap()
+        public static void MeasureManualMap()
         {
             Person person = Person.Create();
 
@@ -228,7 +232,7 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Manual: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        private static void MeasureAutoMapper()
+        public static void MeasureAutoMapper()
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -244,7 +248,7 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("AutoMapper: {0}ms", stopwatch.Elapsed.TotalMilliseconds);
         }
 
-        private static void MeasureWaylessInstance()
+        public static void MeasureWaylessInstance()
         {
             Person person = Person.Create();
 
@@ -334,7 +338,7 @@ namespace Wayless.Performance.Tests
             Console.WriteLine("Wayless (Nested2): {0}ms", stopwatch2.Elapsed.TotalMilliseconds);
         }
 
-        private static void MesaureMapster()
+        public static void MesaureMapster()
         {
             Person person = Person.Create();
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -349,8 +353,7 @@ namespace Wayless.Performance.Tests
         }
 
         private static PersonDTO ManualMap(Person person)
-        {
-            var result = new PersonDTO
+            => new PersonDTO
             {
                 Id = person.Id,
                 FirstName = person.FirstName,
@@ -361,9 +364,6 @@ namespace Wayless.Performance.Tests
                 Nickname = person.Nickname,
                 Phone = person.Phone
 
-            };
-            return result;            
-        }
-
+            };                   
     }
 }
