@@ -12,13 +12,13 @@ AMD Ryzen 7 2700X, 1 CPU, 16 logical and 8 physical cores
 
 Job=Core  Runtime=Core  
 
-```
+
 |           Method |     Mean |     Error |    StdDev |      Min |      Max | Ratio | RatioSD |
 |----------------- |---------:|----------:|----------:|---------:|---------:|------:|--------:|
 |       Manual Map | 1.771 us | 0.0048 us | 0.0045 us | 1.765 us | 1.783 us |  1.00 |    0.00 |
 | Wayless Instance | 2.278 us | 0.0055 us | 0.0051 us | 2.272 us | 2.290 us |  1.29 |    0.00 |
 |          Mapster | 6.223 us | 0.0546 us | 0.0484 us | 6.123 us | 6.303 us |  3.51 |    0.03 |
-
+```
 
 ## Overview
 
