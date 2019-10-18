@@ -1,5 +1,27 @@
 # Wayless
 
+## Benchmarks
+
+``` ini
+
+BenchmarkDotNet=v0.11.5, OS=Windows 10.0.18362
+AMD Ryzen 7 2700X, 1 CPU, 16 logical and 8 physical cores
+.NET Core SDK=3.0.100
+  [Host] : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+  Core   : .NET Core 3.0.0 (CoreCLR 4.700.19.46205, CoreFX 4.700.19.46214), 64bit RyuJIT
+
+Job=Core  Runtime=Core  
+
+
+|           Method |     Mean |     Error |    StdDev |      Min |      Max | Ratio | RatioSD |
+|----------------- |---------:|----------:|----------:|---------:|---------:|------:|--------:|
+|       Manual Map | 1.771 us | 0.0048 us | 0.0045 us | 1.765 us | 1.783 us |  1.00 |    0.00 |
+|          Wayless | 2.278 us | 0.0055 us | 0.0051 us | 2.272 us | 2.290 us |  1.29 |    0.00 |
+|          Mapster | 6.223 us | 0.0546 us | 0.0484 us | 6.123 us | 6.303 us |  3.51 |    0.03 |
+```
+
+## Overview
+
 A basic object-to-object mapper.
 To map from a source to destination object create an instance of the Wayless mapper.
 By default the mapper will match source and destination properties by name. 
@@ -11,7 +33,7 @@ Mapping rules are applied via a call to the `Map` methods.
 	PersonDTO personDTO = mapper.Map(person);
 
 
-# Usage
+## Usage
 Unlike prior versions (before 2.0), you have to create an instance of the mapping store, WayMore.
 
 	WayMore _waymore = new WayMore();
@@ -52,7 +74,7 @@ Using a simple Json file you can pair destination and source properties using th
 A call to `FinalizeRules()` is optional. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
 go ahead and make the call prior to compiling the map function.
 
-# WayMore
+## WayMore
 
 `WayMore` is a thread-safe singleton that stores previously configured and requested instances of `Wayless`.
 Via the singleton you can configure and cache mappings for future use by calling `SetRules` or request a mapper by calling the
@@ -97,7 +119,7 @@ To request a cached instance (for repetative calls and better performance) use t
 	mapper.Map(person);
 
 
-# More
+## More
 
 You can use `Waymore` with any dependency injection API by registering the `IWayMore` interface. For best performance
 you should register it as a singleton with rule declerations. In the example below we use Microsoft's DI API to 
