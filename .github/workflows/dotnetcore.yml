@@ -13,6 +13,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
+        source-url: https://nuget.pkg.github.com/SamirBanjanovic/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.nuget}}
     - name: Build with dotnet
