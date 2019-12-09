@@ -22,9 +22,10 @@ Job=Core  Runtime=Core
 
 ## Overview
 
-A basic object-to-object mapper.
+A basic object-object mapper written with speed and usability as the first priority.
+
 To map from a source to destination object create an instance of the Wayless mapper.
-By default the mapper will match source and destination properties by name. 
+By default source and destination properties are matched by name -- case insenstive. 
 
 	var mapper = new Wayless<PersonDTO, Person>(new SetRuleBuilder<PerstonDTO, Person>().UseDefault());
 
@@ -71,7 +72,7 @@ Using a simple Json file you can pair destination and source properties using th
 	       .FinalizeRules(); 
     });
 
-A call to `FinalizeRules()` is optional. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
+A call to `FinalizeRules()` is __optional__. Wayless will check if the `SetRuleBuilder` has been finalized, if not it will
 go ahead and make the call prior to compiling the map function.
 
 ## WayMore
@@ -112,12 +113,16 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 	});
 
 
-To request a cached instance (for repetative calls and better performance) use the overlaoded `Get` method
+Once configured you can request and instance of the object pair mapper and then call `Map` through the instance. 
 
-	var mapper = _waymore.Get<PersonDTONested, PersonNested>();
+        var personDtoMapper = _waymore.Get<PersonDTO, Person>();
+	var personDto = personDtoMapper.Map(person);
+	
+You can also directly call the `Map` function through `WayMore`.  
 
-	mapper.Map(person);
-
+        var personDto = _waymore.Map<PersonDTO, Person>(person)
+	
+Both calls will used cached mapper instances.
 
 ## More
 
