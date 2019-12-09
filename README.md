@@ -115,12 +115,12 @@ later by calling the `Get` method, or directly use the mapper by calling the gen
 
 Once configured you can request and instance of the object pair mapper and then call `Map` through the instance. 
 
-        var personDtoMapper = _waymore.Get<PersonDTO, Person>();
+	var personDtoMapper = _waymore.Get<PersonDTO, Person>();
 	var personDto = personDtoMapper.Map(person);
 	
 You can also directly call the `Map` function through `WayMore`.  
 
-        var personDto = _waymore.Map<PersonDTO, Person>(person)
+	var personDto = _waymore.Map<PersonDTO, Person>(person)
 	
 Both calls will used cached mapper instances.
 
