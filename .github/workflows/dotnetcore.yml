@@ -1,6 +1,9 @@
-name: .NET Core
+name: Publish to NuGet
 
-on: [push]
+on:
+  pull_request:
+    branches: 
+      - master
 
 jobs:
   build:
@@ -14,8 +17,8 @@ jobs:
       with:
         dotnet-version: 3.0.100
         source-url: https://nuget.pkg.github.com/SamirBanjanovic/index.json
-    - name: Build with dotnet
+    - name: Build
       run: dotnet build --configuration Release
-    - name: Publish the package to nuget
-      run: dotnet nuget push /home/runner/work/Wayless/Wayless/src/Wayless/bin/Release/*.nupkg -k ${{secrets.nuget}} -s https://api.nuget.org/v3/index.json
+    - name: Publish
+      run: dotnet nuget push Wayless/bin/Release/*.nupkg -k ${{secrets.nuget}} -s https://api.nuget.org/v3/index.json
       
