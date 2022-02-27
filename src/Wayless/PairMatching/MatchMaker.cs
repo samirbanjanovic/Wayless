@@ -38,9 +38,7 @@ namespace Wayless
         }
 
         private IDictionary<string, MemberInfo> ConvertToInvariantNameDictionary(IEnumerable<MemberInfo> members)
-        {
-            return members.ToDictionary(x => x.Name.ToLowerInvariant());
-        }
+            => members.ToDictionary(x => x.Name.ToLowerInvariant());
 
     }
 }
